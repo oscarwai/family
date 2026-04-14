@@ -7,7 +7,7 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
   />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#5c67f2" />
+  <meta name="theme-color" content="#f2f2f7" />
   <title>家庭小工具</title>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -16,20 +16,20 @@
 
   <style>
     :root {
-      --primary: #5c67f2;
-      --primary-soft: #eef0ff;
-      --danger: #ff4d4f;
-      --success: #52c41a;
-      --bg: #f3f5f9;
+      --ios-blue: #007aff;
+      --ios-blue-soft: #eaf3ff;
+      --ios-red: #ff3b30;
+      --ios-orange: #ff9500;
+      --ios-green: #34c759;
+      --bg: #f2f2f7;
       --card: #ffffff;
-      --text: #1f2328;
-      --muted: #7a7f87;
-      --line: #e8ebf0;
-      --shadow: 0 8px 24px rgba(22, 29, 37, 0.06);
+      --text: #111111;
+      --subtext: #6e6e73;
+      --line: rgba(60, 60, 67, 0.12);
+      --line-strong: rgba(60, 60, 67, 0.2);
+      --tab-h: 84px;
+      --swipe-width: 88px;
       --radius: 18px;
-      --nav-h: 84px;
-      --swipe-width: 90px;
-      --warn: #faad14;
     }
 
     * {
@@ -37,72 +37,138 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       background: var(--bg);
       color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC",
+        "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC",
-        "Microsoft JhengHei", "Segoe UI", Roboto, "Helvetica Neue", Arial,
-        sans-serif;
+      overscroll-behavior-y: none;
     }
 
-    .wrap {
-      max-width: 520px;
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .app-shell {
+      max-width: 560px;
       margin: 0 auto;
       min-height: 100vh;
-      padding: 16px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);
+      padding: 0 0 calc(var(--tab-h) + env(safe-area-inset-bottom));
+      background: var(--bg);
     }
 
-    .page {
+    .screen {
       display: none;
+      padding: 12px 14px 18px;
     }
 
-    .page.active {
+    .screen.active {
       display: block;
     }
 
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px;
-      margin-bottom: 14px;
-      border: 1px solid #f1f2f4;
+    .login-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 32px 16px;
+      display: flex;
+      align-items: center;
     }
 
-    .header {
+    .hero-title {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--subtext);
+      line-height: 1.45;
+      margin: 0 0 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .panel + .panel {
+      margin-top: 12px;
+    }
+
+    .header-block {
+      padding: 8px 2px 10px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+      margin: 0;
+    }
+
+    .page-sub {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--subtext);
+      line-height: 1.45;
+    }
+
+    .topbar {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
-    .title {
-      margin: 0;
-      font-size: 30px;
-      font-weight: 800;
-      line-height: 1.15;
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
-    .sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .section-meta {
+      font-size: 12px;
+      color: var(--subtext);
+      text-align: right;
+      line-height: 1.35;
     }
 
     .field {
       margin-bottom: 12px;
     }
 
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
     .label {
-      font-size: 13px;
-      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--subtext);
       margin-bottom: 8px;
     }
 
@@ -120,68 +186,14 @@
 
     input:focus,
     textarea:focus {
-      border-color: #b8befb;
-      box-shadow: 0 0 0 4px rgba(92, 103, 242, 0.08);
+      border-color: rgba(0, 122, 255, 0.35);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
     }
 
     textarea {
-      min-height: 96px;
       resize: none;
-      line-height: 1.6;
-    }
-
-    button {
-      border: none;
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      width: 100%;
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .btn-soft {
-      background: var(--primary-soft);
-      color: var(--primary);
-    }
-
-    .btn-success {
-      background: var(--success);
-      color: #fff;
-    }
-
-    .btn-danger {
-      background: #fff1f1;
-      color: var(--danger);
-    }
-
-    .header-btn {
-      width: auto;
-      padding: 10px 14px;
-      border-radius: 12px;
-      background: #f3f4f8;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .mini-btn {
-      width: auto;
-      padding: 10px 12px;
-      font-size: 13px;
-      border-radius: 10px;
-      flex: 0 0 auto;
-    }
-
-    .small-btn {
-      width: auto;
-      padding: 8px 10px;
-      background: #fff1f1;
-      color: var(--danger);
-      font-size: 13px;
-      border-radius: 10px;
-      flex-shrink: 0;
+      min-height: 92px;
+      line-height: 1.5;
     }
 
     .row {
@@ -191,17 +203,165 @@
 
     .row > * {
       flex: 1;
+      min-width: 0;
     }
 
-    .row-tight {
+    .inline-row {
       display: flex;
       gap: 10px;
       align-items: center;
     }
 
-    .row-tight input,
-    .row-tight textarea {
+    .inline-row > *:first-child {
       flex: 1;
+      min-width: 0;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      background: var(--ios-blue);
+      color: #fff;
+      width: 100%;
+    }
+
+    .btn-soft {
+      background: #f2f7ff;
+      color: var(--ios-blue);
+    }
+
+    .btn-plain {
+      background: #f5f5f7;
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: #fff2f1;
+      color: var(--ios-red);
+    }
+
+    .btn-green {
+      background: var(--ios-green);
+      color: #fff;
+    }
+
+    .btn-mini {
+      width: auto;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+
+    .icon-btn {
+      width: auto;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f5f5f7;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      width: auto;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .chip.active {
+      background: var(--ios-blue-soft);
+      color: var(--ios-blue);
+      border-color: rgba(0, 122, 255, 0.12);
+    }
+
+    .manage-list {
+      display: none;
+      margin-top: 12px;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .manage-list.show {
+      display: flex;
+    }
+
+    .manage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fafafc;
+      border: 1px solid var(--line);
+    }
+
+    .manage-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .hero-result {
+      padding: 22px 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+      border: 1px solid #dfeafc;
+      text-align: center;
+    }
+
+    .hero-result-label {
+      font-size: 12px;
+      color: var(--subtext);
+      margin-bottom: 8px;
+    }
+
+    .hero-result-main {
+      min-height: 42px;
+      font-size: 31px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--ios-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      word-break: break-word;
+    }
+
+    .hero-result-sub {
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--subtext);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--subtext);
+      line-height: 1.45;
     }
 
     .list {
@@ -210,247 +370,46 @@
       gap: 10px;
     }
 
-    .item {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      background: #fcfcfd;
-    }
-
-    .item-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .item-title {
-      font-size: 16px;
-      font-weight: 700;
-      word-break: break-word;
-    }
-
-    .item-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 6px;
-      word-break: break-word;
-      line-height: 1.45;
-    }
-
-    .price-big {
-      font-size: 18px;
-      font-weight: 800;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .low {
-      color: var(--danger);
-      font-weight: 700;
-    }
-
-    .warn {
-      color: var(--warn);
-      font-weight: 700;
-    }
-
-    .result {
-      border: 1px solid #dbe9ff;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #f7faff 0%, #eef6ff 100%);
-      text-align: center;
-      padding: 24px 16px;
-      margin-bottom: 12px;
-    }
-
-    .result-label {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .result-text {
-      font-size: 30px;
-      font-weight: 900;
-      color: var(--primary);
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      word-break: break-word;
-      line-height: 1.25;
-      text-align: center;
-    }
-
-    .result-desc {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-
-    .nav {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      justify-content: center;
-    }
-
-    .nav-inner {
-      width: min(520px, 100%);
-      background: rgba(255, 255, 255, 0.96);
-      border-top: 1px solid var(--line);
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      padding: 8px 8px calc(env(safe-area-inset-bottom) + 8px);
-      backdrop-filter: blur(12px);
-    }
-
-    .nav-btn {
-      background: transparent;
-      color: var(--muted);
-      font-size: 12px;
-      padding: 8px 4px;
-      border-radius: 10px;
-    }
-
-    .nav-btn.active {
-      color: var(--primary);
-    }
-
-    .banner {
-      display: none;
-      background: #fff7e6;
-      color: #8a5a00;
-      border: 1px solid #ffd591;
-      padding: 12px 14px;
-      border-radius: 14px;
-      margin-bottom: 14px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .banner.show {
-      display: block;
-    }
-
     .empty {
-      border: 1px dashed var(--line);
-      border-radius: 14px;
-      padding: 16px;
+      padding: 18px 14px;
+      border-radius: 16px;
+      border: 1px dashed var(--line-strong);
+      color: var(--subtext);
       text-align: center;
-      color: var(--muted);
-    }
-
-    .cat-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .cat-btn {
-      width: auto;
-      background: #f7f8fb;
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 10px 12px;
       font-size: 14px;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .cat-btn.active {
-      background: var(--primary-soft);
-      color: var(--primary);
-      border-color: #cfd4ff;
-    }
-
-    .cat-manage-list {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .cat-manage-list.show {
-      display: flex;
-    }
-
-    .cat-manage-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: #fcfcfd;
-    }
-
-    .cat-manage-name {
-      font-size: 14px;
-      font-weight: 700;
-      word-break: break-word;
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .section-tag {
-      font-size: 13px;
-      color: var(--muted);
-      text-align: right;
+      background: #fafafc;
     }
 
     .swipe-row {
       position: relative;
       overflow: hidden;
-      border-radius: 14px;
+      border-radius: 16px;
       border: 1px solid var(--line);
-      background: #fcfcfd;
+      background: #fff;
     }
 
     .swipe-actions {
       position: absolute;
-      right: 0;
       top: 0;
+      right: 0;
       bottom: 0;
       width: var(--swipe-width);
       display: flex;
     }
 
     .swipe-delete-btn {
-      width: 100%;
-      border: none;
       border-radius: 0;
-      background: var(--danger);
+      background: var(--ios-red);
       color: #fff;
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 700;
+      width: 100%;
     }
 
     .swipe-content {
       position: relative;
       z-index: 1;
-      background: #fcfcfd;
+      background: #fff;
       padding: 12px 14px;
       display: flex;
       justify-content: space-between;
@@ -465,47 +424,121 @@
       transform: translateX(calc(var(--swipe-width) * -1));
     }
 
-    .qty-box {
+    .cell-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cell-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+      word-break: break-word;
+      letter-spacing: -0.01em;
+    }
+
+    .cell-sub {
+      margin-top: 5px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--subtext);
+      word-break: break-word;
+    }
+
+    .cell-price {
+      flex: 0 0 auto;
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+
+    .qty-wrap {
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-shrink: 0;
     }
 
     .qty-btn {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       padding: 0;
       border-radius: 50%;
-      background: #eef0f4;
-      color: #1f2328;
+      background: #eef1f5;
+      color: var(--text);
       font-size: 18px;
-      font-weight: 900;
+      font-weight: 800;
       line-height: 1;
     }
 
-    .qty-number {
-      min-width: 28px;
+    .qty-num {
+      min-width: 24px;
       text-align: center;
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 15px;
+      font-weight: 700;
     }
 
-    .small-note {
+    .low {
+      color: var(--ios-red);
+      font-weight: 700;
+    }
+
+    .warn {
+      color: var(--ios-orange);
+      font-weight: 700;
+    }
+
+    .tabbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .tabbar-inner {
+      width: min(560px, 100%);
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: rgba(249, 249, 249, 0.86);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--line);
+      pointer-events: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--subtext);
+      padding: 8px 4px;
+      border-radius: 12px;
       font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-btn.active {
+      color: var(--ios-blue);
+    }
+
+    .tab-icon {
+      font-size: 17px;
+      line-height: 1;
     }
   </style>
 </head>
 <body>
-
-  <div id="loginWrap" class="wrap">
-    <div class="card">
-      <h1 class="title">登入</h1>
-      <div class="sub">只限指定帳戶使用。</div>
-
-      <div id="debugBanner" class="banner show">JS 已載入</div>
+  <div id="loginWrap" class="login-wrap">
+    <div class="panel" style="width:100%;">
+      <h1 class="hero-title">登入</h1>
+      <div class="hero-sub">只限指定帳戶使用。</div>
 
       <div class="field">
         <div class="label">Email</div>
@@ -518,152 +551,166 @@
       </div>
 
       <button id="loginBtn">登入</button>
-      <div id="loginMsg" class="sub" style="margin-top:12px;"></div>
+      <div id="loginMsg" class="hero-sub" style="margin-top:12px;"></div>
     </div>
   </div>
 
   <div id="appWrap" style="display:none;">
-    <div class="wrap">
-      <div id="errorBanner" class="banner"></div>
+    <div class="app-shell">
+      <div id="errorBanner" class="panel" style="display:none;margin:12px 14px 0;"></div>
 
-      <section id="page-dinner" class="page active">
-        <div class="card">
-          <div class="header">
+      <section id="page-dinner" class="screen active">
+        <div class="header-block">
+          <div class="topbar">
             <div>
-              <h1 class="title">今晚煮咩</h1>
-              <div class="sub">大類別可新增／刪除；可同時選多個類別抽選</div>
+              <h1 class="page-title">今晚煮咩</h1>
+              <div class="page-sub">以晚餐決策為核心，日常操作放前，管理操作收起。</div>
             </div>
-            <button id="logoutBtn1" class="header-btn">登出</button>
+            <button id="logoutBtn1" class="icon-btn">登出</button>
           </div>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
-            <div class="section-title">晚餐大類別</div>
-            <div class="section-tag" id="currentDinnerCatLabel">未選擇</div>
+            <div class="section-title">選類別</div>
+            <div id="currentDinnerCatLabel" class="section-meta">未選擇</div>
           </div>
 
-          <div class="row-tight">
+          <div class="chips" id="dinnerCatGrid"></div>
+
+          <div style="height:12px;"></div>
+
+          <div class="inline-row">
             <input id="newDinnerCatInput" type="text" placeholder="新增大類別，例如：湯類、宵夜、日式" />
-            <button id="addDinnerCatBtn" class="mini-btn">新增</button>
+            <button id="addDinnerCatBtn" class="btn-mini">新增</button>
           </div>
-
-          <div id="dinnerCatGrid" class="cat-grid"></div>
 
           <div style="height:10px;"></div>
           <button id="toggleDinnerManageBtn" class="btn-soft">管理分類</button>
-          <div id="dinnerCatManageList" class="cat-manage-list"></div>
+          <div id="dinnerCatManageList" class="manage-list"></div>
         </div>
 
-        <div class="card">
-          <div class="result">
-            <div class="result-label">隨機抽選結果</div>
-            <div id="resultDisplay" class="result-text">請先選大類別</div>
-            <div id="resultDesc" class="result-desc"></div>
+        <div class="panel">
+          <div class="hero-result">
+            <div class="hero-result-label">抽選結果</div>
+            <div id="resultDisplay" class="hero-result-main">請先選大類別</div>
+            <div id="resultDesc" class="hero-result-sub"></div>
           </div>
+
+          <div style="height:12px;"></div>
+
           <div class="row">
-            <button id="drawBtn" class="btn-success">隨機抽選</button>
+            <button id="drawBtn" class="btn-green">隨機抽選</button>
             <button id="redrawBtn" class="btn-soft">再抽一次</button>
           </div>
+
           <div style="height:10px;"></div>
           <button id="resetTodayBtn" class="btn-soft">重置今日抽過</button>
-          <div class="small-note">再抽一次不重複上一次；今日抽過可重置</div>
+
+          <div class="hint">再抽一次不重複上一次；今日抽過可重置。</div>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
-            <div class="section-title">加入菜式</div>
-            <div class="section-tag" id="dinnerAddCatLabel">管理類別：未選擇</div>
+            <div class="section-title">新增菜式</div>
+            <div id="dinnerManageLabel" class="section-meta">管理類別：未選擇</div>
           </div>
+
           <div class="field">
             <div class="label">菜式名稱</div>
             <input id="foodInput" type="text" placeholder="例如：洋蔥牛仔骨" />
           </div>
+
           <div class="field">
             <div class="label">簡單煮法</div>
             <textarea id="foodDescInput" placeholder="例如：先醃牛仔骨，煎香後加洋蔥炒至軟身"></textarea>
           </div>
+
           <button id="addFoodBtn">新增菜式</button>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
             <div class="section-title">菜式清單</div>
-            <div class="section-tag" id="dinnerListCatLabel">管理類別：未選擇</div>
+            <div id="dinnerListLabel" class="section-meta">管理類別：未選擇</div>
           </div>
           <div id="foodList" class="list"></div>
         </div>
       </section>
 
-      <section id="page-stock" class="page">
-        <div class="card">
-          <div class="header">
+      <section id="page-stock" class="screen">
+        <div class="header-block">
+          <div class="topbar">
             <div>
-              <h1 class="title">存貨清單</h1>
-              <div class="sub">類別可新增／刪除；低庫存有提示</div>
+              <h1 class="page-title">存貨</h1>
+              <div class="page-sub">類別清楚、操作簡單，低庫存即時可見。</div>
             </div>
-            <button id="logoutBtn2" class="header-btn">登出</button>
+            <button id="logoutBtn2" class="icon-btn">登出</button>
           </div>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
-            <div class="section-title">存貨類別</div>
-            <div class="section-tag" id="currentStockCatLabel">未選擇</div>
+            <div class="section-title">選類別</div>
+            <div id="currentStockCatLabel" class="section-meta">未選擇</div>
           </div>
 
-          <div class="row-tight">
+          <div class="chips" id="stockCatGrid"></div>
+
+          <div style="height:12px;"></div>
+
+          <div class="inline-row">
             <input id="newStockCatInput" type="text" placeholder="新增類別，例如：零食、早餐、冷凍食品" />
-            <button id="addStockCatBtn" class="mini-btn">新增</button>
+            <button id="addStockCatBtn" class="btn-mini">新增</button>
           </div>
-
-          <div id="stockCatGrid" class="cat-grid"></div>
 
           <div style="height:10px;"></div>
           <button id="toggleStockManageBtn" class="btn-soft">管理類別</button>
-          <div id="stockCatManageList" class="cat-manage-list"></div>
+          <div id="stockCatManageList" class="manage-list"></div>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
             <div class="section-title">新增項目</div>
-            <div class="section-tag" id="stockAddCatLabel">請先選類別</div>
+            <div id="stockManageLabel" class="section-meta">管理類別：未選擇</div>
           </div>
+
           <div class="field">
             <div class="label">項目名稱</div>
             <input id="stockInput" type="text" placeholder="例如：可樂、雞翼、廁紙" />
           </div>
+
           <button id="addStockBtn">新增</button>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
-            <div class="section-title">類別清單</div>
-            <div class="section-tag" id="stockListCatLabel">請先選類別</div>
+            <div class="section-title">項目清單</div>
+            <div id="stockListLabel" class="section-meta">管理類別：未選擇</div>
           </div>
           <div id="stockList" class="list"></div>
         </div>
       </section>
 
-      <section id="page-price" class="page">
-        <div class="card">
-          <div class="header">
+      <section id="page-price" class="screen">
+        <div class="header-block">
+          <div class="topbar">
             <div>
-              <h1 class="title">食物價格</h1>
-              <div class="sub">輸入價格後可隨時查返；支援搜尋</div>
+              <h1 class="page-title">價格</h1>
+              <div class="page-sub">輸入食物價格，之後可以即時搜尋返。</div>
             </div>
-            <button id="logoutBtn3" class="header-btn">登出</button>
+            <button id="logoutBtn3" class="icon-btn">登出</button>
           </div>
         </div>
 
-        <div class="card">
-          <div class="field">
+        <div class="panel">
+          <div class="field" style="margin-bottom:0;">
             <div class="label">搜尋</div>
-            <input id="priceSearchInput" type="text" placeholder="搜尋食物名稱 / 商店" />
+            <input id="priceSearchInput" type="text" placeholder="搜尋食物名稱 / 商店 / 備註" />
           </div>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="field">
             <div class="label">食物名稱</div>
             <input id="priceNameInput" type="text" placeholder="例如：雞蛋、可樂、菜心" />
@@ -693,27 +740,27 @@
           <button id="addPriceBtn">新增價格記錄</button>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
             <div class="section-title">價格記錄</div>
-            <div class="section-tag" id="priceCountLabel">0 項</div>
+            <div id="priceCountLabel" class="section-meta">0 項</div>
           </div>
           <div id="priceList" class="list"></div>
         </div>
       </section>
 
-      <section id="page-memo" class="page">
-        <div class="card">
-          <div class="header">
+      <section id="page-memo" class="screen">
+        <div class="header-block">
+          <div class="topbar">
             <div>
-              <h1 class="title">備忘錄</h1>
-              <div class="sub">一條一條新增，向左滑刪除</div>
+              <h1 class="page-title">備忘</h1>
+              <div class="page-sub">快速記低，之後再返嚟睇。</div>
             </div>
-            <button id="logoutBtn4" class="header-btn">登出</button>
+            <button id="logoutBtn4" class="icon-btn">登出</button>
           </div>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="field">
             <div class="label">新增備忘</div>
             <textarea id="memoInput" placeholder="例如：今晚記得解凍雞翼"></textarea>
@@ -721,22 +768,34 @@
           <button id="addMemoBtn">新增備忘</button>
         </div>
 
-        <div class="card">
+        <div class="panel">
           <div class="section-head">
             <div class="section-title">備忘清單</div>
-            <div class="section-tag" id="memoCountLabel">0 項</div>
+            <div id="memoCountLabel" class="section-meta">0 項</div>
           </div>
           <div id="memoList" class="list"></div>
         </div>
       </section>
     </div>
 
-    <nav class="nav">
-      <div class="nav-inner">
-        <button class="nav-btn active" data-page="dinner">晚餐</button>
-        <button class="nav-btn" data-page="stock">存貨</button>
-        <button class="nav-btn" data-page="price">價格</button>
-        <button class="nav-btn" data-page="memo">備忘</button>
+    <nav class="tabbar">
+      <div class="tabbar-inner">
+        <button class="tab-btn active" data-page="dinner">
+          <div class="tab-icon">🍽</div>
+          <div>晚餐</div>
+        </button>
+        <button class="tab-btn" data-page="stock">
+          <div class="tab-icon">📦</div>
+          <div>存貨</div>
+        </button>
+        <button class="tab-btn" data-page="price">
+          <div class="tab-icon">🏷️</div>
+          <div>價格</div>
+        </button>
+        <button class="tab-btn" data-page="memo">
+          <div class="tab-icon">📝</div>
+          <div>備忘</div>
+        </button>
       </div>
     </nav>
   </div>
@@ -788,8 +847,8 @@
       let dinnerItemsCache = {};
       let stockCategoriesCache = {};
       let stockItemsCache = {};
-      let memoCache = {};
       let priceCache = {};
+      let memoCache = {};
 
       let currentDinnerCat = null;
       let currentStockCat = null;
@@ -815,8 +874,8 @@
         dinnerCatGrid: document.getElementById("dinnerCatGrid"),
         dinnerCatManageList: document.getElementById("dinnerCatManageList"),
         currentDinnerCatLabel: document.getElementById("currentDinnerCatLabel"),
-        dinnerAddCatLabel: document.getElementById("dinnerAddCatLabel"),
-        dinnerListCatLabel: document.getElementById("dinnerListCatLabel"),
+        dinnerManageLabel: document.getElementById("dinnerManageLabel"),
+        dinnerListLabel: document.getElementById("dinnerListLabel"),
         resultDisplay: document.getElementById("resultDisplay"),
         resultDesc: document.getElementById("resultDesc"),
         drawBtn: document.getElementById("drawBtn"),
@@ -833,8 +892,8 @@
         stockCatGrid: document.getElementById("stockCatGrid"),
         stockCatManageList: document.getElementById("stockCatManageList"),
         currentStockCatLabel: document.getElementById("currentStockCatLabel"),
-        stockAddCatLabel: document.getElementById("stockAddCatLabel"),
-        stockListCatLabel: document.getElementById("stockListCatLabel"),
+        stockManageLabel: document.getElementById("stockManageLabel"),
+        stockListLabel: document.getElementById("stockListLabel"),
         stockInput: document.getElementById("stockInput"),
         addStockBtn: document.getElementById("addStockBtn"),
         stockList: document.getElementById("stockList"),
@@ -857,12 +916,12 @@
 
       function setError(msg) {
         if (!msg) {
-          els.errorBanner.classList.remove("show");
+          els.errorBanner.style.display = "none";
           els.errorBanner.textContent = "";
           return;
         }
         els.errorBanner.textContent = msg;
-        els.errorBanner.classList.add("show");
+        els.errorBanner.style.display = "block";
       }
 
       function setLoginMsg(msg) {
@@ -920,12 +979,12 @@
       }
 
       function showPage(pageName, btn) {
-        document.querySelectorAll(".page").forEach(function (el) {
+        document.querySelectorAll(".screen").forEach(function (el) {
           el.classList.remove("active");
         });
         document.getElementById("page-" + pageName).classList.add("active");
 
-        document.querySelectorAll(".nav-btn").forEach(function (el) {
+        document.querySelectorAll(".tab-btn").forEach(function (el) {
           el.classList.remove("active");
         });
         btn.classList.add("active");
@@ -969,17 +1028,14 @@
 
         els.dinnerCatGrid.innerHTML = rows.map(function (row) {
           const active = selectedDinnerCats.includes(row.id) ? " active" : "";
-          return `<button class="cat-btn${active}" data-dinner-cat="${row.id}">${esc(row.value.name)}</button>`;
+          return `<button class="chip${active}" data-dinner-cat="${row.id}">${esc(row.value.name)}</button>`;
         }).join("");
 
         els.dinnerCatManageList.innerHTML = rows.map(function (row) {
           return `
-            <div class="cat-manage-row">
-              <div class="cat-manage-name">${esc(row.value.name)}</div>
-              <div class="row" style="width:auto;gap:8px;">
-                <button class="mini-btn btn-soft" data-manage-dinner-cat="${row.id}" style="width:auto;">管理</button>
-                <button class="small-btn" data-del-dinner-cat="${row.id}">刪除</button>
-              </div>
+            <div class="manage-row">
+              <div class="manage-name">${esc(row.value.name)}</div>
+              <button class="btn-mini btn-danger" data-del-dinner-cat="${row.id}" style="width:auto;">刪除</button>
             </div>
           `;
         }).join("");
@@ -994,8 +1050,8 @@
         }
 
         const manageName = currentDinnerCat ? getDinnerCatName(currentDinnerCat) : "未選擇";
-        els.dinnerAddCatLabel.textContent = "管理類別：" + manageName;
-        els.dinnerListCatLabel.textContent = "管理類別：" + manageName;
+        els.dinnerManageLabel.textContent = "管理類別：" + manageName;
+        els.dinnerListLabel.textContent = "管理類別：" + manageName;
       }
 
       function renderStockCategories() {
@@ -1005,17 +1061,14 @@
 
         els.stockCatGrid.innerHTML = rows.map(function (row) {
           const active = currentStockCat === row.id ? " active" : "";
-          return `<button class="cat-btn${active}" data-stock-cat="${row.id}">${esc(row.value.name)}</button>`;
+          return `<button class="chip${active}" data-stock-cat="${row.id}">${esc(row.value.name)}</button>`;
         }).join("");
 
         els.stockCatManageList.innerHTML = rows.map(function (row) {
           return `
-            <div class="cat-manage-row">
-              <div class="cat-manage-name">${esc(row.value.name)}</div>
-              <div class="row" style="width:auto;gap:8px;">
-                <button class="mini-btn btn-soft" data-manage-stock-cat="${row.id}" style="width:auto;">管理</button>
-                <button class="small-btn" data-del-stock-cat="${row.id}">刪除</button>
-              </div>
+            <div class="manage-row">
+              <div class="manage-name">${esc(row.value.name)}</div>
+              <button class="btn-mini btn-danger" data-del-stock-cat="${row.id}" style="width:auto;">刪除</button>
             </div>
           `;
         }).join("");
@@ -1025,12 +1078,8 @@
 
         const label = currentStockCat ? getStockCatName(currentStockCat) : "未選擇";
         els.currentStockCatLabel.textContent = label;
-        els.stockAddCatLabel.textContent = "管理類別：" + label;
-        els.stockListCatLabel.textContent = "管理類別：" + label;
-      }
-
-      function getDinnerRowsOfCurrentCat() {
-        return rowsFromObj(dinnerItemsCache[currentDinnerCat] || {});
+        els.stockManageLabel.textContent = "管理類別：" + label;
+        els.stockListLabel.textContent = "管理類別：" + label;
       }
 
       function renderDinnerItems() {
@@ -1039,34 +1088,31 @@
           return;
         }
 
-        const rows = getDinnerRowsOfCurrentCat();
+        const rows = rowsFromObj(dinnerItemsCache[currentDinnerCat] || {});
 
         if (rows.length === 0) {
           els.foodList.innerHTML = '<div class="empty">未有菜式</div>';
           return;
         }
 
-        els.foodList.innerHTML = rows
-          .reverse()
-          .map(function (row) {
-            const key = "food:" + currentDinnerCat + ":" + row.id;
-            const openClass = openSwipeKey === key ? " open" : "";
-            const item = row.value || {};
-            return `
-              <div class="swipe-row${openClass}" data-swipe-key="${key}" data-food-id="${row.id}">
-                <div class="swipe-actions">
-                  <button class="swipe-delete-btn" data-del-food="${row.id}">刪除</button>
-                </div>
-                <div class="swipe-content">
-                  <div class="item-main">
-                    <div class="item-title">${esc(item.name || "")}</div>
-                    <div class="item-sub">${esc(item.desc || "未有簡介")}</div>
-                  </div>
+        els.foodList.innerHTML = rows.reverse().map(function (row) {
+          const key = "food:" + currentDinnerCat + ":" + row.id;
+          const openClass = openSwipeKey === key ? " open" : "";
+          const item = row.value || {};
+          return `
+            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-food-id="${row.id}">
+              <div class="swipe-actions">
+                <button class="swipe-delete-btn" data-del-food="${row.id}">刪除</button>
+              </div>
+              <div class="swipe-content">
+                <div class="cell-main">
+                  <div class="cell-title">${esc(item.name || "")}</div>
+                  <div class="cell-sub">${esc(item.desc || "未有簡介")}</div>
                 </div>
               </div>
-            `;
-          })
-          .join("");
+            </div>
+          `;
+        }).join("");
       }
 
       function renderStocks() {
@@ -1082,47 +1128,44 @@
           return;
         }
 
-        els.stockList.innerHTML = rows
-          .reverse()
-          .map(function (row) {
-            const key = "stock:" + currentStockCat + ":" + row.id;
-            const openClass = openSwipeKey === key ? " open" : "";
-            const item = row.value || {};
-            const qty = Number(item.qty || 0);
+        els.stockList.innerHTML = rows.reverse().map(function (row) {
+          const key = "stock:" + currentStockCat + ":" + row.id;
+          const openClass = openSwipeKey === key ? " open" : "";
+          const item = row.value || {};
+          const qty = Number(item.qty || 0);
 
-            let sub = "";
-            let cls = "";
+          let sub = "";
+          let cls = "";
 
-            if (qty === 0) {
-              sub = "❌ 無存貨";
-              cls = "low";
-            } else if (qty <= 1) {
-              sub = "⚠️ 快用完";
-              cls = "warn";
-            } else {
-              sub = "屋企有";
-            }
+          if (qty === 0) {
+            sub = "❌ 無存貨";
+            cls = "low";
+          } else if (qty <= 1) {
+            sub = "⚠️ 快用完";
+            cls = "warn";
+          } else {
+            sub = "屋企有";
+          }
 
-            return `
-              <div class="swipe-row${openClass}" data-swipe-key="${key}" data-stock-id="${row.id}">
-                <div class="swipe-actions">
-                  <button class="swipe-delete-btn" data-del-stock="${row.id}">刪除</button>
+          return `
+            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-stock-id="${row.id}">
+              <div class="swipe-actions">
+                <button class="swipe-delete-btn" data-del-stock="${row.id}">刪除</button>
+              </div>
+              <div class="swipe-content">
+                <div class="cell-main">
+                  <div class="cell-title">${esc(item.name || "")}</div>
+                  <div class="cell-sub ${cls}">${sub}</div>
                 </div>
-                <div class="swipe-content">
-                  <div class="item-main">
-                    <div class="item-title">${esc(item.name || "")}</div>
-                    <div class="item-sub ${cls}">${sub}</div>
-                  </div>
-                  <div class="qty-box">
-                    <button class="qty-btn" data-minus-stock="${row.id}">−</button>
-                    <div class="qty-number">${qty}</div>
-                    <button class="qty-btn" data-plus-stock="${row.id}">+</button>
-                  </div>
+                <div class="qty-wrap">
+                  <button class="qty-btn" data-minus-stock="${row.id}">−</button>
+                  <div class="qty-num">${qty}</div>
+                  <button class="qty-btn" data-plus-stock="${row.id}">+</button>
                 </div>
               </div>
-            `;
-          })
-          .join("");
+            </div>
+          `;
+        }).join("");
       }
 
       function renderPrices() {
@@ -1135,11 +1178,7 @@
         if (keyword) {
           rows = rows.filter(function (row) {
             const v = row.value || {};
-            const text = [
-              v.name || "",
-              v.store || "",
-              v.note || ""
-            ].join(" ").toLowerCase();
+            const text = [v.name || "", v.store || "", v.note || ""].join(" ").toLowerCase();
             return text.includes(keyword);
           });
         }
@@ -1155,20 +1194,25 @@
           const key = "price:" + row.id;
           const openClass = openSwipeKey === key ? " open" : "";
           const item = row.value || {};
+          const meta = [
+            item.store || "未填商店",
+            item.date || ""
+          ].filter(Boolean).join("｜");
+
           return `
             <div class="swipe-row${openClass}" data-swipe-key="${key}" data-price-id="${row.id}">
               <div class="swipe-actions">
                 <button class="swipe-delete-btn" data-del-price="${row.id}">刪除</button>
               </div>
               <div class="swipe-content">
-                <div class="item-main">
-                  <div class="item-title">${esc(item.name || "")}</div>
-                  <div class="item-sub">
-                    ${item.store ? esc(item.store) : "未填商店"}${item.date ? "｜" + esc(item.date) : ""}
+                <div class="cell-main">
+                  <div class="cell-title">${esc(item.name || "")}</div>
+                  <div class="cell-sub">
+                    ${esc(meta)}
                     ${item.note ? "<br>" + esc(item.note) : ""}
                   </div>
                 </div>
-                <div class="price-big">${money(item.price || 0)}</div>
+                <div class="cell-price">${money(item.price || 0)}</div>
               </div>
             </div>
           `;
@@ -1187,30 +1231,28 @@
           return;
         }
 
-        els.memoList.innerHTML = rows
-          .map(function (row) {
-            const key = "memo:" + row.id;
-            const openClass = openSwipeKey === key ? " open" : "";
-            const item = row.value || {};
-            return `
-              <div class="swipe-row${openClass}" data-swipe-key="${key}" data-memo-id="${row.id}">
-                <div class="swipe-actions">
-                  <button class="swipe-delete-btn" data-del-memo="${row.id}">刪除</button>
-                </div>
-                <div class="swipe-content">
-                  <div class="item-main">
-                    <div class="item-title">${esc(item.text || "")}</div>
-                    <div class="item-sub">${timeStr(item.ts)}</div>
-                  </div>
+        els.memoList.innerHTML = rows.map(function (row) {
+          const key = "memo:" + row.id;
+          const openClass = openSwipeKey === key ? " open" : "";
+          const item = row.value || {};
+          return `
+            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-memo-id="${row.id}">
+              <div class="swipe-actions">
+                <button class="swipe-delete-btn" data-del-memo="${row.id}">刪除</button>
+              </div>
+              <div class="swipe-content">
+                <div class="cell-main">
+                  <div class="cell-title">${esc(item.text || "")}</div>
+                  <div class="cell-sub">${timeStr(item.ts)}</div>
                 </div>
               </div>
-            `;
-          })
-          .join("");
+            </div>
+          `;
+        }).join("");
       }
 
       function seedDefaultsOnce() {
-        db.ref("meta/seededV7")
+        db.ref("meta/seededV8")
           .once("value")
           .then(async function (s) {
             if (s.exists()) return;
@@ -1295,7 +1337,7 @@
               );
             }
 
-            jobs.push(db.ref("meta/seededV7").set(true));
+            jobs.push(db.ref("meta/seededV8").set(true));
             await Promise.all(jobs);
           })
           .catch(function (err) {
@@ -1360,8 +1402,8 @@
         }
 
         try {
-          const r = await auth.signInWithEmailAndPassword(email, password);
-          setLoginMsg("登入成功：" + r.user.email);
+          await auth.signInWithEmailAndPassword(email, password);
+          setLoginMsg("");
         } catch (err) {
           setLoginMsg(err.code + " | " + err.message);
           alert("Login Error: " + err.code + " | " + err.message);
@@ -1399,8 +1441,7 @@
 
       async function deleteDinnerCategory(id) {
         const name = getDinnerCatName(id);
-        const ok = confirm("確定刪除晚餐大類別「" + name + "」及入面所有菜式？");
-        if (!ok) return;
+        if (!confirm("確定刪除晚餐大類別「" + name + "」及入面所有菜式？")) return;
 
         try {
           await Promise.all([
@@ -1420,9 +1461,7 @@
           }
 
           Object.keys(excludedToday).forEach(function (key) {
-            if (key.startsWith(id + "__")) {
-              delete excludedToday[key];
-            }
+            if (key.startsWith(id + "__")) delete excludedToday[key];
           });
 
           if (lastDrawKey && lastDrawKey.startsWith(id + "__")) {
@@ -1537,8 +1576,7 @@
 
       async function deleteStockCategory(id) {
         const name = getStockCatName(id);
-        const ok = confirm("確定刪除存貨類別「" + name + "」及入面所有項目？");
-        if (!ok) return;
+        if (!confirm("確定刪除存貨類別「" + name + "」及入面所有項目？")) return;
 
         try {
           await Promise.all([
@@ -1652,7 +1690,7 @@
 
       els.addMemoBtn.addEventListener("click", addMemo);
 
-      document.querySelectorAll(".nav-btn").forEach(function (btn) {
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
           showPage(btn.dataset.page, btn);
         });
@@ -1678,14 +1716,6 @@
       });
 
       els.dinnerCatManageList.addEventListener("click", function (e) {
-        const manageId = e.target.getAttribute("data-manage-dinner-cat");
-        if (manageId) {
-          currentDinnerCat = manageId;
-          renderDinnerCategories();
-          renderDinnerItems();
-          return;
-        }
-
         const delId = e.target.getAttribute("data-del-dinner-cat");
         if (delId) {
           deleteDinnerCategory(delId);
@@ -1695,6 +1725,7 @@
       els.stockCatGrid.addEventListener("click", function (e) {
         const cat = e.target.getAttribute("data-stock-cat");
         if (!cat) return;
+
         currentStockCat = cat;
         closeAllSwipes();
         renderStockCategories();
@@ -1702,14 +1733,6 @@
       });
 
       els.stockCatManageList.addEventListener("click", function (e) {
-        const manageId = e.target.getAttribute("data-manage-stock-cat");
-        if (manageId) {
-          currentStockCat = manageId;
-          renderStockCategories();
-          renderStocks();
-          return;
-        }
-
         const delId = e.target.getAttribute("data-del-stock-cat");
         if (delId) {
           deleteStockCategory(delId);
@@ -1795,50 +1818,42 @@
 
         try {
           await db.ref("memos/" + id).remove();
-          if (openSwipeKey === "memo:" + id) openSwipeKey = null;
+          if (openSwipeKey === "memo:" + id) {
+            openSwipeKey = null;
+          }
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
       });
 
-      function attachSwipe(container, typeName, getIdAttrName) {
+      function attachSwipe(container, typeName) {
         let startX = 0;
         let startY = 0;
         let touchedRow = null;
         let moved = false;
 
-        container.addEventListener(
-          "touchstart",
-          function (e) {
-            const row = e.target.closest(".swipe-row");
-            if (!row) return;
-            touchedRow = row;
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            moved = false;
-          },
-          { passive: true }
-        );
+        container.addEventListener("touchstart", function (e) {
+          const row = e.target.closest(".swipe-row");
+          if (!row) return;
+          touchedRow = row;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          moved = false;
+        }, { passive: true });
 
-        container.addEventListener(
-          "touchmove",
-          function (e) {
-            if (!touchedRow) return;
-            const dx = e.touches[0].clientX - startX;
-            const dy = e.touches[0].clientY - startY;
-
-            if (Math.abs(dy) > Math.abs(dx)) return;
-            moved = true;
-          },
-          { passive: true }
-        );
+        container.addEventListener("touchmove", function (e) {
+          if (!touchedRow) return;
+          const dx = e.touches[0].clientX - startX;
+          const dy = e.touches[0].clientY - startY;
+          if (Math.abs(dy) > Math.abs(dx)) return;
+          moved = true;
+        }, { passive: true });
 
         container.addEventListener("touchend", function (e) {
           if (!touchedRow) return;
 
-          const changed = e.changedTouches[0];
-          const dx = changed.clientX - startX;
-          const dy = changed.clientY - startY;
+          const dx = e.changedTouches[0].clientX - startX;
+          const dy = e.changedTouches[0].clientY - startY;
           const fullKey = touchedRow.getAttribute("data-swipe-key");
 
           if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 35) {
@@ -1854,11 +1869,9 @@
             }
           } else if (!moved) {
             const insideButton = e.target.closest("button,input,label");
-            if (!insideButton) {
-              if (openSwipeKey === fullKey) {
-                openSwipeKey = null;
-                renderByType(typeName);
-              }
+            if (!insideButton && openSwipeKey === fullKey) {
+              openSwipeKey = null;
+              renderByType(typeName);
             }
           }
 
@@ -1873,10 +1886,10 @@
         if (typeName === "memo") renderMemos();
       }
 
-      attachSwipe(els.foodList, "food", "data-food-id");
-      attachSwipe(els.stockList, "stock", "data-stock-id");
-      attachSwipe(els.priceList, "price", "data-price-id");
-      attachSwipe(els.memoList, "memo", "data-memo-id");
+      attachSwipe(els.foodList, "food");
+      attachSwipe(els.stockList, "stock");
+      attachSwipe(els.priceList, "price");
+      attachSwipe(els.memoList, "memo");
 
       document.addEventListener("click", function (e) {
         const insideSwipe = e.target.closest(".swipe-row");
