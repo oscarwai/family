@@ -54,7 +54,7 @@
 
     .header{
       display:flex;
-      align-items:flex-end;
+      align-items:flex-start;
       justify-content:space-between;
       gap:12px;
       margin:4px 2px 18px;
@@ -89,6 +89,7 @@
     }
 
     .field{margin-bottom:12px}
+
     .label{
       font-size:13px;
       color:var(--muted);
@@ -104,6 +105,11 @@
       padding:14px;
       font-size:16px;
       outline:none;
+    }
+
+    input:focus, textarea:focus{
+      border-color:#b8befb;
+      box-shadow:0 0 0 4px rgba(92,103,242,.08);
     }
 
     textarea{
@@ -125,12 +131,12 @@
     .btn-primary{background:var(--primary);color:#fff}
     .btn-success{background:var(--success);color:#fff}
     .btn-soft{background:var(--primary-soft);color:var(--primary)}
-    .btn-ghost{background:#f3f4f8;color:var(--text)}
 
     .btn-row{
       display:flex;
       gap:10px;
     }
+
     .btn-row .btn{flex:1}
 
     .split{
@@ -138,6 +144,7 @@
       gap:10px;
       align-items:center;
     }
+
     .split input{flex:1}
 
     .result-box{
@@ -357,13 +364,9 @@
 
     .banner.show{display:block}
 
-    .login-card{
-      width:100%;
-    }
+    .login-card{width:100%}
 
-    .login-top{
-      margin-bottom:18px;
-    }
+    .login-top{margin-bottom:18px}
 
     .login-title{
       margin:0;
@@ -394,10 +397,31 @@
       margin-top:10px;
     }
 
+    .header-actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-shrink:0;
+    }
+
+    .header-btn{
+      width:auto;
+      border:none;
+      background:#f3f4f8;
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
     @media (max-width:360px){
       .title,.login-title{font-size:26px}
       .result-text{font-size:26px}
       .stat-value{font-size:22px}
+      .header-btn{padding:9px 12px;font-size:13px}
     }
   </style>
 </head>
@@ -425,9 +449,6 @@
         <button class="btn btn-soft" id="signupBtn">註冊</button>
       </div>
 
-      <div style="height:10px"></div>
-      <button class="btn btn-ghost" id="logoutBtn">登出</button>
-
       <div id="loginMsg" class="login-msg"></div>
     </div>
   </div>
@@ -441,6 +462,9 @@
           <div>
             <h1 class="title">家庭開支</h1>
             <div class="subtitle">兩部手機共用同一份記錄</div>
+          </div>
+          <div class="header-actions">
+            <button class="header-btn" onclick="logout()">登出</button>
           </div>
         </div>
 
@@ -484,6 +508,9 @@
             <h1 class="title">今晚煮咩</h1>
             <div class="subtitle">雲端同步晚餐菜單</div>
           </div>
+          <div class="header-actions">
+            <button class="header-btn" onclick="logout()">登出</button>
+          </div>
         </div>
 
         <div class="card">
@@ -517,6 +544,9 @@
             <h1 class="title">存貨清單</h1>
             <div class="subtitle">開關式顯示，開 = 屋企有</div>
           </div>
+          <div class="header-actions">
+            <button class="header-btn" onclick="logout()">登出</button>
+          </div>
         </div>
 
         <div class="card">
@@ -538,6 +568,9 @@
           <div>
             <h1 class="title">備忘錄</h1>
             <div class="subtitle">輸入後即時自動保存到雲端</div>
+          </div>
+          <div class="header-actions">
+            <button class="header-btn" onclick="logout()">登出</button>
           </div>
         </div>
 
@@ -597,6 +630,7 @@ let expenseCache = [];
 let foodCache = [];
 let stockCache = [];
 let memoTypingTimer = null;
+let initialized = false;
 
 const defaultFoods = [
   "洋蔥牛仔骨","煎豬扒","焗雞扒","手撕雞","雞翼","三文魚",
@@ -633,7 +667,7 @@ function setLoginMsg(msg, isError){
 
 function handleError(err){
   console.error(err);
-  showError("雲端資料未連接成功。請確認已登入指定帳戶，並且 Database Rules 已允許該 email。");
+  showError("雲端資料未連接成功。請確認你已登入正確帳戶，Authentication 已開 Email/Password，Database Rules 已容許該 email。");
 }
 
 function escapeHtml(str){
@@ -699,9 +733,15 @@ document.getElementById("loginBtn").addEventListener("click", function(){
     });
 });
 
-document.getElementById("logoutBtn").addEventListener("click", function(){
-  auth.signOut();
-});
+function logout(){
+  auth.signOut().then(function(){
+    document.getElementById("loginPassword").value = "";
+    setLoginMsg("已登出", false);
+  }).catch(function(err){
+    console.error(err);
+    setLoginMsg(err.message, true);
+  });
+}
 
 auth.onAuthStateChanged(function(user){
   if(user){
@@ -715,18 +755,22 @@ auth.onAuthStateChanged(function(user){
   }
 });
 
-let initialized = false;
+function seedDefaultsOnce(){
+  db.ref("meta/seeded").once("value").then(function(s){
+    if(s.exists()) return;
+    return Promise.all([
+      db.ref("foods").set(defaultFoods),
+      db.ref("stocks").set(defaultStocks),
+      db.ref("meta/seeded").set(true)
+    ]);
+  }).catch(handleError);
+}
+
 function initData(){
   if(initialized) return;
   initialized = true;
 
-  db.ref("foods").once("value").then(function(s){
-    if(!s.exists()) return db.ref("foods").set(defaultFoods);
-  }).catch(handleError);
-
-  db.ref("stocks").once("value").then(function(s){
-    if(!s.exists()) return db.ref("stocks").set(defaultStocks);
-  }).catch(handleError);
+  seedDefaultsOnce();
 
   document.getElementById("addExpenseBtn").addEventListener("click", function(){
     clearError();
@@ -933,6 +977,7 @@ window.deleteExpense = deleteExpense;
 window.deleteFood = deleteFood;
 window.toggleStock = toggleStock;
 window.deleteStock = deleteStock;
+window.logout = logout;
 </script>
 </body>
 </html>
