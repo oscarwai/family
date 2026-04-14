@@ -254,6 +254,16 @@
       line-height: 1.45;
     }
 
+    .low {
+      color: #ff4d4f;
+      font-weight: 700;
+    }
+
+    .warn {
+      color: #faad14;
+      font-weight: 700;
+    }
+
     .result {
       border: 1px solid #dbe9ff;
       border-radius: 18px;
@@ -353,10 +363,10 @@
       background: #f7f8fb;
       color: var(--text);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px 12px;
+      border-radius: 999px;
+      padding: 12px 14px;
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 700;
       text-align: center;
     }
 
@@ -382,6 +392,7 @@
     .section-tag {
       font-size: 13px;
       color: var(--muted);
+      text-align: right;
     }
 
     .swipe-row {
@@ -556,7 +567,7 @@
           <div class="header">
             <div>
               <h1 class="title">今晚煮咩</h1>
-              <div class="sub">先選大類別，再抽菜式</div>
+              <div class="sub">可同時選多個類別抽選</div>
             </div>
             <button id="logoutBtn2" class="header-btn">登出</button>
           </div>
@@ -580,13 +591,15 @@
             <button id="drawBtn" class="btn-success">隨機抽選</button>
             <button id="redrawBtn" class="btn-soft">再抽一次</button>
           </div>
-          <div class="small-note">再抽一次唔會重複上一次結果（同類別內）</div>
+          <div style="height:10px;"></div>
+          <button id="resetTodayBtn" class="btn-soft">重置今日抽過</button>
+          <div class="small-note">再抽一次唔會重複上一次；今日抽過可重置</div>
         </div>
 
         <div class="card">
           <div class="section-head">
             <div class="section-title">加入菜式</div>
-            <div class="section-tag" id="dinnerAddCatLabel">請先選類別</div>
+            <div class="section-tag" id="dinnerAddCatLabel">管理類別：海鮮</div>
           </div>
           <div class="field">
             <div class="label">菜式名稱</div>
@@ -602,7 +615,7 @@
         <div class="card">
           <div class="section-head">
             <div class="section-title">菜式清單</div>
-            <div class="section-tag" id="dinnerListCatLabel">請先選類別</div>
+            <div class="section-tag" id="dinnerListCatLabel">管理類別：海鮮</div>
           </div>
           <div id="foodList" class="list"></div>
         </div>
@@ -613,7 +626,7 @@
           <div class="header">
             <div>
               <h1 class="title">存貨清單</h1>
-              <div class="sub">先選分類，再管理數量</div>
+              <div class="sub">低庫存會有提示</div>
             </div>
             <button id="logoutBtn3" class="header-btn">登出</button>
           </div>
@@ -737,7 +750,9 @@
       let memoCache = {};
       let currentDinnerCat = DINNER_CATEGORIES[0].id;
       let currentStockCat = STOCK_CATEGORIES[0].id;
-      let lastDrawByCat = {};
+      let selectedDinnerCats = [];
+      let excludedToday = {};
+      let lastDrawKey = null;
       let openSwipeKey = null;
 
       const els = {
@@ -771,6 +786,7 @@
         resultDesc: document.getElementById("resultDesc"),
         drawBtn: document.getElementById("drawBtn"),
         redrawBtn: document.getElementById("redrawBtn"),
+        resetTodayBtn: document.getElementById("resetTodayBtn"),
         foodInput: document.getElementById("foodInput"),
         foodDescInput: document.getElementById("foodDescInput"),
         addFoodBtn: document.getElementById("addFoodBtn"),
@@ -895,14 +911,19 @@
 
       function renderDinnerCategories() {
         els.dinnerCatGrid.innerHTML = DINNER_CATEGORIES.map(function (cat) {
-          const active = cat.id === currentDinnerCat ? " active" : "";
+          const active = selectedDinnerCats.includes(cat.id) ? " active" : "";
           return `<button class="cat-btn${active}" data-dinner-cat="${cat.id}">${cat.label}</button>`;
         }).join("");
 
-        const label = getDinnerCatLabel(currentDinnerCat);
-        els.currentDinnerCatLabel.textContent = label;
-        els.dinnerAddCatLabel.textContent = label;
-        els.dinnerListCatLabel.textContent = label;
+        if (selectedDinnerCats.length === 0) {
+          els.currentDinnerCatLabel.textContent = "未選擇"
+        } else {
+          els.currentDinnerCatLabel.textContent = selectedDinnerCats.map(getDinnerCatLabel).join("、")
+        }
+
+        const manageLabel = getDinnerCatLabel(currentDinnerCat)
+        els.dinnerAddCatLabel.textContent = "管理類別：" + manageLabel
+        els.dinnerListCatLabel.textContent = "管理類別：" + manageLabel
       }
 
       function renderStockCategories() {
@@ -1005,7 +1026,19 @@
             const openClass = openSwipeKey === key ? " open" : "";
             const item = row.value || {};
             const qty = Number(item.qty || 0);
-            const sub = qty > 0 ? "屋企有" : "屋企冇";
+
+            let sub = ""
+            let cls = ""
+
+            if (qty === 0) {
+              sub = "❌ 無存貨"
+              cls = "low"
+            } else if (qty <= 1) {
+              sub = "⚠️ 快用完"
+              cls = "warn"
+            } else {
+              sub = "屋企有"
+            }
 
             return `
               <div class="swipe-row${openClass}" data-swipe-key="${key}" data-stock-id="${row.id}">
@@ -1015,7 +1048,7 @@
                 <div class="swipe-content">
                   <div class="item-main">
                     <div class="item-title">${esc(item.name || "")}</div>
-                    <div class="item-sub">${sub}</div>
+                    <div class="item-sub ${cls}">${sub}</div>
                   </div>
                   <div class="qty-box">
                     <button class="qty-btn" data-minus-stock="${row.id}">−</button>
@@ -1143,6 +1176,8 @@
 
         els.expenseDate.value = todayStr();
 
+        selectedDinnerCats = [currentDinnerCat]
+
         renderDinnerCategories();
         renderStockCategories();
         seedDefaultsOnce();
@@ -1263,40 +1298,67 @@
       }
 
       function drawFood(isRedraw) {
-        const rows = getDinnerRowsOfCurrentCat();
-
-        if (rows.length === 0) {
-          els.resultDisplay.textContent = "請先加入菜式";
-          els.resultDesc.textContent = "";
-          return;
+        if (selectedDinnerCats.length === 0) {
+          els.resultDisplay.textContent = "請先選分類"
+          els.resultDesc.textContent = ""
+          return
         }
 
-        let pool = rows;
+        let pool = []
 
-        if (isRedraw && lastDrawByCat[currentDinnerCat] && rows.length > 1) {
-          pool = rows.filter(function (row) {
-            return row.id !== lastDrawByCat[currentDinnerCat];
-          });
+        selectedDinnerCats.forEach(function (cat) {
+          const rows = rowsFromObj(dinnerCache[cat] || {})
+          rows.forEach(function (row) {
+            const excludeKey = cat + "__" + row.id
+            if (!excludedToday[excludeKey]) {
+              pool.push({
+                ...row.value,
+                id: row.id,
+                cat: cat,
+                excludeKey: excludeKey
+              })
+            }
+          })
+        })
+
+        if (isRedraw && lastDrawKey && pool.length > 1) {
+          pool = pool.filter(function (item) {
+            return item.excludeKey !== lastDrawKey
+          })
         }
 
-        const picked = pool[Math.floor(Math.random() * pool.length)];
-        const names = pool.map(function (row) {
-          return row.value.name || "";
-        });
+        if (pool.length === 0) {
+          els.resultDisplay.textContent = "今日已抽晒"
+          els.resultDesc.textContent = ""
+          return
+        }
 
-        let count = 0;
+        const picked = pool[Math.floor(Math.random() * pool.length)]
+        const names = pool.map(function (item) {
+          return item.name || ""
+        })
+
+        let count = 0
         const timer = setInterval(function () {
           els.resultDisplay.textContent =
-            names[Math.floor(Math.random() * names.length)] || "未有結果";
-          els.resultDesc.textContent = "";
-          count++;
+            names[Math.floor(Math.random() * names.length)] || "未有結果"
+          els.resultDesc.textContent = ""
+          count++
           if (count > 12) {
-            clearInterval(timer);
-            lastDrawByCat[currentDinnerCat] = picked.id;
-            els.resultDisplay.textContent = picked.value.name || "未有結果";
-            els.resultDesc.textContent = picked.value.desc || "";
+            clearInterval(timer)
+            excludedToday[picked.excludeKey] = true
+            lastDrawKey = picked.excludeKey
+            els.resultDisplay.textContent = picked.name || "未有結果"
+            els.resultDesc.textContent = picked.desc || ""
           }
-        }, 60);
+        }, 60)
+      }
+
+      function resetToday() {
+        excludedToday = {}
+        lastDrawKey = null
+        els.resultDisplay.textContent = "已重置今日抽過"
+        els.resultDesc.textContent = ""
       }
 
       function getDinnerRowsOfCurrentCat() {
@@ -1353,6 +1415,8 @@
         drawFood(true);
       });
 
+      els.resetTodayBtn.addEventListener("click", resetToday)
+
       els.addFoodBtn.addEventListener("click", addFood);
       els.addStockBtn.addEventListener("click", addStock);
       els.addMemoBtn.addEventListener("click", addMemo);
@@ -1366,7 +1430,17 @@
       els.dinnerCatGrid.addEventListener("click", function (e) {
         const cat = e.target.getAttribute("data-dinner-cat");
         if (!cat) return;
-        currentDinnerCat = cat;
+
+        currentDinnerCat = cat
+
+        if (selectedDinnerCats.includes(cat)) {
+          selectedDinnerCats = selectedDinnerCats.filter(function (id) {
+            return id !== cat
+          })
+        } else {
+          selectedDinnerCats.push(cat)
+        }
+
         closeAllSwipes();
         renderDinnerCategories();
         renderDinnerItems();
@@ -1397,9 +1471,13 @@
 
         try {
           await db.ref("dinnerItems/" + currentDinnerCat + "/" + id).remove();
-          if (lastDrawByCat[currentDinnerCat] === id) {
-            delete lastDrawByCat[currentDinnerCat];
+
+          const drawKey = currentDinnerCat + "__" + id
+          if (lastDrawKey === drawKey) {
+            lastDrawKey = null
           }
+          delete excludedToday[drawKey]
+
           if (openSwipeKey === "food:" + id) openSwipeKey = null;
         } catch (err) {
           alert(err.code + " | " + err.message);
