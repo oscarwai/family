@@ -29,6 +29,7 @@
       --radius: 18px;
       --nav-h: 84px;
       --swipe-width: 90px;
+      --warn: #faad14;
     }
 
     * {
@@ -165,6 +166,23 @@
       font-size: 14px;
     }
 
+    .mini-btn {
+      width: auto;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 10px;
+    }
+
+    .small-btn {
+      width: auto;
+      padding: 8px 10px;
+      background: #fff1f1;
+      color: var(--danger);
+      font-size: 13px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
     .row {
       display: flex;
       gap: 10px;
@@ -255,12 +273,12 @@
     }
 
     .low {
-      color: #ff4d4f;
+      color: var(--danger);
       font-weight: 700;
     }
 
     .warn {
-      color: #faad14;
+      color: var(--warn);
       font-weight: 700;
     }
 
@@ -289,6 +307,7 @@
       justify-content: center;
       word-break: break-word;
       line-height: 1.25;
+      text-align: center;
     }
 
     .result-desc {
@@ -374,6 +393,30 @@
       background: var(--primary-soft);
       color: var(--primary);
       border-color: #cfd4ff;
+    }
+
+    .cat-manage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .cat-manage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fcfcfd;
+    }
+
+    .cat-manage-name {
+      font-size: 14px;
+      font-weight: 700;
+      word-break: break-word;
     }
 
     .section-head {
@@ -567,7 +610,7 @@
           <div class="header">
             <div>
               <h1 class="title">今晚煮咩</h1>
-              <div class="sub">可同時選多個類別抽選</div>
+              <div class="sub">可同時揀幾個類別抽選；分類可增減</div>
             </div>
             <button id="logoutBtn2" class="header-btn">登出</button>
           </div>
@@ -575,10 +618,17 @@
 
         <div class="card">
           <div class="section-head">
-            <div class="section-title">大類別</div>
+            <div class="section-title">晚餐分類</div>
             <div class="section-tag" id="currentDinnerCatLabel">未選擇</div>
           </div>
-          <div id="dinnerCatGrid" class="cat-grid"></div>
+
+          <div class="row-tight">
+            <input id="newDinnerCatInput" type="text" placeholder="新增分類，例如：湯類、宵夜、日式" />
+            <button id="addDinnerCatBtn" class="mini-btn" style="width:auto;">新增</button>
+          </div>
+
+          <div id="dinnerCatGrid" class="cat-grid" style="margin-top:12px;"></div>
+          <div id="dinnerCatManageList" class="cat-manage-list"></div>
         </div>
 
         <div class="card">
@@ -599,7 +649,7 @@
         <div class="card">
           <div class="section-head">
             <div class="section-title">加入菜式</div>
-            <div class="section-tag" id="dinnerAddCatLabel">管理類別：海鮮</div>
+            <div class="section-tag" id="dinnerAddCatLabel">管理類別：未選擇</div>
           </div>
           <div class="field">
             <div class="label">菜式名稱</div>
@@ -615,7 +665,7 @@
         <div class="card">
           <div class="section-head">
             <div class="section-title">菜式清單</div>
-            <div class="section-tag" id="dinnerListCatLabel">管理類別：海鮮</div>
+            <div class="section-tag" id="dinnerListCatLabel">管理類別：未選擇</div>
           </div>
           <div id="foodList" class="list"></div>
         </div>
@@ -626,7 +676,7 @@
           <div class="header">
             <div>
               <h1 class="title">存貨清單</h1>
-              <div class="sub">低庫存會有提示</div>
+              <div class="sub">分類可增減；低庫存會提示</div>
             </div>
             <button id="logoutBtn3" class="header-btn">登出</button>
           </div>
@@ -634,10 +684,17 @@
 
         <div class="card">
           <div class="section-head">
-            <div class="section-title">分類</div>
+            <div class="section-title">存貨分類</div>
             <div class="section-tag" id="currentStockCatLabel">未選擇</div>
           </div>
-          <div id="stockCatGrid" class="cat-grid"></div>
+
+          <div class="row-tight">
+            <input id="newStockCatInput" type="text" placeholder="新增分類，例如：零食、早餐、冷凍食品" />
+            <button id="addStockCatBtn" class="mini-btn" style="width:auto;">新增</button>
+          </div>
+
+          <div id="stockCatGrid" class="cat-grid" style="margin-top:12px;"></div>
+          <div id="stockCatManageList" class="cat-manage-list"></div>
         </div>
 
         <div class="card">
@@ -707,26 +764,26 @@
         "angelleung2023@gmail.com"
       ];
 
-      const DINNER_CATEGORIES = [
-        { id: "seafood", label: "海鮮" },
-        { id: "pork", label: "豬肉" },
-        { id: "beef", label: "牛肉" },
-        { id: "chicken", label: "雞肉" },
-        { id: "vegetable", label: "蔬菜" },
-        { id: "western", label: "西餐" },
-        { id: "pasta", label: "意粉" }
-      ];
+      const DEFAULT_DINNER_CATEGORIES = {
+        seafood: { name: "海鮮" },
+        pork: { name: "豬肉" },
+        beef: { name: "牛肉" },
+        chicken: { name: "雞肉" },
+        vegetable: { name: "蔬菜" },
+        western: { name: "西餐" },
+        pasta: { name: "意粉" }
+      };
 
-      const STOCK_CATEGORIES = [
-        { id: "drinks", label: "飲品" },
-        { id: "meat", label: "肉類（雪藏/急凍）" },
-        { id: "vegetables", label: "蔬菜" },
-        { id: "staples", label: "主食 / 乾貨" },
-        { id: "seasoning", label: "調味 / 廚房材料" },
-        { id: "daily", label: "日用品" },
-        { id: "cleaning", label: "清潔用品" },
-        { id: "personal", label: "個人護理" }
-      ];
+      const DEFAULT_STOCK_CATEGORIES = {
+        drinks: { name: "飲品" },
+        meat: { name: "肉類（雪藏/急凍）" },
+        vegetables: { name: "蔬菜" },
+        staples: { name: "主食 / 乾貨" },
+        seasoning: { name: "調味 / 廚房材料" },
+        daily: { name: "日用品" },
+        cleaning: { name: "清潔用品" },
+        personal: { name: "個人護理" }
+      };
 
       const firebaseConfig = {
         apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
@@ -745,11 +802,15 @@
       let initialized = false;
       let budgetCache = 0;
       let expenseCache = {};
-      let dinnerCache = {};
-      let stockCache = {};
+      let dinnerCategoriesCache = {};
+      let dinnerItemsCache = {};
+      let stockCategoriesCache = {};
+      let stockItemsCache = {};
       let memoCache = {};
-      let currentDinnerCat = DINNER_CATEGORIES[0].id;
-      let currentStockCat = STOCK_CATEGORIES[0].id;
+
+      let currentDinnerCat = "seafood";
+      let currentStockCat = "drinks";
+
       let selectedDinnerCats = [];
       let excludedToday = {};
       let lastDrawKey = null;
@@ -764,7 +825,6 @@
         loginMsg: document.getElementById("loginMsg"),
 
         errorBanner: document.getElementById("errorBanner"),
-        currentUserLine: document.getElementById("currentUserLine"),
 
         budgetInput: document.getElementById("budgetInput"),
         saveBudgetBtn: document.getElementById("saveBudgetBtn"),
@@ -778,7 +838,10 @@
         addExpenseBtn: document.getElementById("addExpenseBtn"),
         expenseList: document.getElementById("expenseList"),
 
+        newDinnerCatInput: document.getElementById("newDinnerCatInput"),
+        addDinnerCatBtn: document.getElementById("addDinnerCatBtn"),
         dinnerCatGrid: document.getElementById("dinnerCatGrid"),
+        dinnerCatManageList: document.getElementById("dinnerCatManageList"),
         currentDinnerCatLabel: document.getElementById("currentDinnerCatLabel"),
         dinnerAddCatLabel: document.getElementById("dinnerAddCatLabel"),
         dinnerListCatLabel: document.getElementById("dinnerListCatLabel"),
@@ -792,7 +855,10 @@
         addFoodBtn: document.getElementById("addFoodBtn"),
         foodList: document.getElementById("foodList"),
 
+        newStockCatInput: document.getElementById("newStockCatInput"),
+        addStockCatBtn: document.getElementById("addStockCatBtn"),
         stockCatGrid: document.getElementById("stockCatGrid"),
+        stockCatManageList: document.getElementById("stockCatManageList"),
         currentStockCatLabel: document.getElementById("currentStockCatLabel"),
         stockAddCatLabel: document.getElementById("stockAddCatLabel"),
         stockListCatLabel: document.getElementById("stockListCatLabel"),
@@ -805,20 +871,6 @@
         memoList: document.getElementById("memoList"),
         memoCountLabel: document.getElementById("memoCountLabel")
       };
-
-      function getDinnerCatLabel(id) {
-        const found = DINNER_CATEGORIES.find(function (x) {
-          return x.id === id;
-        });
-        return found ? found.label : "未選擇";
-      }
-
-      function getStockCatLabel(id) {
-        const found = STOCK_CATEGORIES.find(function (x) {
-          return x.id === id;
-        });
-        return found ? found.label : "未選擇";
-      }
 
       function setError(msg) {
         if (!msg) {
@@ -909,33 +961,94 @@
         closeAllSwipes();
       }
 
+      function getDinnerCatName(id) {
+        return dinnerCategoriesCache[id] ? dinnerCategoriesCache[id].name : "未選擇";
+      }
+
+      function getStockCatName(id) {
+        return stockCategoriesCache[id] ? stockCategoriesCache[id].name : "未選擇";
+      }
+
+      function ensureCurrentCats() {
+        const dinnerIds = Object.keys(dinnerCategoriesCache || {});
+        const stockIds = Object.keys(stockCategoriesCache || {});
+
+        if (!dinnerIds.includes(currentDinnerCat)) {
+          currentDinnerCat = dinnerIds[0] || null;
+        }
+
+        if (!stockIds.includes(currentStockCat)) {
+          currentStockCat = stockIds[0] || null;
+        }
+
+        selectedDinnerCats = selectedDinnerCats.filter(function (id) {
+          return dinnerIds.includes(id);
+        });
+
+        if (selectedDinnerCats.length === 0 && currentDinnerCat) {
+          selectedDinnerCats = [currentDinnerCat];
+        }
+      }
+
       function renderDinnerCategories() {
-        els.dinnerCatGrid.innerHTML = DINNER_CATEGORIES.map(function (cat) {
-          const active = selectedDinnerCats.includes(cat.id) ? " active" : "";
-          return `<button class="cat-btn${active}" data-dinner-cat="${cat.id}">${cat.label}</button>`;
+        ensureCurrentCats();
+
+        const rows = rowsFromObj(dinnerCategoriesCache);
+
+        els.dinnerCatGrid.innerHTML = rows.map(function (row) {
+          const active = selectedDinnerCats.includes(row.id) ? " active" : "";
+          return `<button class="cat-btn${active}" data-dinner-cat="${row.id}">${esc(row.value.name)}</button>`;
+        }).join("");
+
+        els.dinnerCatManageList.innerHTML = rows.map(function (row) {
+          return `
+            <div class="cat-manage-row">
+              <div class="cat-manage-name">${esc(row.value.name)}</div>
+              <div class="row" style="width:auto;gap:8px;">
+                <button class="mini-btn btn-soft" data-manage-dinner-cat="${row.id}" style="width:auto;">管理</button>
+                <button class="small-btn" data-del-dinner-cat="${row.id}">刪除</button>
+              </div>
+            </div>
+          `;
         }).join("");
 
         if (selectedDinnerCats.length === 0) {
-          els.currentDinnerCatLabel.textContent = "未選擇"
+          els.currentDinnerCatLabel.textContent = "未選擇";
         } else {
-          els.currentDinnerCatLabel.textContent = selectedDinnerCats.map(getDinnerCatLabel).join("、")
+          els.currentDinnerCatLabel.textContent = selectedDinnerCats.map(getDinnerCatName).join("、");
         }
 
-        const manageLabel = getDinnerCatLabel(currentDinnerCat)
-        els.dinnerAddCatLabel.textContent = "管理類別：" + manageLabel
-        els.dinnerListCatLabel.textContent = "管理類別：" + manageLabel
+        const manageName = currentDinnerCat ? getDinnerCatName(currentDinnerCat) : "未選擇";
+        els.dinnerAddCatLabel.textContent = "管理類別：" + manageName;
+        els.dinnerListCatLabel.textContent = "管理類別：" + manageName;
       }
 
       function renderStockCategories() {
-        els.stockCatGrid.innerHTML = STOCK_CATEGORIES.map(function (cat) {
-          const active = cat.id === currentStockCat ? " active" : "";
-          return `<button class="cat-btn${active}" data-stock-cat="${cat.id}">${cat.label}</button>`;
+        ensureCurrentCats();
+
+        const rows = rowsFromObj(stockCategoriesCache);
+
+        els.stockCatGrid.innerHTML = rows.map(function (row) {
+          const active = currentStockCat === row.id ? " active" : "";
+          return `<button class="cat-btn${active}" data-stock-cat="${row.id}">${esc(row.value.name)}</button>`;
         }).join("");
 
-        const label = getStockCatLabel(currentStockCat);
+        els.stockCatManageList.innerHTML = rows.map(function (row) {
+          return `
+            <div class="cat-manage-row">
+              <div class="cat-manage-name">${esc(row.value.name)}</div>
+              <div class="row" style="width:auto;gap:8px;">
+                <button class="mini-btn btn-soft" data-manage-stock-cat="${row.id}" style="width:auto;">管理</button>
+                <button class="small-btn" data-del-stock-cat="${row.id}">刪除</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        const label = currentStockCat ? getStockCatName(currentStockCat) : "未選擇";
         els.currentStockCatLabel.textContent = label;
-        els.stockAddCatLabel.textContent = label;
-        els.stockListCatLabel.textContent = label;
+        els.stockAddCatLabel.textContent = "管理類別：" + label;
+        els.stockListCatLabel.textContent = "管理類別：" + label;
       }
 
       function renderExpenses() {
@@ -977,10 +1090,15 @@
       }
 
       function getDinnerRowsOfCurrentCat() {
-        return rowsFromObj(dinnerCache[currentDinnerCat] || {});
+        return rowsFromObj(dinnerItemsCache[currentDinnerCat] || {});
       }
 
       function renderDinnerItems() {
+        if (!currentDinnerCat) {
+          els.foodList.innerHTML = '<div class="empty">未有分類</div>';
+          return;
+        }
+
         const rows = getDinnerRowsOfCurrentCat();
 
         if (rows.length === 0) {
@@ -1012,7 +1130,12 @@
       }
 
       function renderStocks() {
-        const rows = rowsFromObj(stockCache[currentStockCat] || {});
+        if (!currentStockCat) {
+          els.stockList.innerHTML = '<div class="empty">未有分類</div>';
+          return;
+        }
+
+        const rows = rowsFromObj(stockItemsCache[currentStockCat] || {});
 
         if (rows.length === 0) {
           els.stockList.innerHTML = '<div class="empty">未有存貨項目</div>';
@@ -1027,17 +1150,17 @@
             const item = row.value || {};
             const qty = Number(item.qty || 0);
 
-            let sub = ""
-            let cls = ""
+            let sub = "";
+            let cls = "";
 
             if (qty === 0) {
-              sub = "❌ 無存貨"
-              cls = "low"
+              sub = "❌ 無存貨";
+              cls = "low";
             } else if (qty <= 1) {
-              sub = "⚠️ 快用完"
-              cls = "warn"
+              sub = "⚠️ 快用完";
+              cls = "warn";
             } else {
-              sub = "屋企有"
+              sub = "屋企有";
             }
 
             return `
@@ -1097,73 +1220,93 @@
       }
 
       function seedDefaultsOnce() {
-        db.ref("meta/seededV3")
+        db.ref("meta/seededV5")
           .once("value")
-          .then(function (s) {
+          .then(async function (s) {
             if (s.exists()) return;
 
-            const dinnerSeed = {
-              seafood: {
-                a1: { name: "蒸魚", desc: "魚加薑蔥蒸 8-10 分鐘，蒸好再淋熟油及豉油。" },
-                a2: { name: "白酒煮蜆", desc: "蒜蓉炒香後加蜆同白酒，開口後即熄火。" }
-              },
-              pork: {
-                b1: { name: "煎豬扒", desc: "豬扒醃味後煎至兩面金黃。" }
-              },
-              beef: {
-                c1: { name: "洋蔥牛仔骨", desc: "先醃牛仔骨，煎香後加洋蔥炒至軟身。" }
-              },
-              chicken: {
-                d1: { name: "焗雞扒", desc: "雞扒調味後焗熟，最後灑少量香草。" }
-              },
-              vegetable: {
-                e1: { name: "蒜蓉炒菜心", desc: "蒜蓉起鑊，大火快炒菜心至熟。" }
-              },
-              western: {
-                f1: { name: "白汁焗蘑菇雞", desc: "雞件煎香後加白汁及蘑菇焗熟。" }
-              },
-              pasta: {
-                g1: { name: "番茄肉醬意粉", desc: "先炒肉碎，再加番茄醬煮滾後拌意粉。" }
-              }
-            };
+            const dinnerCategoriesSnapshot = await db.ref("dinnerCategories").once("value");
+            const stockCategoriesSnapshot = await db.ref("stockCategories").once("value");
+            const dinnerItemsSnapshot = await db.ref("dinnerItems").once("value");
+            const stockItemsSnapshot = await db.ref("stockItems").once("value");
 
-            const stockSeed = {
-              drinks: {
-                s1: { name: "可樂", qty: 2 },
-                s2: { name: "牛奶", qty: 1 }
-              },
-              meat: {
-                s3: { name: "雞翼", qty: 5 },
-                s4: { name: "豬扒", qty: 2 }
-              },
-              vegetables: {
-                s5: { name: "洋蔥", qty: 2 },
-                s6: { name: "菜心", qty: 1 }
-              },
-              staples: {
-                s7: { name: "米", qty: 1 },
-                s8: { name: "意粉", qty: 2 }
-              },
-              seasoning: {
-                s9: { name: "豉油", qty: 1 },
-                s10: { name: "鹽", qty: 1 }
-              },
-              daily: {
-                s11: { name: "廁紙", qty: 5 }
-              },
-              cleaning: {
-                s12: { name: "洗潔精", qty: 1 }
-              },
-              personal: {
-                s13: { name: "牙膏", qty: 1 }
-              }
-            };
+            const jobs = [];
 
-            return Promise.all([
-              db.ref("dinnerItems").set(dinnerSeed),
-              db.ref("stockItems").set(stockSeed),
-              db.ref("meta/seededV3").set(true)
-            ]);
+            if (!dinnerCategoriesSnapshot.exists()) {
+              jobs.push(db.ref("dinnerCategories").set(DEFAULT_DINNER_CATEGORIES));
+            }
+
+            if (!stockCategoriesSnapshot.exists()) {
+              jobs.push(db.ref("stockCategories").set(DEFAULT_STOCK_CATEGORIES));
+            }
+
+            if (!dinnerItemsSnapshot.exists()) {
+              jobs.push(
+                db.ref("dinnerItems").set({
+                  seafood: {
+                    a1: { name: "蒸魚", desc: "魚加薑蔥蒸 8-10 分鐘，蒸好再淋熟油及豉油。" },
+                    a2: { name: "白酒煮蜆", desc: "蒜蓉炒香後加蜆同白酒，開口後即熄火。" }
+                  },
+                  pork: {
+                    b1: { name: "煎豬扒", desc: "豬扒醃味後煎至兩面金黃。" }
+                  },
+                  beef: {
+                    c1: { name: "洋蔥牛仔骨", desc: "先醃牛仔骨，煎香後加洋蔥炒至軟身。" }
+                  },
+                  chicken: {
+                    d1: { name: "焗雞扒", desc: "雞扒調味後焗熟，最後灑少量香草。" }
+                  },
+                  vegetable: {
+                    e1: { name: "蒜蓉炒菜心", desc: "蒜蓉起鑊，大火快炒菜心至熟。" }
+                  },
+                  western: {
+                    f1: { name: "白汁焗蘑菇雞", desc: "雞件煎香後加白汁及蘑菇焗熟。" }
+                  },
+                  pasta: {
+                    g1: { name: "番茄肉醬意粉", desc: "先炒肉碎，再加番茄醬煮滾後拌意粉。" }
+                  }
+                })
+              );
+            }
+
+            if (!stockItemsSnapshot.exists()) {
+              jobs.push(
+                db.ref("stockItems").set({
+                  drinks: {
+                    s1: { name: "可樂", qty: 2 },
+                    s2: { name: "牛奶", qty: 1 }
+                  },
+                  meat: {
+                    s3: { name: "雞翼", qty: 5 },
+                    s4: { name: "豬扒", qty: 2 }
+                  },
+                  vegetables: {
+                    s5: { name: "洋蔥", qty: 2 },
+                    s6: { name: "菜心", qty: 1 }
+                  },
+                  staples: {
+                    s7: { name: "米", qty: 1 },
+                    s8: { name: "意粉", qty: 2 }
+                  },
+                  seasoning: {
+                    s9: { name: "豉油", qty: 1 },
+                    s10: { name: "鹽", qty: 1 }
+                  },
+                  daily: {
+                    s11: { name: "廁紙", qty: 5 }
+                  },
+                  cleaning: {
+                    s12: { name: "洗潔精", qty: 1 }
+                  },
+                  personal: {
+                    s13: { name: "牙膏", qty: 1 }
+                  }
+                })
+              );
+            }
+
+            jobs.push(db.ref("meta/seededV5").set(true));
+            await Promise.all(jobs);
           })
           .catch(function (err) {
             setError(err.code + " | " + err.message);
@@ -1175,11 +1318,6 @@
         initialized = true;
 
         els.expenseDate.value = todayStr();
-
-        selectedDinnerCats = [currentDinnerCat]
-
-        renderDinnerCategories();
-        renderStockCategories();
         seedDefaultsOnce();
 
         db.ref("budget").on("value", function (s) {
@@ -1194,13 +1332,25 @@
           renderExpenses();
         });
 
-        db.ref("dinnerItems").on("value", function (s) {
-          dinnerCache = s.val() || {};
+        db.ref("dinnerCategories").on("value", function (s) {
+          dinnerCategoriesCache = s.val() || {};
+          renderDinnerCategories();
           renderDinnerItems();
         });
 
+        db.ref("dinnerItems").on("value", function (s) {
+          dinnerItemsCache = s.val() || {};
+          renderDinnerItems();
+        });
+
+        db.ref("stockCategories").on("value", function (s) {
+          stockCategoriesCache = s.val() || {};
+          renderStockCategories();
+          renderStocks();
+        });
+
         db.ref("stockItems").on("value", function (s) {
-          stockCache = s.val() || {};
+          stockItemsCache = s.val() || {};
           renderStocks();
         });
 
@@ -1208,9 +1358,6 @@
           memoCache = s.val() || {};
           renderMemos();
         });
-
-        els.currentUserLine.textContent =
-          "目前登入：" + (auth.currentUser ? auth.currentUser.email : "");
       }
 
       async function doLogin() {
@@ -1278,8 +1425,68 @@
         }
       }
 
+      async function addDinnerCategory() {
+        try {
+          const name = els.newDinnerCatInput.value.trim();
+          if (!name) return;
+
+          const ref = db.ref("dinnerCategories").push();
+          await ref.set({ name: name });
+
+          currentDinnerCat = ref.key;
+          if (!selectedDinnerCats.includes(ref.key)) {
+            selectedDinnerCats.push(ref.key);
+          }
+
+          els.newDinnerCatInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function deleteDinnerCategory(id) {
+        const name = getDinnerCatName(id);
+        const ok = confirm("確定刪除晚餐分類「" + name + "」及入面所有菜式？");
+        if (!ok) return;
+
+        try {
+          await Promise.all([
+            db.ref("dinnerCategories/" + id).remove(),
+            db.ref("dinnerItems/" + id).remove()
+          ]);
+
+          selectedDinnerCats = selectedDinnerCats.filter(function (x) {
+            return x !== id;
+          });
+
+          if (currentDinnerCat === id) {
+            const remaining = Object.keys(dinnerCategoriesCache).filter(function (x) {
+              return x !== id;
+            });
+            currentDinnerCat = remaining[0] || null;
+          }
+
+          Object.keys(excludedToday).forEach(function (key) {
+            if (key.startsWith(id + "__")) {
+              delete excludedToday[key];
+            }
+          });
+
+          if (lastDrawKey && lastDrawKey.startsWith(id + "__")) {
+            lastDrawKey = null;
+          }
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
       async function addFood() {
         try {
+          if (!currentDinnerCat) {
+            alert("請先新增或選擇管理類別");
+            return;
+          }
+
           const name = els.foodInput.value.trim();
           const desc = els.foodDescInput.value.trim();
 
@@ -1299,74 +1506,112 @@
 
       function drawFood(isRedraw) {
         if (selectedDinnerCats.length === 0) {
-          els.resultDisplay.textContent = "請先選分類"
-          els.resultDesc.textContent = ""
-          return
+          els.resultDisplay.textContent = "請先選分類";
+          els.resultDesc.textContent = "";
+          return;
         }
 
-        let pool = []
+        let pool = [];
 
         selectedDinnerCats.forEach(function (cat) {
-          const rows = rowsFromObj(dinnerCache[cat] || {})
+          const rows = rowsFromObj(dinnerItemsCache[cat] || {});
           rows.forEach(function (row) {
-            const excludeKey = cat + "__" + row.id
+            const excludeKey = cat + "__" + row.id;
             if (!excludedToday[excludeKey]) {
               pool.push({
                 ...row.value,
                 id: row.id,
                 cat: cat,
                 excludeKey: excludeKey
-              })
+              });
             }
-          })
-        })
+          });
+        });
 
         if (isRedraw && lastDrawKey && pool.length > 1) {
           pool = pool.filter(function (item) {
-            return item.excludeKey !== lastDrawKey
-          })
+            return item.excludeKey !== lastDrawKey;
+          });
         }
 
         if (pool.length === 0) {
-          els.resultDisplay.textContent = "今日已抽晒"
-          els.resultDesc.textContent = ""
-          return
+          els.resultDisplay.textContent = "今日已抽晒";
+          els.resultDesc.textContent = "";
+          return;
         }
 
-        const picked = pool[Math.floor(Math.random() * pool.length)]
+        const picked = pool[Math.floor(Math.random() * pool.length)];
         const names = pool.map(function (item) {
-          return item.name || ""
-        })
+          return item.name || "";
+        });
 
-        let count = 0
+        let count = 0;
         const timer = setInterval(function () {
           els.resultDisplay.textContent =
-            names[Math.floor(Math.random() * names.length)] || "未有結果"
-          els.resultDesc.textContent = ""
-          count++
+            names[Math.floor(Math.random() * names.length)] || "未有結果";
+          els.resultDesc.textContent = "";
+          count++;
           if (count > 12) {
-            clearInterval(timer)
-            excludedToday[picked.excludeKey] = true
-            lastDrawKey = picked.excludeKey
-            els.resultDisplay.textContent = picked.name || "未有結果"
-            els.resultDesc.textContent = picked.desc || ""
+            clearInterval(timer);
+            excludedToday[picked.excludeKey] = true;
+            lastDrawKey = picked.excludeKey;
+            els.resultDisplay.textContent = picked.name || "未有結果";
+            els.resultDesc.textContent = picked.desc || "";
           }
-        }, 60)
+        }, 60);
       }
 
       function resetToday() {
-        excludedToday = {}
-        lastDrawKey = null
-        els.resultDisplay.textContent = "已重置今日抽過"
-        els.resultDesc.textContent = ""
+        excludedToday = {};
+        lastDrawKey = null;
+        els.resultDisplay.textContent = "已重置今日抽過";
+        els.resultDesc.textContent = "";
       }
 
-      function getDinnerRowsOfCurrentCat() {
-        return rowsFromObj(dinnerCache[currentDinnerCat] || {});
+      async function addStockCategory() {
+        try {
+          const name = els.newStockCatInput.value.trim();
+          if (!name) return;
+
+          const ref = db.ref("stockCategories").push();
+          await ref.set({ name: name });
+
+          currentStockCat = ref.key;
+          els.newStockCatInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function deleteStockCategory(id) {
+        const name = getStockCatName(id);
+        const ok = confirm("確定刪除存貨分類「" + name + "」及入面所有項目？");
+        if (!ok) return;
+
+        try {
+          await Promise.all([
+            db.ref("stockCategories/" + id).remove(),
+            db.ref("stockItems/" + id).remove()
+          ]);
+
+          if (currentStockCat === id) {
+            const remaining = Object.keys(stockCategoriesCache).filter(function (x) {
+              return x !== id;
+            });
+            currentStockCat = remaining[0] || null;
+          }
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
       }
 
       async function addStock() {
         try {
+          if (!currentStockCat) {
+            alert("請先新增或選擇存貨分類");
+            return;
+          }
+
           const val = els.stockInput.value.trim();
           if (!val) return;
 
@@ -1407,18 +1652,19 @@
       els.saveBudgetBtn.addEventListener("click", saveBudget);
       els.addExpenseBtn.addEventListener("click", addExpense);
 
+      els.addDinnerCatBtn.addEventListener("click", addDinnerCategory);
       els.drawBtn.addEventListener("click", function () {
         drawFood(false);
       });
-
       els.redrawBtn.addEventListener("click", function () {
         drawFood(true);
       });
-
-      els.resetTodayBtn.addEventListener("click", resetToday)
-
+      els.resetTodayBtn.addEventListener("click", resetToday);
       els.addFoodBtn.addEventListener("click", addFood);
+
+      els.addStockCatBtn.addEventListener("click", addStockCategory);
       els.addStockBtn.addEventListener("click", addStock);
+
       els.addMemoBtn.addEventListener("click", addMemo);
 
       document.querySelectorAll(".nav-btn").forEach(function (btn) {
@@ -1431,19 +1677,33 @@
         const cat = e.target.getAttribute("data-dinner-cat");
         if (!cat) return;
 
-        currentDinnerCat = cat
+        currentDinnerCat = cat;
 
         if (selectedDinnerCats.includes(cat)) {
           selectedDinnerCats = selectedDinnerCats.filter(function (id) {
-            return id !== cat
-          })
+            return id !== cat;
+          });
         } else {
-          selectedDinnerCats.push(cat)
+          selectedDinnerCats.push(cat);
         }
 
-        closeAllSwipes();
         renderDinnerCategories();
         renderDinnerItems();
+      });
+
+      els.dinnerCatManageList.addEventListener("click", function (e) {
+        const manageId = e.target.getAttribute("data-manage-dinner-cat");
+        if (manageId) {
+          currentDinnerCat = manageId;
+          renderDinnerCategories();
+          renderDinnerItems();
+          return;
+        }
+
+        const delId = e.target.getAttribute("data-del-dinner-cat");
+        if (delId) {
+          deleteDinnerCategory(delId);
+        }
       });
 
       els.stockCatGrid.addEventListener("click", function (e) {
@@ -1453,6 +1713,21 @@
         closeAllSwipes();
         renderStockCategories();
         renderStocks();
+      });
+
+      els.stockCatManageList.addEventListener("click", function (e) {
+        const manageId = e.target.getAttribute("data-manage-stock-cat");
+        if (manageId) {
+          currentStockCat = manageId;
+          renderStockCategories();
+          renderStocks();
+          return;
+        }
+
+        const delId = e.target.getAttribute("data-del-stock-cat");
+        if (delId) {
+          deleteStockCategory(delId);
+        }
       });
 
       els.expenseList.addEventListener("click", async function (e) {
@@ -1472,11 +1747,11 @@
         try {
           await db.ref("dinnerItems/" + currentDinnerCat + "/" + id).remove();
 
-          const drawKey = currentDinnerCat + "__" + id
+          const drawKey = currentDinnerCat + "__" + id;
           if (lastDrawKey === drawKey) {
-            lastDrawKey = null
+            lastDrawKey = null;
           }
-          delete excludedToday[drawKey]
+          delete excludedToday[drawKey];
 
           if (openSwipeKey === "food:" + id) openSwipeKey = null;
         } catch (err) {
@@ -1499,7 +1774,7 @@
         const plusId = e.target.getAttribute("data-plus-stock");
         if (plusId) {
           try {
-            const item = (stockCache[currentStockCat] || {})[plusId];
+            const item = (stockItemsCache[currentStockCat] || {})[plusId];
             const qty = Number((item && item.qty) || 0) + 1;
             await db.ref("stockItems/" + currentStockCat + "/" + plusId + "/qty").set(qty);
           } catch (err) {
@@ -1511,7 +1786,7 @@
         const minusId = e.target.getAttribute("data-minus-stock");
         if (minusId) {
           try {
-            const item = (stockCache[currentStockCat] || {})[minusId];
+            const item = (stockItemsCache[currentStockCat] || {})[minusId];
             const qty = Math.max(0, Number((item && item.qty) || 0) - 1);
             await db.ref("stockItems/" + currentStockCat + "/" + minusId + "/qty").set(qty);
           } catch (err) {
