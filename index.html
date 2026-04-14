@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#5c67f2">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#5c67f2" />
   <title>家庭小工具</title>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -25,10 +25,21 @@
       --shadow:0 8px 24px rgba(22,29,37,.08);
       --radius:18px;
       --nav-h:84px;
+      --swipe-width:88px;
     }
 
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+    }
+
     body{
       font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     }
@@ -37,11 +48,11 @@
       max-width:520px;
       margin:0 auto;
       min-height:100vh;
-      padding:16px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+      padding:16px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);
     }
 
-    .page{display:none}
-    .page.active{display:block}
+    .page{display:none;}
+    .page.active{display:block;}
 
     .card{
       background:var(--card);
@@ -73,7 +84,7 @@
       line-height:1.5;
     }
 
-    .field{margin-bottom:12px}
+    .field{margin-bottom:12px;}
 
     .label{
       font-size:13px;
@@ -261,43 +272,6 @@
       word-break:break-word;
     }
 
-    .toggle{
-      position:relative;
-      width:52px;
-      height:32px;
-      flex-shrink:0;
-    }
-
-    .toggle input{display:none}
-
-    .slider{
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      background:#d7dbe2;
-    }
-
-    .slider:before{
-      content:"";
-      position:absolute;
-      width:28px;
-      height:28px;
-      left:2px;
-      top:2px;
-      border-radius:50%;
-      background:#fff;
-      box-shadow:0 1px 4px rgba(0,0,0,.16);
-      transition:.2s;
-    }
-
-    .toggle input:checked + .slider{
-      background:var(--success);
-    }
-
-    .toggle input:checked + .slider:before{
-      transform:translateX(20px);
-    }
-
     .nav{
       position:fixed;
       left:0;
@@ -349,6 +323,79 @@
       padding:16px;
       text-align:center;
       color:var(--muted);
+    }
+
+    .stock-swipe{
+      position:relative;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fcfcfd;
+    }
+
+    .stock-actions{
+      position:absolute;
+      right:0;
+      top:0;
+      bottom:0;
+      width:var(--swipe-width);
+      display:flex;
+      align-items:stretch;
+      justify-content:stretch;
+    }
+
+    .stock-delete-btn{
+      width:100%;
+      border:none;
+      border-radius:0;
+      background:var(--danger);
+      color:#fff;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .stock-content{
+      position:relative;
+      z-index:1;
+      background:#fcfcfd;
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      transform:translateX(0);
+      transition:transform .2s ease;
+      touch-action:pan-y;
+    }
+
+    .stock-swipe.open .stock-content{
+      transform:translateX(calc(var(--swipe-width) * -1));
+    }
+
+    .qty-box{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-shrink:0;
+    }
+
+    .qty-btn{
+      width:32px;
+      height:32px;
+      padding:0;
+      border-radius:50%;
+      background:#eef0f4;
+      color:#1f2328;
+      font-size:18px;
+      font-weight:900;
+      line-height:1;
+    }
+
+    .qty-number{
+      min-width:28px;
+      text-align:center;
+      font-size:16px;
+      font-weight:800;
     }
   </style>
 </head>
@@ -485,7 +532,7 @@
           <div class="header">
             <div>
               <h1 class="title">存貨清單</h1>
-              <div class="sub">開關式顯示，開 = 屋企有</div>
+              <div class="sub">可加減數量，向左滑刪除</div>
             </div>
             <button id="logoutBtn3" class="header-btn">登出</button>
           </div>
@@ -543,491 +590,593 @@
     </nav>
   </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function(){
+  <script>
+    document.addEventListener("DOMContentLoaded", function(){
 
-  const ALLOWED_EMAILS = [
-    "oscarwai1994@gmail.com",
-    "angelleung2023@gmail.com"
-  ];
+      const ALLOWED_EMAILS = [
+        "oscarwai1994@gmail.com",
+        "angelleung2023@gmail.com"
+      ];
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
-    authDomain: "family-958f6.firebaseapp.com",
-    databaseURL: "https://family-958f6-default-rtdb.firebaseio.com",
-    projectId: "family-958f6",
-    storageBucket: "family-958f6.firebasestorage.app",
-    messagingSenderId: "297002821278",
-    appId: "1:297002821278:web:49f14e9d1f609fa10c3d8f"
-  };
+      const firebaseConfig = {
+        apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
+        authDomain: "family-958f6.firebaseapp.com",
+        databaseURL: "https://family-958f6-default-rtdb.firebaseio.com",
+        projectId: "family-958f6",
+        storageBucket: "family-958f6.firebasestorage.app",
+        messagingSenderId: "297002821278",
+        appId: "1:297002821278:web:49f14e9d1f609fa10c3d8f"
+      };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.database();
 
-  let initialized = false;
-  let budgetCache = 0;
-  let expenseCache = {};
-  let foodCache = {};
-  let stockCache = {};
-  let memoTimer = null;
+      let initialized = false;
+      let budgetCache = 0;
+      let expenseCache = {};
+      let foodCache = {};
+      let stockCache = {};
+      let memoTimer = null;
+      let openSwipeId = null;
 
-  const defaultFoods = [
-    "洋蔥牛仔骨","煎豬扒","焗雞扒","手撕雞","雞翼","三文魚",
-    "煎蛋","炒蛋","炒肉碎","蒸水蛋","蒸魚","食海鮮"
-  ];
+      const defaultFoods = [
+        "洋蔥牛仔骨","煎豬扒","焗雞扒","手撕雞","雞翼","三文魚",
+        "煎蛋","炒蛋","炒肉碎","蒸水蛋","蒸魚","食海鮮"
+      ];
 
-  const defaultStocks = [
-    { name:"雞蛋", on:true },
-    { name:"洋蔥", on:true },
-    { name:"雞翼", on:false },
-    { name:"三文魚", on:false },
-    { name:"豬扒", on:false },
-    { name:"豆腐", on:false },
-    { name:"米", on:true },
-    { name:"麵", on:true },
-    { name:"廁紙", on:true }
-  ];
+      const defaultStocks = [
+        { name:"雞蛋", qty:3 },
+        { name:"洋蔥", qty:2 },
+        { name:"雞翼", qty:0 },
+        { name:"三文魚", qty:0 },
+        { name:"豬扒", qty:0 },
+        { name:"豆腐", qty:1 },
+        { name:"米", qty:1 },
+        { name:"麵", qty:2 },
+        { name:"廁紙", qty:5 }
+      ];
 
-  const els = {
-    loginWrap: document.getElementById("loginWrap"),
-    appWrap: document.getElementById("appWrap"),
-    loginEmail: document.getElementById("loginEmail"),
-    loginPassword: document.getElementById("loginPassword"),
-    loginBtn: document.getElementById("loginBtn"),
-    loginMsg: document.getElementById("loginMsg"),
-    errorBanner: document.getElementById("errorBanner"),
-    currentUserLine: document.getElementById("currentUserLine"),
+      const els = {
+        loginWrap: document.getElementById("loginWrap"),
+        appWrap: document.getElementById("appWrap"),
+        loginEmail: document.getElementById("loginEmail"),
+        loginPassword: document.getElementById("loginPassword"),
+        loginBtn: document.getElementById("loginBtn"),
+        loginMsg: document.getElementById("loginMsg"),
+        errorBanner: document.getElementById("errorBanner"),
+        currentUserLine: document.getElementById("currentUserLine"),
 
-    budgetInput: document.getElementById("budgetInput"),
-    saveBudgetBtn: document.getElementById("saveBudgetBtn"),
-    budgetTotal: document.getElementById("budgetTotal"),
-    expenseTotal: document.getElementById("expenseTotal"),
-    budgetRemain: document.getElementById("budgetRemain"),
-    expenseLatest: document.getElementById("expenseLatest"),
+        budgetInput: document.getElementById("budgetInput"),
+        saveBudgetBtn: document.getElementById("saveBudgetBtn"),
+        budgetTotal: document.getElementById("budgetTotal"),
+        expenseTotal: document.getElementById("expenseTotal"),
+        budgetRemain: document.getElementById("budgetRemain"),
+        expenseLatest: document.getElementById("expenseLatest"),
 
-    amount: document.getElementById("amount"),
-    note: document.getElementById("note"),
-    expenseDate: document.getElementById("expenseDate"),
-    addExpenseBtn: document.getElementById("addExpenseBtn"),
-    expenseList: document.getElementById("expenseList"),
+        amount: document.getElementById("amount"),
+        note: document.getElementById("note"),
+        expenseDate: document.getElementById("expenseDate"),
+        addExpenseBtn: document.getElementById("addExpenseBtn"),
+        expenseList: document.getElementById("expenseList"),
 
-    resultDisplay: document.getElementById("resultDisplay"),
-    drawBtn: document.getElementById("drawBtn"),
-    redrawBtn: document.getElementById("redrawBtn"),
-    foodInput: document.getElementById("foodInput"),
-    addFoodBtn: document.getElementById("addFoodBtn"),
-    foodList: document.getElementById("foodList"),
+        resultDisplay: document.getElementById("resultDisplay"),
+        drawBtn: document.getElementById("drawBtn"),
+        redrawBtn: document.getElementById("redrawBtn"),
+        foodInput: document.getElementById("foodInput"),
+        addFoodBtn: document.getElementById("addFoodBtn"),
+        foodList: document.getElementById("foodList"),
 
-    stockInput: document.getElementById("stockInput"),
-    addStockBtn: document.getElementById("addStockBtn"),
-    stockList: document.getElementById("stockList"),
+        stockInput: document.getElementById("stockInput"),
+        addStockBtn: document.getElementById("addStockBtn"),
+        stockList: document.getElementById("stockList"),
 
-    memoInput: document.getElementById("memoInput"),
-    memoStatus: document.getElementById("memoStatus"),
-    clearMemoBtn: document.getElementById("clearMemoBtn")
-  };
+        memoInput: document.getElementById("memoInput"),
+        memoStatus: document.getElementById("memoStatus"),
+        clearMemoBtn: document.getElementById("clearMemoBtn")
+      };
 
-  function setError(msg){
-    if(!msg){
-      els.errorBanner.classList.remove("show");
-      els.errorBanner.textContent = "";
-      return;
-    }
-    els.errorBanner.textContent = msg;
-    els.errorBanner.classList.add("show");
-  }
-
-  function setLoginMsg(msg){
-    els.loginMsg.textContent = msg || "";
-  }
-
-  function todayStr(){
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return y + "-" + m + "-" + day;
-  }
-
-  function timeStr(ts){
-    if(!ts) return "未有內容";
-    const d = new Date(ts);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const h = String(d.getHours()).padStart(2, "0");
-    const min = String(d.getMinutes()).padStart(2, "0");
-    return y + "/" + m + "/" + day + " " + h + ":" + min;
-  }
-
-  function money(n){
-    return "$" + Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
-  }
-
-  function esc(str){
-    return String(str || "").replace(/[&<>"']/g, function(s){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s];
-    });
-  }
-
-  function rowsFromObj(obj){
-    return Object.keys(obj || {}).map(function(k){
-      return { id:k, value: obj[k] };
-    });
-  }
-
-  function updateBudgetRemain(){
-    const rows = rowsFromObj(expenseCache);
-    const used = rows.reduce(function(sum, row){
-      return sum + Number((row.value && row.value.a) || 0);
-    }, 0);
-    const remain = Number(budgetCache || 0) - used;
-    els.budgetRemain.textContent = money(remain);
-    els.budgetRemain.style.color = remain < 0 ? "#ff4d4f" : "#1f2328";
-  }
-
-  function showPage(pageName, btn){
-    document.querySelectorAll(".page").forEach(function(el){
-      el.classList.remove("active");
-    });
-    document.getElementById("page-" + pageName).classList.add("active");
-
-    document.querySelectorAll(".nav-btn").forEach(function(el){
-      el.classList.remove("active");
-    });
-    btn.classList.add("active");
-  }
-
-  function seedDefaultsOnce(){
-    db.ref("meta/seeded").once("value").then(function(s){
-      if(s.exists()) return;
-
-      const foodsObj = {};
-      defaultFoods.forEach(function(name){
-        foodsObj[db.ref("foods").push().key] = name;
-      });
-
-      const stocksObj = {};
-      defaultStocks.forEach(function(item){
-        stocksObj[db.ref("stocks").push().key] = item;
-      });
-
-      return Promise.all([
-        db.ref("foods").set(foodsObj),
-        db.ref("stocks").set(stocksObj),
-        db.ref("meta/seeded").set(true)
-      ]);
-    }).catch(function(err){
-      setError(err.code + " | " + err.message);
-    });
-  }
-
-  function renderExpenses(){
-    const rows = rowsFromObj(expenseCache).sort(function(a,b){
-      return (b.value.ts || 0) - (a.value.ts || 0);
-    });
-
-    if(rows.length === 0){
-      els.expenseList.innerHTML = '<div class="empty">未有開支記錄</div>';
-      els.expenseTotal.textContent = "$0";
-      els.expenseLatest.textContent = "最新記錄：—";
-      updateBudgetRemain();
-      return;
-    }
-
-    const total = rows.reduce(function(sum, row){
-      return sum + Number(row.value.a || 0);
-    }, 0);
-
-    els.expenseTotal.textContent = money(total);
-    updateBudgetRemain();
-    els.expenseLatest.textContent = "最新記錄：" + (rows[0].value.n || money(rows[0].value.a));
-
-    els.expenseList.innerHTML = rows.map(function(row){
-      const dateText = row.value.date ? "｜" + esc(row.value.date) : "";
-      return '<div class="item"><div class="item-main"><div class="item-title">' + money(row.value.a) + '</div><div class="item-sub">' + esc(row.value.n || "無備註") + dateText + '</div></div><button class="small-btn" data-del-expense="' + row.id + '">刪除</button></div>';
-    }).join("");
-  }
-
-  function renderFoods(){
-    const rows = rowsFromObj(foodCache);
-    if(rows.length === 0){
-      els.foodList.innerHTML = '<div class="empty">未有菜式</div>';
-      return;
-    }
-
-    els.foodList.innerHTML = rows.reverse().map(function(row){
-      return '<div class="item"><div class="item-main"><div class="item-title">' + esc(row.value) + '</div></div><button class="small-btn" data-del-food="' + row.id + '">刪除</button></div>';
-    }).join("");
-  }
-
-  function renderStocks(){
-    const rows = rowsFromObj(stockCache);
-    if(rows.length === 0){
-      els.stockList.innerHTML = '<div class="empty">未有存貨項目</div>';
-      return;
-    }
-
-    els.stockList.innerHTML = rows.reverse().map(function(row){
-      const item = row.value || {};
-      const name = esc(item.name || "");
-      const on = !!item.on;
-      return '<div class="item"><div class="item-main"><div class="item-title">' + name + '</div><div class="item-sub">' + (on ? "屋企有" : "屋企冇") + '</div></div><div class="item-right"><label class="toggle"><input type="checkbox" data-toggle-stock="' + row.id + '" ' + (on ? 'checked' : '') + '><span class="slider"></span></label><button class="small-btn" data-del-stock="' + row.id + '">刪除</button></div></div>';
-    }).join("");
-  }
-
-  function initApp(){
-    if(initialized) return;
-    initialized = true;
-
-    els.expenseDate.value = todayStr();
-    seedDefaultsOnce();
-
-    db.ref("budget").on("value", function(s){
-      budgetCache = Number(s.val() || 0);
-      els.budgetInput.value = budgetCache || "";
-      els.budgetTotal.textContent = money(budgetCache);
-      updateBudgetRemain();
-    });
-
-    db.ref("expenses").on("value", function(s){
-      expenseCache = s.val() || {};
-      renderExpenses();
-    });
-
-    db.ref("foods").on("value", function(s){
-      foodCache = s.val() || {};
-      renderFoods();
-    });
-
-    db.ref("stocks").on("value", function(s){
-      stockCache = s.val() || {};
-      renderStocks();
-    });
-
-    db.ref("memo").on("value", function(s){
-      const data = s.val() || { text:"", updatedAt:null };
-      if(document.activeElement !== els.memoInput){
-        els.memoInput.value = data.text || "";
+      function setError(msg){
+        if(!msg){
+          els.errorBanner.classList.remove("show");
+          els.errorBanner.textContent = "";
+          return;
+        }
+        els.errorBanner.textContent = msg;
+        els.errorBanner.classList.add("show");
       }
-      els.memoStatus.textContent = "最後更新：" + timeStr(data.updatedAt);
-    });
 
-    els.currentUserLine.textContent = "目前登入：" + (auth.currentUser ? auth.currentUser.email : "");
-  }
+      function setLoginMsg(msg){
+        els.loginMsg.textContent = msg || "";
+      }
 
-  async function doLogin(){
-    const email = els.loginEmail.value.trim();
-    const password = els.loginPassword.value;
+      function todayStr(){
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + day;
+      }
 
-    if(!email || !password){
-      setLoginMsg("請輸入 email 同 password");
-      return;
-    }
+      function timeStr(ts){
+        if(!ts) return "未有內容";
+        const d = new Date(ts);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        const h = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        return y + "/" + m + "/" + day + " " + h + ":" + min;
+      }
 
-    if(!ALLOWED_EMAILS.includes(email)){
-      setLoginMsg("此帳戶不允許登入");
-      return;
-    }
+      function money(n){
+        return "$" + Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+      }
 
-    try{
-      const r = await auth.signInWithEmailAndPassword(email, password);
-      setLoginMsg("登入成功：" + r.user.email);
-    }catch(err){
-      setLoginMsg(err.code + " | " + err.message);
-      alert("Login Error: " + err.code + " | " + err.message);
-    }
-  }
-
-  async function doLogout(){
-    try{
-      await auth.signOut();
-      els.loginPassword.value = "";
-      setLoginMsg("已登出");
-    }catch(err){
-      alert("Logout Error: " + err.code + " | " + err.message);
-    }
-  }
-
-  async function saveBudget(){
-    try{
-      const val = Number(els.budgetInput.value || 0);
-      await db.ref("budget").set(val);
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  }
-
-  async function addExpense(){
-    try{
-      const amount = els.amount.value.trim();
-      const note = els.note.value.trim();
-      const date = els.expenseDate.value || todayStr();
-
-      if(!amount || Number(amount) <= 0) return;
-
-      await db.ref("expenses").push({
-        a: amount,
-        n: note,
-        date: date,
-        ts: Date.now()
-      });
-
-      els.amount.value = "";
-      els.note.value = "";
-      els.expenseDate.value = todayStr();
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  }
-
-  async function addFood(){
-    try{
-      const val = els.foodInput.value.trim();
-      if(!val) return;
-      await db.ref("foods").push(val);
-      els.foodInput.value = "";
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  }
-
-  async function addStock(){
-    try{
-      const val = els.stockInput.value.trim();
-      if(!val) return;
-      await db.ref("stocks").push({ name: val, on: true });
-      els.stockInput.value = "";
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  }
-
-  function drawFood(){
-    const rows = rowsFromObj(foodCache);
-    if(rows.length === 0){
-      els.resultDisplay.textContent = "請先加入菜式";
-      return;
-    }
-
-    const arr = rows.map(function(r){ return r.value; });
-    let count = 0;
-    const timer = setInterval(function(){
-      els.resultDisplay.textContent = arr[Math.floor(Math.random() * arr.length)];
-      count++;
-      if(count > 12) clearInterval(timer);
-    }, 60);
-  }
-
-  async function clearMemo(){
-    try{
-      await db.ref("memo").set({
-        text: "",
-        updatedAt: Date.now()
-      });
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  }
-
-  els.memoInput.addEventListener("input", function(){
-    clearTimeout(memoTimer);
-    const val = this.value;
-    memoTimer = setTimeout(async function(){
-      try{
-        await db.ref("memo").set({
-          text: val,
-          updatedAt: Date.now()
+      function esc(str){
+        return String(str || "").replace(/[&<>"']/g, function(s){
+          return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s];
         });
-      }catch(err){
-        alert(err.code + " | " + err.message);
       }
-    }, 180);
-  });
 
-  els.loginBtn.addEventListener("click", doLogin);
+      function rowsFromObj(obj){
+        return Object.keys(obj || {}).map(function(k){
+          return { id:k, value: obj[k] };
+        });
+      }
 
-  document.getElementById("logoutBtn1").addEventListener("click", doLogout);
-  document.getElementById("logoutBtn2").addEventListener("click", doLogout);
-  document.getElementById("logoutBtn3").addEventListener("click", doLogout);
-  document.getElementById("logoutBtn4").addEventListener("click", doLogout);
+      function updateBudgetRemain(){
+        const rows = rowsFromObj(expenseCache);
+        const used = rows.reduce(function(sum, row){
+          return sum + Number((row.value && row.value.a) || 0);
+        }, 0);
+        const remain = Number(budgetCache || 0) - used;
+        els.budgetRemain.textContent = money(remain);
+        els.budgetRemain.style.color = remain < 0 ? "#ff4d4f" : "#1f2328";
+      }
 
-  els.saveBudgetBtn.addEventListener("click", saveBudget);
-  els.addExpenseBtn.addEventListener("click", addExpense);
-  els.addFoodBtn.addEventListener("click", addFood);
-  els.addStockBtn.addEventListener("click", addStock);
-  els.drawBtn.addEventListener("click", drawFood);
-  els.redrawBtn.addEventListener("click", drawFood);
-  els.clearMemoBtn.addEventListener("click", clearMemo);
+      function showPage(pageName, btn){
+        document.querySelectorAll(".page").forEach(function(el){
+          el.classList.remove("active");
+        });
+        document.getElementById("page-" + pageName).classList.add("active");
 
-  document.querySelectorAll(".nav-btn").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      showPage(btn.dataset.page, btn);
+        document.querySelectorAll(".nav-btn").forEach(function(el){
+          el.classList.remove("active");
+        });
+        btn.classList.add("active");
+      }
+
+      function seedDefaultsOnce(){
+        db.ref("meta/seeded").once("value").then(function(s){
+          if(s.exists()) return;
+
+          const foodsObj = {};
+          defaultFoods.forEach(function(name){
+            foodsObj[db.ref("foods").push().key] = name;
+          });
+
+          const stocksObj = {};
+          defaultStocks.forEach(function(item){
+            stocksObj[db.ref("stocks").push().key] = item;
+          });
+
+          return Promise.all([
+            db.ref("foods").set(foodsObj),
+            db.ref("stocks").set(stocksObj),
+            db.ref("meta/seeded").set(true)
+          ]);
+        }).catch(function(err){
+          setError(err.code + " | " + err.message);
+        });
+      }
+
+      function renderExpenses(){
+        const rows = rowsFromObj(expenseCache).sort(function(a,b){
+          return (b.value.ts || 0) - (a.value.ts || 0);
+        });
+
+        if(rows.length === 0){
+          els.expenseList.innerHTML = '<div class="empty">未有開支記錄</div>';
+          els.expenseTotal.textContent = "$0";
+          els.expenseLatest.textContent = "最新記錄：—";
+          updateBudgetRemain();
+          return;
+        }
+
+        const total = rows.reduce(function(sum, row){
+          return sum + Number(row.value.a || 0);
+        }, 0);
+
+        els.expenseTotal.textContent = money(total);
+        updateBudgetRemain();
+        els.expenseLatest.textContent = "最新記錄：" + (rows[0].value.n || money(rows[0].value.a));
+
+        els.expenseList.innerHTML = rows.map(function(row){
+          const dateText = row.value.date ? "｜" + esc(row.value.date) : "";
+          return '<div class="item"><div class="item-main"><div class="item-title">' + money(row.value.a) + '</div><div class="item-sub">' + esc(row.value.n || "無備註") + dateText + '</div></div><button class="small-btn" data-del-expense="' + row.id + '">刪除</button></div>';
+        }).join("");
+      }
+
+      function renderFoods(){
+        const rows = rowsFromObj(foodCache);
+        if(rows.length === 0){
+          els.foodList.innerHTML = '<div class="empty">未有菜式</div>';
+          return;
+        }
+
+        els.foodList.innerHTML = rows.reverse().map(function(row){
+          return '<div class="item"><div class="item-main"><div class="item-title">' + esc(row.value) + '</div></div><button class="small-btn" data-del-food="' + row.id + '">刪除</button></div>';
+        }).join("");
+      }
+
+      function renderStocks(){
+        const rows = rowsFromObj(stockCache);
+        if(rows.length === 0){
+          els.stockList.innerHTML = '<div class="empty">未有存貨項目</div>';
+          return;
+        }
+
+        els.stockList.innerHTML = rows.reverse().map(function(row){
+          const item = row.value || {};
+          const name = esc(item.name || "");
+          const qty = Number(item.qty || 0);
+          const sub = qty > 0 ? "屋企有" : "屋企冇";
+          const openClass = openSwipeId === row.id ? " open" : "";
+
+          return `
+            <div class="stock-swipe${openClass}" data-stock-id="${row.id}">
+              <div class="stock-actions">
+                <button class="stock-delete-btn" data-del-stock="${row.id}">刪除</button>
+              </div>
+              <div class="stock-content">
+                <div class="item-main">
+                  <div class="item-title">${name}</div>
+                  <div class="item-sub">${sub}</div>
+                </div>
+                <div class="qty-box">
+                  <button class="qty-btn" data-minus-stock="${row.id}">−</button>
+                  <div class="qty-number">${qty}</div>
+                  <button class="qty-btn" data-plus-stock="${row.id}">+</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function initApp(){
+        if(initialized) return;
+        initialized = true;
+
+        els.expenseDate.value = todayStr();
+        seedDefaultsOnce();
+
+        db.ref("budget").on("value", function(s){
+          budgetCache = Number(s.val() || 0);
+          els.budgetInput.value = budgetCache || "";
+          els.budgetTotal.textContent = money(budgetCache);
+          updateBudgetRemain();
+        });
+
+        db.ref("expenses").on("value", function(s){
+          expenseCache = s.val() || {};
+          renderExpenses();
+        });
+
+        db.ref("foods").on("value", function(s){
+          foodCache = s.val() || {};
+          renderFoods();
+        });
+
+        db.ref("stocks").on("value", function(s){
+          stockCache = s.val() || {};
+          renderStocks();
+        });
+
+        db.ref("memo").on("value", function(s){
+          const data = s.val() || { text:"", updatedAt:null };
+          if(document.activeElement !== els.memoInput){
+            els.memoInput.value = data.text || "";
+          }
+          els.memoStatus.textContent = "最後更新：" + timeStr(data.updatedAt);
+        });
+
+        els.currentUserLine.textContent = "目前登入：" + (auth.currentUser ? auth.currentUser.email : "");
+      }
+
+      async function doLogin(){
+        const email = els.loginEmail.value.trim();
+        const password = els.loginPassword.value;
+
+        if(!email || !password){
+          setLoginMsg("請輸入 email 同 password");
+          return;
+        }
+
+        if(!ALLOWED_EMAILS.includes(email)){
+          setLoginMsg("此帳戶不允許登入");
+          return;
+        }
+
+        try{
+          const r = await auth.signInWithEmailAndPassword(email, password);
+          setLoginMsg("登入成功：" + r.user.email);
+        }catch(err){
+          setLoginMsg(err.code + " | " + err.message);
+          alert("Login Error: " + err.code + " | " + err.message);
+        }
+      }
+
+      async function doLogout(){
+        try{
+          await auth.signOut();
+          els.loginPassword.value = "";
+          setLoginMsg("已登出");
+        }catch(err){
+          alert("Logout Error: " + err.code + " | " + err.message);
+        }
+      }
+
+      async function saveBudget(){
+        try{
+          const val = Number(els.budgetInput.value || 0);
+          await db.ref("budget").set(val);
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addExpense(){
+        try{
+          const amount = els.amount.value.trim();
+          const note = els.note.value.trim();
+          const date = els.expenseDate.value || todayStr();
+
+          if(!amount || Number(amount) <= 0) return;
+
+          await db.ref("expenses").push({
+            a: amount,
+            n: note,
+            date: date,
+            ts: Date.now()
+          });
+
+          els.amount.value = "";
+          els.note.value = "";
+          els.expenseDate.value = todayStr();
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addFood(){
+        try{
+          const val = els.foodInput.value.trim();
+          if(!val) return;
+          await db.ref("foods").push(val);
+          els.foodInput.value = "";
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addStock(){
+        try{
+          const val = els.stockInput.value.trim();
+          if(!val) return;
+          await db.ref("stocks").push({ name: val, qty: 1 });
+          els.stockInput.value = "";
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      function drawFood(){
+        const rows = rowsFromObj(foodCache);
+        if(rows.length === 0){
+          els.resultDisplay.textContent = "請先加入菜式";
+          return;
+        }
+
+        const arr = rows.map(function(r){ return r.value; });
+        let count = 0;
+        const timer = setInterval(function(){
+          els.resultDisplay.textContent = arr[Math.floor(Math.random() * arr.length)];
+          count++;
+          if(count > 12) clearInterval(timer);
+        }, 60);
+      }
+
+      async function clearMemo(){
+        try{
+          await db.ref("memo").set({
+            text: "",
+            updatedAt: Date.now()
+          });
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      function closeAllStockSwipe(){
+        openSwipeId = null;
+        document.querySelectorAll(".stock-swipe.open").forEach(function(el){
+          el.classList.remove("open");
+        });
+      }
+
+      els.memoInput.addEventListener("input", function(){
+        clearTimeout(memoTimer);
+        const val = this.value;
+        memoTimer = setTimeout(async function(){
+          try{
+            await db.ref("memo").set({
+              text: val,
+              updatedAt: Date.now()
+            });
+          }catch(err){
+            alert(err.code + " | " + err.message);
+          }
+        }, 180);
+      });
+
+      els.loginBtn.addEventListener("click", doLogin);
+
+      document.getElementById("logoutBtn1").addEventListener("click", doLogout);
+      document.getElementById("logoutBtn2").addEventListener("click", doLogout);
+      document.getElementById("logoutBtn3").addEventListener("click", doLogout);
+      document.getElementById("logoutBtn4").addEventListener("click", doLogout);
+
+      els.saveBudgetBtn.addEventListener("click", saveBudget);
+      els.addExpenseBtn.addEventListener("click", addExpense);
+      els.addFoodBtn.addEventListener("click", addFood);
+      els.addStockBtn.addEventListener("click", addStock);
+      els.drawBtn.addEventListener("click", drawFood);
+      els.redrawBtn.addEventListener("click", drawFood);
+      els.clearMemoBtn.addEventListener("click", clearMemo);
+
+      document.querySelectorAll(".nav-btn").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          showPage(btn.dataset.page, btn);
+          closeAllStockSwipe();
+        });
+      });
+
+      els.expenseList.addEventListener("click", async function(e){
+        const id = e.target.getAttribute("data-del-expense");
+        if(!id) return;
+        try{
+          await db.ref("expenses/" + id).remove();
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      });
+
+      els.foodList.addEventListener("click", async function(e){
+        const id = e.target.getAttribute("data-del-food");
+        if(!id) return;
+        try{
+          await db.ref("foods/" + id).remove();
+        }catch(err){
+          alert(err.code + " | " + err.message);
+        }
+      });
+
+      els.stockList.addEventListener("click", async function(e){
+        const delId = e.target.getAttribute("data-del-stock");
+        if(delId){
+          try{
+            await db.ref("stocks/" + delId).remove();
+            if(openSwipeId === delId) openSwipeId = null;
+          }catch(err){
+            alert(err.code + " | " + err.message);
+          }
+          return;
+        }
+
+        const plusId = e.target.getAttribute("data-plus-stock");
+        if(plusId){
+          try{
+            const item = stockCache[plusId];
+            const qty = Number((item && item.qty) || 0) + 1;
+            await db.ref("stocks/" + plusId + "/qty").set(qty);
+          }catch(err){
+            alert(err.code + " | " + err.message);
+          }
+          return;
+        }
+
+        const minusId = e.target.getAttribute("data-minus-stock");
+        if(minusId){
+          try{
+            const item = stockCache[minusId];
+            const qty = Math.max(0, Number((item && item.qty) || 0) - 1);
+            await db.ref("stocks/" + minusId + "/qty").set(qty);
+          }catch(err){
+            alert(err.code + " | " + err.message);
+          }
+        }
+      });
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchItem = null;
+      let touchMoved = false;
+
+      els.stockList.addEventListener("touchstart", function(e){
+        const stockItem = e.target.closest(".stock-swipe");
+        if(!stockItem) return;
+        touchItem = stockItem;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+      }, { passive: true });
+
+      els.stockList.addEventListener("touchmove", function(e){
+        if(!touchItem) return;
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+
+        if(Math.abs(dy) > Math.abs(dx)){
+          return;
+        }
+        touchMoved = true;
+      }, { passive: true });
+
+      els.stockList.addEventListener("touchend", function(e){
+        if(!touchItem) return;
+
+        const changed = e.changedTouches[0];
+        const dx = changed.clientX - touchStartX;
+        const dy = changed.clientY - touchStartY;
+
+        if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 35){
+          const id = touchItem.getAttribute("data-stock-id");
+
+          if(dx < 0){
+            closeAllStockSwipe();
+            openSwipeId = id;
+            touchItem.classList.add("open");
+          }else{
+            touchItem.classList.remove("open");
+            if(openSwipeId === id) openSwipeId = null;
+          }
+        }else if(!touchMoved){
+          const isInsideButton = e.target.closest("button,label,input");
+          if(!isInsideButton){
+            closeAllStockSwipe();
+          }
+        }
+
+        touchItem = null;
+      });
+
+      document.addEventListener("click", function(e){
+        const insideStock = e.target.closest(".stock-swipe");
+        if(!insideStock){
+          closeAllStockSwipe();
+        }
+      });
+
+      auth.onAuthStateChanged(function(user){
+        if(user){
+          if(!ALLOWED_EMAILS.includes(user.email)){
+            alert("你無權使用");
+            auth.signOut();
+            return;
+          }
+
+          els.loginWrap.style.display = "none";
+          els.appWrap.style.display = "block";
+          initApp();
+        }else{
+          els.loginWrap.style.display = "block";
+          els.appWrap.style.display = "none";
+        }
+      });
+
     });
-  });
-
-  els.expenseList.addEventListener("click", async function(e){
-    const id = e.target.getAttribute("data-del-expense");
-    if(!id) return;
-    try{
-      await db.ref("expenses/" + id).remove();
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  });
-
-  els.foodList.addEventListener("click", async function(e){
-    const id = e.target.getAttribute("data-del-food");
-    if(!id) return;
-    try{
-      await db.ref("foods/" + id).remove();
-    }catch(err){
-      alert(err.code + " | " + err.message);
-    }
-  });
-
-  els.stockList.addEventListener("click", async function(e){
-    const delId = e.target.getAttribute("data-del-stock");
-    if(delId){
-      try{
-        await db.ref("stocks/" + delId).remove();
-      }catch(err){
-        alert(err.code + " | " + err.message);
-      }
-      return;
-    }
-
-    const toggleId = e.target.getAttribute("data-toggle-stock");
-    if(toggleId){
-      try{
-        const item = stockCache[toggleId];
-        if(!item) return;
-        await db.ref("stocks/" + toggleId + "/on").set(!item.on);
-      }catch(err){
-        alert(err.code + " | " + err.message);
-      }
-    }
-  });
-
-  auth.onAuthStateChanged(function(user){
-    if(user){
-      if(!ALLOWED_EMAILS.includes(user.email)){
-        alert("你無權使用");
-        auth.signOut();
-        return;
-      }
-
-      els.loginWrap.style.display = "none";
-      els.appWrap.style.display = "block";
-      initApp();
-    }else{
-      els.loginWrap.style.display = "block";
-      els.appWrap.style.display = "none";
-    }
-  });
-
-});
-</script>
+  </script>
 </body>
 </html>
