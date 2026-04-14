@@ -29,7 +29,6 @@
       --line-strong: rgba(60, 60, 67, 0.2);
       --tab-h: 84px;
       --swipe-width: 88px;
-      --radius: 18px;
     }
 
     * {
@@ -37,8 +36,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       background: var(--bg);
@@ -258,6 +256,11 @@
       flex: 0 0 auto;
     }
 
+    .btn-tertiary {
+      padding: 11px 14px;
+      font-size: 14px;
+    }
+
     .icon-btn {
       width: auto;
       padding: 10px 12px;
@@ -367,7 +370,32 @@
     .list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
+    }
+
+    .list.light .swipe-content {
+      padding: 10px 12px;
+    }
+
+    .list.light .cell-title {
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .list.light .cell-sub {
+      margin-top: 4px;
+      font-size: 12px;
+    }
+
+    .list.light .qty-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 16px;
+    }
+
+    .list.light .qty-num {
+      font-size: 14px;
+      min-width: 22px;
     }
 
     .empty {
@@ -489,6 +517,96 @@
       font-weight: 700;
     }
 
+    .memo-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(60, 60, 67, 0.25);
+      background: #fff;
+      flex: 0 0 auto;
+      position: relative;
+      margin-right: 2px;
+    }
+
+    .memo-check.done {
+      background: var(--ios-green);
+      border-color: var(--ios-green);
+    }
+
+    .memo-check.done::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 4px;
+      width: 6px;
+      height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .memo-done .cell-title {
+      text-decoration: line-through;
+      color: var(--subtext);
+    }
+
+    .memo-done .cell-sub {
+      color: #8f8f95;
+    }
+
+    .price-group {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .price-group-head {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fcfcfd;
+    }
+
+    .price-group-title {
+      font-size: 17px;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .price-group-meta {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .price-meta-box {
+      background: #f7f8fa;
+      border-radius: 12px;
+      padding: 10px 10px;
+      border: 1px solid rgba(60, 60, 67, 0.08);
+    }
+
+    .price-meta-label {
+      font-size: 11px;
+      color: var(--subtext);
+      margin-bottom: 5px;
+    }
+
+    .price-meta-value {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .price-history {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fff;
+    }
+
     .tabbar {
       position: fixed;
       left: 0;
@@ -514,23 +632,18 @@
     .tab-btn {
       background: transparent;
       color: var(--subtext);
-      padding: 8px 4px;
+      padding: 10px 4px;
       border-radius: 12px;
       font-size: 12px;
       font-weight: 600;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      min-height: 40px;
     }
 
     .tab-btn.active {
       color: var(--ios-blue);
-    }
-
-    .tab-icon {
-      font-size: 17px;
-      line-height: 1;
     }
   </style>
 </head>
@@ -605,7 +718,7 @@
           </div>
 
           <div style="height:10px;"></div>
-          <button id="resetTodayBtn" class="btn-soft">重置今日抽過</button>
+          <button id="resetTodayBtn" class="btn-plain btn-tertiary">重置今日抽過</button>
 
           <div class="hint">再抽一次不重複上一次；今日抽過可重置。</div>
         </div>
@@ -688,7 +801,7 @@
             <div class="section-title">項目清單</div>
             <div id="stockListLabel" class="section-meta">管理類別：未選擇</div>
           </div>
-          <div id="stockList" class="list"></div>
+          <div id="stockList" class="list light"></div>
         </div>
       </section>
 
@@ -697,7 +810,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">價格</h1>
-              <div class="page-sub">輸入食物價格，之後可以即時搜尋返。</div>
+              <div class="page-sub">同一食物會自動整合成歷史比較。</div>
             </div>
             <button id="logoutBtn3" class="icon-btn">登出</button>
           </div>
@@ -742,8 +855,8 @@
 
         <div class="panel">
           <div class="section-head">
-            <div class="section-title">價格記錄</div>
-            <div id="priceCountLabel" class="section-meta">0 項</div>
+            <div class="section-title">食物歷史比較</div>
+            <div id="priceCountLabel" class="section-meta">0 組</div>
           </div>
           <div id="priceList" class="list"></div>
         </div>
@@ -754,7 +867,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">備忘</h1>
-              <div class="page-sub">快速記低，之後再返嚟睇。</div>
+              <div class="page-sub">可勾選完成，之後再返嚟睇。</div>
             </div>
             <button id="logoutBtn4" class="icon-btn">登出</button>
           </div>
@@ -780,22 +893,10 @@
 
     <nav class="tabbar">
       <div class="tabbar-inner">
-        <button class="tab-btn active" data-page="dinner">
-          <div class="tab-icon">🍽</div>
-          <div>晚餐</div>
-        </button>
-        <button class="tab-btn" data-page="stock">
-          <div class="tab-icon">📦</div>
-          <div>存貨</div>
-        </button>
-        <button class="tab-btn" data-page="price">
-          <div class="tab-icon">🏷️</div>
-          <div>價格</div>
-        </button>
-        <button class="tab-btn" data-page="memo">
-          <div class="tab-icon">📝</div>
-          <div>備忘</div>
-        </button>
+        <button class="tab-btn active" data-page="dinner">晚餐</button>
+        <button class="tab-btn" data-page="stock">存貨</button>
+        <button class="tab-btn" data-page="price">價格</button>
+        <button class="tab-btn" data-page="memo">備忘</button>
       </div>
     </nav>
   </div>
@@ -1168,6 +1269,28 @@
         }).join("");
       }
 
+      function groupPriceRows(rows) {
+        const groups = {};
+        rows.forEach(function (row) {
+          const v = row.value || {};
+          const key = (v.name || "").trim().toLowerCase();
+          if (!key) return;
+          if (!groups[key]) {
+            groups[key] = {
+              displayName: v.name || "",
+              rows: []
+            };
+          }
+          groups[key].rows.push(row);
+        });
+
+        return Object.values(groups).sort(function (a, b) {
+          const aTs = (a.rows[0] && a.rows[0].value && a.rows[0].value.ts) || 0;
+          const bTs = (b.rows[0] && b.rows[0].value && b.rows[0].value.ts) || 0;
+          return bTs - aTs;
+        });
+      }
+
       function renderPrices() {
         const keyword = (els.priceSearchInput.value || "").trim().toLowerCase();
 
@@ -1183,36 +1306,73 @@
           });
         }
 
-        els.priceCountLabel.textContent = rows.length + " 項";
+        const groups = groupPriceRows(rows);
+        els.priceCountLabel.textContent = groups.length + " 組";
 
-        if (rows.length === 0) {
+        if (groups.length === 0) {
           els.priceList.innerHTML = '<div class="empty">未有價格記錄</div>';
           return;
         }
 
-        els.priceList.innerHTML = rows.map(function (row) {
-          const key = "price:" + row.id;
-          const openClass = openSwipeKey === key ? " open" : "";
-          const item = row.value || {};
-          const meta = [
-            item.store || "未填商店",
-            item.date || ""
-          ].filter(Boolean).join("｜");
+        els.priceList.innerHTML = groups.map(function (group) {
+          const histories = group.rows.sort(function (a, b) {
+            return (b.value.ts || 0) - (a.value.ts || 0);
+          });
+
+          const latest = histories[0] ? histories[0].value : {};
+          const lowestRow = histories.reduce(function (min, row) {
+            if (!min) return row;
+            return Number(row.value.price || 0) < Number(min.value.price || 0) ? row : min;
+          }, null);
+
+          const stores = Array.from(new Set(histories.map(function (r) {
+            return (r.value.store || "").trim();
+          }).filter(Boolean)));
 
           return `
-            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-price-id="${row.id}">
-              <div class="swipe-actions">
-                <button class="swipe-delete-btn" data-del-price="${row.id}">刪除</button>
-              </div>
-              <div class="swipe-content">
-                <div class="cell-main">
-                  <div class="cell-title">${esc(item.name || "")}</div>
-                  <div class="cell-sub">
-                    ${esc(meta)}
-                    ${item.note ? "<br>" + esc(item.note) : ""}
+            <div class="price-group">
+              <div class="price-group-head">
+                <div class="price-group-title">${esc(group.displayName)}</div>
+                <div class="price-group-meta">
+                  <div class="price-meta-box">
+                    <div class="price-meta-label">最近</div>
+                    <div class="price-meta-value">${money(latest.price || 0)}</div>
+                  </div>
+                  <div class="price-meta-box">
+                    <div class="price-meta-label">最低</div>
+                    <div class="price-meta-value">${money(lowestRow ? lowestRow.value.price : 0)}</div>
+                  </div>
+                  <div class="price-meta-box">
+                    <div class="price-meta-label">商店</div>
+                    <div class="price-meta-value">${stores.length || 1} 間</div>
                   </div>
                 </div>
-                <div class="cell-price">${money(item.price || 0)}</div>
+              </div>
+              <div class="price-history">
+                ${histories.map(function (row) {
+                  const key = "price:" + row.id;
+                  const openClass = openSwipeKey === key ? " open" : "";
+                  const item = row.value || {};
+                  const meta = [
+                    item.store || "未填商店",
+                    item.date || ""
+                  ].filter(Boolean).join("｜");
+
+                  return `
+                    <div class="swipe-row${openClass}" data-swipe-key="${key}" data-price-id="${row.id}">
+                      <div class="swipe-actions">
+                        <button class="swipe-delete-btn" data-del-price="${row.id}">刪除</button>
+                      </div>
+                      <div class="swipe-content">
+                        <div class="cell-main">
+                          <div class="cell-title">${esc(meta)}</div>
+                          <div class="cell-sub">${item.note ? esc(item.note) : "—"}</div>
+                        </div>
+                        <div class="cell-price">${money(item.price || 0)}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
               </div>
             </div>
           `;
@@ -1221,6 +1381,9 @@
 
       function renderMemos() {
         const rows = rowsFromObj(memoCache).sort(function (a, b) {
+          const aDone = !!(a.value && a.value.done);
+          const bDone = !!(b.value && b.value.done);
+          if (aDone !== bDone) return aDone - bDone;
           return (b.value.ts || 0) - (a.value.ts || 0);
         });
 
@@ -1235,12 +1398,16 @@
           const key = "memo:" + row.id;
           const openClass = openSwipeKey === key ? " open" : "";
           const item = row.value || {};
+          const doneClass = item.done ? " memo-done" : "";
+          const checkClass = item.done ? "memo-check done" : "memo-check";
+
           return `
             <div class="swipe-row${openClass}" data-swipe-key="${key}" data-memo-id="${row.id}">
               <div class="swipe-actions">
                 <button class="swipe-delete-btn" data-del-memo="${row.id}">刪除</button>
               </div>
-              <div class="swipe-content">
+              <div class="swipe-content${doneClass}">
+                <button class="${checkClass}" data-toggle-memo="${row.id}"></button>
                 <div class="cell-main">
                   <div class="cell-title">${esc(item.text || "")}</div>
                   <div class="cell-sub">${timeStr(item.ts)}</div>
@@ -1252,7 +1419,7 @@
       }
 
       function seedDefaultsOnce() {
-        db.ref("meta/seededV8")
+        db.ref("meta/seededV9")
           .once("value")
           .then(async function (s) {
             if (s.exists()) return;
@@ -1337,7 +1504,7 @@
               );
             }
 
-            jobs.push(db.ref("meta/seededV8").set(true));
+            jobs.push(db.ref("meta/seededV9").set(true));
             await Promise.all(jobs);
           })
           .catch(function (err) {
@@ -1441,7 +1608,9 @@
 
       async function deleteDinnerCategory(id) {
         const name = getDinnerCatName(id);
-        if (!confirm("確定刪除晚餐大類別「" + name + "」及入面所有菜式？")) return;
+        const itemCount = rowsFromObj(dinnerItemsCache[id] || {}).length;
+        const message = `確定刪除晚餐大類別「${name}」？\n\n會同時刪除入面 ${itemCount} 個菜式。`;
+        if (!confirm(message)) return;
 
         try {
           await Promise.all([
@@ -1576,7 +1745,9 @@
 
       async function deleteStockCategory(id) {
         const name = getStockCatName(id);
-        if (!confirm("確定刪除存貨類別「" + name + "」及入面所有項目？")) return;
+        const itemCount = rowsFromObj(stockItemsCache[id] || {}).length;
+        const message = `確定刪除存貨類別「${name}」？\n\n會同時刪除入面 ${itemCount} 個項目。`;
+        if (!confirm(message)) return;
 
         try {
           await Promise.all([
@@ -1652,10 +1823,20 @@
 
           await db.ref("memos").push({
             text: text,
-            ts: Date.now()
+            ts: Date.now(),
+            done: false
           });
 
           els.memoInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function toggleMemoDone(id) {
+        try {
+          const item = memoCache[id] || {};
+          await db.ref("memos/" + id + "/done").set(!item.done);
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
@@ -1813,6 +1994,12 @@
       });
 
       els.memoList.addEventListener("click", async function (e) {
+        const toggleId = e.target.getAttribute("data-toggle-memo");
+        if (toggleId) {
+          toggleMemoDone(toggleId);
+          return;
+        }
+
         const id = e.target.getAttribute("data-del-memo");
         if (!id) return;
 
