@@ -115,7 +115,10 @@
     .btn-primary{background:var(--primary);color:#fff}
     .btn-success{background:var(--success);color:#fff}
     .btn-soft{background:var(--primary-soft);color:var(--primary)}
-    .btn-row{display:flex;gap:10px}
+    .btn-row{
+      display:flex;
+      gap:10px;
+    }
     .btn-row .btn{flex:1}
     .split{
       display:flex;
@@ -411,16 +414,33 @@
 
         <div class="card">
           <div class="card-title">支出統計</div>
-          <div class="stats">
-            <div class="stat">
-              <div class="stat-label">總支出</div>
-              <div class="stat-value" id="expenseTotal">$0</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">記錄數量</div>
-              <div class="stat-value" id="expenseCount">0</div>
+
+          <div class="field">
+            <div class="label">預算</div>
+            <div class="split">
+              <input type="number" id="budgetInput" placeholder="例如：5000">
+              <button class="btn btn-primary" id="saveBudgetBtn" style="width:auto;padding-inline:18px">儲存</button>
             </div>
           </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">預算</div>
+              <div class="stat-value" id="budgetTotal">$0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">已用</div>
+              <div class="stat-value" id="expenseTotal">$0</div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="stat">
+            <div class="stat-label">結餘</div>
+            <div class="stat-value" id="budgetRemain">$0</div>
+          </div>
+
           <div class="stat-note" id="expenseLatest">最新記錄：—</div>
         </div>
 
@@ -433,6 +453,10 @@
           <div class="field">
             <div class="label">備註</div>
             <input type="text" id="note" placeholder="例如：買餸、交租、日用品">
+          </div>
+          <div class="field">
+            <div class="label">日期</div>
+            <input type="date" id="expenseDate">
           </div>
           <button class="btn btn-primary" id="addExpenseBtn">新增記錄</button>
         </div>
@@ -570,6 +594,7 @@ const auth = firebase.auth();
 let expenseCache = {};
 let foodCache = {};
 let stockCache = {};
+let budgetCache = 0;
 let memoTypingTimer = null;
 let initialized = false;
 
@@ -633,11 +658,33 @@ function formatDateTime(ts){
   return y + "/" + m + "/" + day + " " + h + ":" + min;
 }
 
+function getTodayString(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
 function valuesFromObject(obj){
   if(!obj) return [];
   return Object.entries(obj).map(function(pair){
     return { id: pair[0], value: pair[1] };
   });
+}
+
+function updateBudgetRemain(){
+  const rows = valuesFromObject(expenseCache);
+  const totalExpense = rows.reduce(function(sum, row){
+    return sum + Number((row.value && row.value.a) || 0);
+  }, 0);
+
+  const remain = Number(budgetCache || 0) - totalExpense;
+  const remainEl = document.getElementById("budgetRemain");
+  if(remainEl){
+    remainEl.textContent = formatMoney(remain);
+    remainEl.style.color = remain < 0 ? "#ff4d4f" : "#1f2328";
+  }
 }
 
 document.querySelectorAll(".nav-item").forEach(function(btn){
@@ -733,22 +780,45 @@ function initData(){
 
   seedDefaultsOnce();
 
+  const expenseDateEl = document.getElementById("expenseDate");
+  if(expenseDateEl && !expenseDateEl.value){
+    expenseDateEl.value = getTodayString();
+  }
+
+  document.getElementById("saveBudgetBtn").addEventListener("click", function(){
+    clearError();
+    const val = Number(document.getElementById("budgetInput").value || 0);
+    db.ref("budget").set(val).catch(handleError);
+  });
+
+  db.ref("budget").on("value", function(s){
+    budgetCache = Number(s.val() || 0);
+    document.getElementById("budgetInput").value = budgetCache || "";
+    document.getElementById("budgetTotal").textContent = formatMoney(budgetCache);
+    updateBudgetRemain();
+  }, handleError);
+
   document.getElementById("addExpenseBtn").addEventListener("click", function(){
     clearError();
     const amountEl = document.getElementById("amount");
     const noteEl = document.getElementById("note");
+    const dateEl = document.getElementById("expenseDate");
+
     const amount = amountEl.value.trim();
     const note = noteEl.value.trim();
+    const expenseDate = dateEl.value || getTodayString();
+
     if(!amount || Number(amount) <= 0) return;
 
-    const newRef = db.ref("expenses").push();
-    newRef.set({
+    db.ref("expenses").push({
       a: amount,
       n: note,
+      date: expenseDate,
       ts: Date.now()
     }).then(function(){
       amountEl.value = "";
       noteEl.value = "";
+      dateEl.value = getTodayString();
     }).catch(handleError);
   });
 
@@ -806,7 +876,6 @@ function initData(){
     expenseCache = s.val() || {};
     const listEl = document.getElementById("expenseList");
     const totalEl = document.getElementById("expenseTotal");
-    const countEl = document.getElementById("expenseCount");
     const latestEl = document.getElementById("expenseLatest");
 
     const rows = valuesFromObject(expenseCache).sort(function(a,b){
@@ -816,8 +885,8 @@ function initData(){
     if(rows.length === 0){
       listEl.innerHTML = '<div class="empty">未有開支記錄</div>';
       totalEl.textContent = "$0";
-      countEl.textContent = "0";
       latestEl.textContent = "最新記錄：—";
+      updateBudgetRemain();
       return;
     }
 
@@ -826,13 +895,14 @@ function initData(){
     }, 0);
 
     totalEl.textContent = formatMoney(total);
-    countEl.textContent = String(rows.length);
+    updateBudgetRemain();
 
     const latest = rows[0].value;
     latestEl.textContent = "最新記錄：" + (latest.n ? latest.n : formatMoney(latest.a));
 
     listEl.innerHTML = rows.map(function(row){
-      return '<div class="item"><div class="item-main"><div class="item-title">' + formatMoney(row.value.a) + '</div><div class="item-sub">' + (row.value.n ? escapeHtml(row.value.n) : "無備註") + '</div></div><div class="item-right"><button class="small-btn" onclick="deleteExpense(\\'' + row.id + '\\')">刪除</button></div></div>';
+      const dateText = row.value.date ? row.value.date : "";
+      return '<div class="item"><div class="item-main"><div class="item-title">' + formatMoney(row.value.a) + '</div><div class="item-sub">' + (row.value.n ? escapeHtml(row.value.n) : "無備註") + (dateText ? "｜" + escapeHtml(dateText) : "") + '</div></div><div class="item-right"><button class="small-btn" onclick="deleteExpense(\\'' + row.id + '\\')">刪除</button></div></div>';
     }).join("");
   }, handleError);
 
