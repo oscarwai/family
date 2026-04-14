@@ -26,20 +26,17 @@
       --radius:18px;
       --nav-h:84px;
     }
-
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
     body{
       font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     }
-
     .app-shell{
       max-width:520px;
       margin:0 auto;
       min-height:100vh;
       padding:calc(env(safe-area-inset-top) + 16px) 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);
     }
-
     .login-wrap{
       max-width:520px;
       margin:0 auto;
@@ -48,10 +45,8 @@
       display:flex;
       align-items:center;
     }
-
     .page{display:none}
     .page.active{display:block}
-
     .header{
       display:flex;
       align-items:flex-start;
@@ -59,21 +54,18 @@
       gap:12px;
       margin:4px 2px 18px;
     }
-
     .title{
       font-size:30px;
       font-weight:800;
       line-height:1.15;
       margin:0;
     }
-
     .subtitle{
       margin-top:6px;
       font-size:13px;
       color:var(--muted);
       line-height:1.4;
     }
-
     .card{
       background:var(--card);
       border-radius:var(--radius);
@@ -81,21 +73,17 @@
       padding:16px;
       margin-bottom:14px;
     }
-
     .card-title{
       font-size:16px;
       font-weight:800;
       margin:0 0 12px;
     }
-
     .field{margin-bottom:12px}
-
     .label{
       font-size:13px;
       color:var(--muted);
       margin-bottom:8px;
     }
-
     input, textarea{
       width:100%;
       border:1px solid var(--line);
@@ -106,18 +94,15 @@
       font-size:16px;
       outline:none;
     }
-
     input:focus, textarea:focus{
       border-color:#b8befb;
       box-shadow:0 0 0 4px rgba(92,103,242,.08);
     }
-
     textarea{
       min-height:280px;
       resize:none;
       line-height:1.6;
     }
-
     .btn{
       border:none;
       width:100%;
@@ -127,26 +112,17 @@
       font-weight:800;
       cursor:pointer;
     }
-
     .btn-primary{background:var(--primary);color:#fff}
     .btn-success{background:var(--success);color:#fff}
     .btn-soft{background:var(--primary-soft);color:var(--primary)}
-
-    .btn-row{
-      display:flex;
-      gap:10px;
-    }
-
+    .btn-row{display:flex;gap:10px}
     .btn-row .btn{flex:1}
-
     .split{
       display:flex;
       gap:10px;
       align-items:center;
     }
-
     .split input{flex:1}
-
     .result-box{
       background:linear-gradient(180deg,#f7faff 0%,#eef6ff 100%);
       border:1px solid #dbe9ff;
@@ -155,13 +131,11 @@
       padding:24px 16px;
       margin-bottom:12px;
     }
-
     .result-label{
       font-size:13px;
       color:var(--muted);
       margin-bottom:10px;
     }
-
     .result-text{
       font-size:30px;
       font-weight:900;
@@ -173,13 +147,11 @@
       justify-content:center;
       word-break:break-word;
     }
-
     .list{
       display:flex;
       flex-direction:column;
       gap:10px;
     }
-
     .empty{
       background:#fafbfc;
       border:1px dashed var(--line);
@@ -189,7 +161,6 @@
       color:var(--muted);
       font-size:14px;
     }
-
     .item{
       border:1px solid var(--line);
       background:#fcfcfd;
@@ -200,19 +171,16 @@
       justify-content:space-between;
       gap:12px;
     }
-
     .item-main{
       min-width:0;
       flex:1;
     }
-
     .item-title{
       font-size:16px;
       font-weight:700;
       line-height:1.3;
       word-break:break-word;
     }
-
     .item-sub{
       margin-top:6px;
       font-size:13px;
@@ -220,14 +188,12 @@
       line-height:1.35;
       word-break:break-word;
     }
-
     .item-right{
       display:flex;
       align-items:center;
       gap:8px;
       flex-shrink:0;
     }
-
     .small-btn{
       border:none;
       background:transparent;
@@ -238,14 +204,12 @@
       cursor:pointer;
       width:auto;
     }
-
     .toggle{
       position:relative;
       width:52px;
       height:32px;
       flex-shrink:0;
     }
-
     .toggle input{display:none}
     .slider{
       position:absolute;
@@ -255,7 +219,6 @@
       transition:.22s ease;
       cursor:pointer;
     }
-
     .slider:before{
       content:"";
       position:absolute;
@@ -268,41 +231,34 @@
       box-shadow:0 1px 4px rgba(0,0,0,.16);
       transition:.22s ease;
     }
-
     .toggle input:checked + .slider{background:var(--success)}
     .toggle input:checked + .slider:before{transform:translateX(20px)}
-
     .stats{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:12px;
     }
-
     .stat{
       border:1px solid var(--line);
       background:#fafbff;
       border-radius:16px;
       padding:14px;
     }
-
     .stat-label{
       font-size:12px;
       color:var(--muted);
       margin-bottom:8px;
     }
-
     .stat-value{
       font-size:26px;
       font-weight:900;
       line-height:1.15;
     }
-
     .stat-note{
       margin-top:10px;
       font-size:13px;
       color:var(--muted);
     }
-
     .footer-line{
       display:flex;
       align-items:center;
@@ -312,7 +268,6 @@
       font-size:12px;
       color:var(--muted);
     }
-
     .nav{
       position:fixed;
       left:0;
@@ -321,7 +276,6 @@
       display:flex;
       justify-content:center;
     }
-
     .nav-inner{
       width:min(520px,100%);
       background:rgba(255,255,255,.94);
@@ -331,7 +285,6 @@
       grid-template-columns:repeat(4,1fr);
       padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);
     }
-
     .nav-item{
       border:none;
       background:transparent;
@@ -346,10 +299,8 @@
       font-weight:800;
       cursor:pointer;
     }
-
     .nav-item.active{color:var(--primary)}
     .nav-icon{font-size:20px;line-height:1}
-
     .banner{
       display:none;
       margin-bottom:14px;
@@ -361,27 +312,21 @@
       line-height:1.5;
       font-size:14px;
     }
-
     .banner.show{display:block}
-
     .login-card{width:100%}
-
     .login-top{margin-bottom:18px}
-
     .login-title{
       margin:0;
       font-size:30px;
       font-weight:800;
       line-height:1.15;
     }
-
     .login-sub{
       margin-top:8px;
       color:var(--muted);
       font-size:14px;
       line-height:1.5;
     }
-
     .login-msg{
       margin-top:12px;
       font-size:14px;
@@ -390,20 +335,17 @@
       line-height:1.5;
       word-break:break-word;
     }
-
     .user-line{
       font-size:13px;
       color:var(--muted);
       margin-top:10px;
     }
-
     .header-actions{
       display:flex;
       gap:8px;
       align-items:center;
       flex-shrink:0;
     }
-
     .header-btn{
       width:auto;
       border:none;
@@ -416,7 +358,6 @@
       cursor:pointer;
       white-space:nowrap;
     }
-
     @media (max-width:360px){
       .title,.login-title{font-size:26px}
       .result-text{font-size:26px}
@@ -626,9 +567,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-let expenseCache = [];
-let foodCache = [];
-let stockCache = [];
+let expenseCache = {};
+let foodCache = {};
+let stockCache = {};
 let memoTypingTimer = null;
 let initialized = false;
 
@@ -690,6 +631,13 @@ function formatDateTime(ts){
   const h = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
   return y + "/" + m + "/" + day + " " + h + ":" + min;
+}
+
+function valuesFromObject(obj){
+  if(!obj) return [];
+  return Object.entries(obj).map(function(pair){
+    return { id: pair[0], value: pair[1] };
+  });
 }
 
 document.querySelectorAll(".nav-item").forEach(function(btn){
@@ -758,9 +706,22 @@ auth.onAuthStateChanged(function(user){
 function seedDefaultsOnce(){
   db.ref("meta/seeded").once("value").then(function(s){
     if(s.exists()) return;
+
+    const foodUpdates = {};
+    defaultFoods.forEach(function(name){
+      const key = db.ref("foods").push().key;
+      foodUpdates[key] = name;
+    });
+
+    const stockUpdates = {};
+    defaultStocks.forEach(function(item){
+      const key = db.ref("stocks").push().key;
+      stockUpdates[key] = item;
+    });
+
     return Promise.all([
-      db.ref("foods").set(defaultFoods),
-      db.ref("stocks").set(defaultStocks),
+      db.ref("foods").set(foodUpdates),
+      db.ref("stocks").set(stockUpdates),
       db.ref("meta/seeded").set(true)
     ]);
   }).catch(handleError);
@@ -778,15 +739,13 @@ function initData(){
     const noteEl = document.getElementById("note");
     const amount = amountEl.value.trim();
     const note = noteEl.value.trim();
-
     if(!amount || Number(amount) <= 0) return;
 
-    const item = { a: amount, n: note, ts: Date.now() };
-
-    db.ref("expenses").once("value").then(function(s){
-      const list = s.val() || [];
-      list.push(item);
-      return db.ref("expenses").set(list);
+    const newRef = db.ref("expenses").push();
+    newRef.set({
+      a: amount,
+      n: note,
+      ts: Date.now()
     }).then(function(){
       amountEl.value = "";
       noteEl.value = "";
@@ -799,11 +758,7 @@ function initData(){
     const value = input.value.trim();
     if(!value) return;
 
-    db.ref("foods").once("value").then(function(s){
-      const list = s.val() || [];
-      list.push(value);
-      return db.ref("foods").set(list);
-    }).then(function(){
+    db.ref("foods").push(value).then(function(){
       input.value = "";
     }).catch(handleError);
   });
@@ -817,10 +772,9 @@ function initData(){
     const value = input.value.trim();
     if(!value) return;
 
-    db.ref("stocks").once("value").then(function(s){
-      const list = s.val() || [];
-      list.push({ name:value, on:true });
-      return db.ref("stocks").set(list);
+    db.ref("stocks").push({
+      name: value,
+      on: true
     }).then(function(){
       input.value = "";
     }).catch(handleError);
@@ -849,13 +803,17 @@ function initData(){
   });
 
   db.ref("expenses").on("value", function(s){
-    expenseCache = s.val() || [];
+    expenseCache = s.val() || {};
     const listEl = document.getElementById("expenseList");
     const totalEl = document.getElementById("expenseTotal");
     const countEl = document.getElementById("expenseCount");
     const latestEl = document.getElementById("expenseLatest");
 
-    if(expenseCache.length === 0){
+    const rows = valuesFromObject(expenseCache).sort(function(a,b){
+      return (b.value.ts || 0) - (a.value.ts || 0);
+    });
+
+    if(rows.length === 0){
       listEl.innerHTML = '<div class="empty">未有開支記錄</div>';
       totalEl.textContent = "$0";
       countEl.textContent = "0";
@@ -863,55 +821,52 @@ function initData(){
       return;
     }
 
-    const total = expenseCache.reduce(function(sum, item){
-      return sum + Number(item.a || 0);
+    const total = rows.reduce(function(sum, row){
+      return sum + Number(row.value.a || 0);
     }, 0);
 
     totalEl.textContent = formatMoney(total);
-    countEl.textContent = String(expenseCache.length);
+    countEl.textContent = String(rows.length);
 
-    const latest = expenseCache[expenseCache.length - 1];
+    const latest = rows[0].value;
     latestEl.textContent = "最新記錄：" + (latest.n ? latest.n : formatMoney(latest.a));
 
-    const reversed = expenseCache.slice().reverse();
-    listEl.innerHTML = reversed.map(function(item, reversedIndex){
-      const realIndex = expenseCache.length - 1 - reversedIndex;
-      return '<div class="item"><div class="item-main"><div class="item-title">' + formatMoney(item.a) + '</div><div class="item-sub">' + (item.n ? escapeHtml(item.n) : "無備註") + '</div></div><div class="item-right"><button class="small-btn" onclick="deleteExpense(' + realIndex + ')">刪除</button></div></div>';
+    listEl.innerHTML = rows.map(function(row){
+      return '<div class="item"><div class="item-main"><div class="item-title">' + formatMoney(row.value.a) + '</div><div class="item-sub">' + (row.value.n ? escapeHtml(row.value.n) : "無備註") + '</div></div><div class="item-right"><button class="small-btn" onclick="deleteExpense(\\'' + row.id + '\\')">刪除</button></div></div>';
     }).join("");
   }, handleError);
 
   db.ref("foods").on("value", function(s){
-    foodCache = s.val() || [];
+    foodCache = s.val() || {};
     const listEl = document.getElementById("foodList");
+    const rows = valuesFromObject(foodCache);
 
-    if(foodCache.length === 0){
+    if(rows.length === 0){
       listEl.innerHTML = '<div class="empty">未有菜式</div>';
       return;
     }
 
-    const reversed = foodCache.slice().reverse();
-    listEl.innerHTML = reversed.map(function(item, reversedIndex){
-      const realIndex = foodCache.length - 1 - reversedIndex;
-      return '<div class="item"><div class="item-main"><div class="item-title">' + escapeHtml(item) + '</div></div><div class="item-right"><button class="small-btn" onclick="deleteFood(' + realIndex + ')">刪除</button></div></div>';
+    listEl.innerHTML = rows.reverse().map(function(row){
+      return '<div class="item"><div class="item-main"><div class="item-title">' + escapeHtml(row.value) + '</div></div><div class="item-right"><button class="small-btn" onclick="deleteFood(\\'' + row.id + '\\')">刪除</button></div></div>';
     }).join("");
   }, handleError);
 
   db.ref("stocks").on("value", function(s){
-    stockCache = s.val() || [];
+    stockCache = s.val() || {};
     const listEl = document.getElementById("stockList");
+    const rows = valuesFromObject(stockCache);
 
-    if(stockCache.length === 0){
+    if(rows.length === 0){
       listEl.innerHTML = '<div class="empty">未有存貨項目</div>';
       return;
     }
 
-    const reversed = stockCache.slice().reverse();
-    listEl.innerHTML = reversed.map(function(item, reversedIndex){
-      const realIndex = stockCache.length - 1 - reversedIndex;
+    listEl.innerHTML = rows.reverse().map(function(row){
+      const item = row.value || {};
       const name = typeof item === "string" ? item : item.name;
       const on = typeof item === "string" ? true : !!item.on;
 
-      return '<div class="item"><div class="item-main"><div class="item-title">' + escapeHtml(name) + '</div><div class="item-sub">' + (on ? "屋企有" : "屋企冇") + '</div></div><div class="item-right"><label class="toggle"><input type="checkbox" ' + (on ? "checked" : "") + ' onchange="toggleStock(' + realIndex + ')"><span class="slider"></span></label><button class="small-btn" onclick="deleteStock(' + realIndex + ')">刪除</button></div></div>';
+      return '<div class="item"><div class="item-main"><div class="item-title">' + escapeHtml(name) + '</div><div class="item-sub">' + (on ? "屋企有" : "屋企冇") + '</div></div><div class="item-right"><label class="toggle"><input type="checkbox" ' + (on ? "checked" : "") + ' onchange="toggleStock(\\'' + row.id + '\\')"><span class="slider"></span></label><button class="small-btn" onclick="deleteStock(\\'' + row.id + '\\')">刪除</button></div></div>';
     }).join("");
   }, handleError);
 
@@ -924,30 +879,28 @@ function initData(){
   }, handleError);
 }
 
-function deleteExpense(index){
+function deleteExpense(id){
   clearError();
-  const list = expenseCache.slice();
-  list.splice(index, 1);
-  db.ref("expenses").set(list).catch(handleError);
+  db.ref("expenses/" + id).remove().catch(handleError);
 }
 
-function deleteFood(index){
+function deleteFood(id){
   clearError();
-  const list = foodCache.slice();
-  list.splice(index, 1);
-  db.ref("foods").set(list).catch(handleError);
+  db.ref("foods/" + id).remove().catch(handleError);
 }
 
 function drawFood(){
-  if(foodCache.length === 0){
+  const rows = valuesFromObject(foodCache);
+  if(rows.length === 0){
     document.getElementById("resultDisplay").textContent = "請先加入菜式";
     return;
   }
 
+  const names = rows.map(function(row){ return row.value; });
   const display = document.getElementById("resultDisplay");
   let count = 0;
   const timer = setInterval(function(){
-    display.textContent = foodCache[Math.floor(Math.random() * foodCache.length)];
+    display.textContent = names[Math.floor(Math.random() * names.length)];
     count++;
     if(count > 12){
       clearInterval(timer);
@@ -959,18 +912,16 @@ function drawFood(){
   }, 60);
 }
 
-function toggleStock(index){
+function toggleStock(id){
   clearError();
-  const list = stockCache.slice();
-  list[index].on = !list[index].on;
-  db.ref("stocks").set(list).catch(handleError);
+  const item = stockCache[id];
+  if(!item) return;
+  db.ref("stocks/" + id + "/on").set(!item.on).catch(handleError);
 }
 
-function deleteStock(index){
+function deleteStock(id){
   clearError();
-  const list = stockCache.slice();
-  list.splice(index, 1);
-  db.ref("stocks").set(list).catch(handleError);
+  db.ref("stocks/" + id).remove().catch(handleError);
 }
 
 window.deleteExpense = deleteExpense;
