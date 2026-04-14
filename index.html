@@ -25,7 +25,7 @@
       --text: #1f2328;
       --muted: #7a7f87;
       --line: #e8ebf0;
-      --shadow: 0 8px 24px rgba(22, 29, 37, 0.08);
+      --shadow: 0 8px 24px rgba(22, 29, 37, 0.06);
       --radius: 18px;
       --nav-h: 84px;
       --swipe-width: 90px;
@@ -37,8 +37,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       background: var(--bg);
@@ -72,6 +71,7 @@
       box-shadow: var(--shadow);
       padding: 16px;
       margin-bottom: 14px;
+      border: 1px solid #f1f2f4;
     }
 
     .header {
@@ -125,7 +125,7 @@
     }
 
     textarea {
-      min-height: 110px;
+      min-height: 96px;
       resize: none;
       line-height: 1.6;
     }
@@ -168,9 +168,10 @@
 
     .mini-btn {
       width: auto;
-      padding: 8px 10px;
+      padding: 10px 12px;
       font-size: 13px;
       border-radius: 10px;
+      flex: 0 0 auto;
     }
 
     .small-btn {
@@ -201,39 +202,6 @@
     .row-tight input,
     .row-tight textarea {
       flex: 1;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .stat {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: #fafbff;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 26px;
-      font-weight: 900;
-      line-height: 1.15;
-    }
-
-    .big-stat {
-      margin-top: 12px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: #fafbff;
     }
 
     .list {
@@ -270,6 +238,13 @@
       margin-top: 6px;
       word-break: break-word;
       line-height: 1.45;
+    }
+
+    .price-big {
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .low {
@@ -334,6 +309,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       padding: 8px 8px calc(env(safe-area-inset-bottom) + 8px);
+      backdrop-filter: blur(12px);
     }
 
     .nav-btn {
@@ -373,18 +349,20 @@
     }
 
     .cat-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
     }
 
     .cat-btn {
+      width: auto;
       background: #f7f8fb;
       color: var(--text);
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 12px 14px;
-      font-size: 15px;
+      padding: 10px 12px;
+      font-size: 14px;
       font-weight: 700;
       text-align: center;
     }
@@ -396,10 +374,14 @@
     }
 
     .cat-manage-list {
-      display: flex;
+      display: none;
       flex-direction: column;
       gap: 8px;
       margin-top: 12px;
+    }
+
+    .cat-manage-list.show {
+      display: flex;
     }
 
     .cat-manage-row {
@@ -544,90 +526,32 @@
     <div class="wrap">
       <div id="errorBanner" class="banner"></div>
 
-      <section id="page-expense" class="page active">
+      <section id="page-dinner" class="page active">
         <div class="card">
           <div class="header">
             <div>
-              <h1 class="title">家庭開支</h1>
-              <div class="sub">兩部手機共用同一份記錄</div>
+              <h1 class="title">今晚煮咩</h1>
+              <div class="sub">大類別可新增／刪除；可同時選多個類別抽選</div>
             </div>
             <button id="logoutBtn1" class="header-btn">登出</button>
           </div>
         </div>
 
         <div class="card">
-          <div class="field">
-            <div class="label">預算</div>
-            <div class="row-tight">
-              <input id="budgetInput" type="number" placeholder="例如：5000" />
-              <button id="saveBudgetBtn" style="width:auto;padding:14px 18px;">儲存</button>
-            </div>
-          </div>
-
-          <div class="stats">
-            <div class="stat">
-              <div class="stat-label">預算</div>
-              <div id="budgetTotal" class="stat-value">$0</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">已用</div>
-              <div id="expenseTotal" class="stat-value">$0</div>
-            </div>
-          </div>
-
-          <div class="big-stat">
-            <div class="stat-label">結餘</div>
-            <div id="budgetRemain" class="stat-value">$0</div>
-          </div>
-
-          <div id="expenseLatest" class="sub" style="margin-top:10px;">最新記錄：—</div>
-        </div>
-
-        <div class="card">
-          <div class="field">
-            <div class="label">金額</div>
-            <input id="amount" type="number" placeholder="例如：86" />
-          </div>
-          <div class="field">
-            <div class="label">備註</div>
-            <input id="note" type="text" placeholder="例如：買餸、交租、日用品" />
-          </div>
-          <div class="field">
-            <div class="label">日期</div>
-            <input id="expenseDate" type="date" />
-          </div>
-          <button id="addExpenseBtn">新增記錄</button>
-        </div>
-
-        <div class="card">
-          <div class="label">開支列表</div>
-          <div id="expenseList" class="list"></div>
-        </div>
-      </section>
-
-      <section id="page-dinner" class="page">
-        <div class="card">
-          <div class="header">
-            <div>
-              <h1 class="title">今晚煮咩</h1>
-              <div class="sub">可同時揀幾個類別抽選；分類可增減</div>
-            </div>
-            <button id="logoutBtn2" class="header-btn">登出</button>
-          </div>
-        </div>
-
-        <div class="card">
           <div class="section-head">
-            <div class="section-title">晚餐分類</div>
+            <div class="section-title">晚餐大類別</div>
             <div class="section-tag" id="currentDinnerCatLabel">未選擇</div>
           </div>
 
           <div class="row-tight">
-            <input id="newDinnerCatInput" type="text" placeholder="新增分類，例如：湯類、宵夜、日式" />
-            <button id="addDinnerCatBtn" class="mini-btn" style="width:auto;">新增</button>
+            <input id="newDinnerCatInput" type="text" placeholder="新增大類別，例如：湯類、宵夜、日式" />
+            <button id="addDinnerCatBtn" class="mini-btn">新增</button>
           </div>
 
-          <div id="dinnerCatGrid" class="cat-grid" style="margin-top:12px;"></div>
+          <div id="dinnerCatGrid" class="cat-grid"></div>
+
+          <div style="height:10px;"></div>
+          <button id="toggleDinnerManageBtn" class="btn-soft">管理分類</button>
           <div id="dinnerCatManageList" class="cat-manage-list"></div>
         </div>
 
@@ -643,7 +567,7 @@
           </div>
           <div style="height:10px;"></div>
           <button id="resetTodayBtn" class="btn-soft">重置今日抽過</button>
-          <div class="small-note">再抽一次唔會重複上一次；今日抽過可重置</div>
+          <div class="small-note">再抽一次不重複上一次；今日抽過可重置</div>
         </div>
 
         <div class="card">
@@ -676,31 +600,34 @@
           <div class="header">
             <div>
               <h1 class="title">存貨清單</h1>
-              <div class="sub">分類可增減；低庫存會提示</div>
+              <div class="sub">類別可新增／刪除；低庫存有提示</div>
             </div>
-            <button id="logoutBtn3" class="header-btn">登出</button>
+            <button id="logoutBtn2" class="header-btn">登出</button>
           </div>
         </div>
 
         <div class="card">
           <div class="section-head">
-            <div class="section-title">存貨分類</div>
+            <div class="section-title">存貨類別</div>
             <div class="section-tag" id="currentStockCatLabel">未選擇</div>
           </div>
 
           <div class="row-tight">
-            <input id="newStockCatInput" type="text" placeholder="新增分類，例如：零食、早餐、冷凍食品" />
-            <button id="addStockCatBtn" class="mini-btn" style="width:auto;">新增</button>
+            <input id="newStockCatInput" type="text" placeholder="新增類別，例如：零食、早餐、冷凍食品" />
+            <button id="addStockCatBtn" class="mini-btn">新增</button>
           </div>
 
-          <div id="stockCatGrid" class="cat-grid" style="margin-top:12px;"></div>
+          <div id="stockCatGrid" class="cat-grid"></div>
+
+          <div style="height:10px;"></div>
+          <button id="toggleStockManageBtn" class="btn-soft">管理類別</button>
           <div id="stockCatManageList" class="cat-manage-list"></div>
         </div>
 
         <div class="card">
           <div class="section-head">
             <div class="section-title">新增項目</div>
-            <div class="section-tag" id="stockAddCatLabel">請先選分類</div>
+            <div class="section-tag" id="stockAddCatLabel">請先選類別</div>
           </div>
           <div class="field">
             <div class="label">項目名稱</div>
@@ -711,10 +638,67 @@
 
         <div class="card">
           <div class="section-head">
-            <div class="section-title">分類清單</div>
-            <div class="section-tag" id="stockListCatLabel">請先選分類</div>
+            <div class="section-title">類別清單</div>
+            <div class="section-tag" id="stockListCatLabel">請先選類別</div>
           </div>
           <div id="stockList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="page-price" class="page">
+        <div class="card">
+          <div class="header">
+            <div>
+              <h1 class="title">食物價格</h1>
+              <div class="sub">輸入價格後可隨時查返；支援搜尋</div>
+            </div>
+            <button id="logoutBtn3" class="header-btn">登出</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <div class="label">搜尋</div>
+            <input id="priceSearchInput" type="text" placeholder="搜尋食物名稱 / 商店" />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <div class="label">食物名稱</div>
+            <input id="priceNameInput" type="text" placeholder="例如：雞蛋、可樂、菜心" />
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <div class="label">價格</div>
+              <input id="priceValueInput" type="number" step="0.1" placeholder="例如：25.9" />
+            </div>
+            <div class="field">
+              <div class="label">日期</div>
+              <input id="priceDateInput" type="date" />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="label">商店</div>
+            <input id="priceStoreInput" type="text" placeholder="例如：百佳、惠康、街市" />
+          </div>
+
+          <div class="field">
+            <div class="label">備註</div>
+            <textarea id="priceNoteInput" placeholder="例如：特價、兩件裝、街市檔口"></textarea>
+          </div>
+
+          <button id="addPriceBtn">新增價格記錄</button>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <div class="section-title">價格記錄</div>
+            <div class="section-tag" id="priceCountLabel">0 項</div>
+          </div>
+          <div id="priceList" class="list"></div>
         </div>
       </section>
 
@@ -749,9 +733,9 @@
 
     <nav class="nav">
       <div class="nav-inner">
-        <button class="nav-btn active" data-page="expense">開支</button>
-        <button class="nav-btn" data-page="dinner">晚餐</button>
+        <button class="nav-btn active" data-page="dinner">晚餐</button>
         <button class="nav-btn" data-page="stock">存貨</button>
+        <button class="nav-btn" data-page="price">價格</button>
         <button class="nav-btn" data-page="memo">備忘</button>
       </div>
     </nav>
@@ -800,21 +784,21 @@
       const db = firebase.database();
 
       let initialized = false;
-      let budgetCache = 0;
-      let expenseCache = {};
       let dinnerCategoriesCache = {};
       let dinnerItemsCache = {};
       let stockCategoriesCache = {};
       let stockItemsCache = {};
       let memoCache = {};
+      let priceCache = {};
 
-      let currentDinnerCat = "seafood";
-      let currentStockCat = "drinks";
-
+      let currentDinnerCat = null;
+      let currentStockCat = null;
       let selectedDinnerCats = [];
       let excludedToday = {};
       let lastDrawKey = null;
       let openSwipeKey = null;
+      let isDinnerManageOpen = false;
+      let isStockManageOpen = false;
 
       const els = {
         loginWrap: document.getElementById("loginWrap"),
@@ -823,23 +807,11 @@
         loginPassword: document.getElementById("loginPassword"),
         loginBtn: document.getElementById("loginBtn"),
         loginMsg: document.getElementById("loginMsg"),
-
         errorBanner: document.getElementById("errorBanner"),
-
-        budgetInput: document.getElementById("budgetInput"),
-        saveBudgetBtn: document.getElementById("saveBudgetBtn"),
-        budgetTotal: document.getElementById("budgetTotal"),
-        expenseTotal: document.getElementById("expenseTotal"),
-        budgetRemain: document.getElementById("budgetRemain"),
-        expenseLatest: document.getElementById("expenseLatest"),
-        amount: document.getElementById("amount"),
-        note: document.getElementById("note"),
-        expenseDate: document.getElementById("expenseDate"),
-        addExpenseBtn: document.getElementById("addExpenseBtn"),
-        expenseList: document.getElementById("expenseList"),
 
         newDinnerCatInput: document.getElementById("newDinnerCatInput"),
         addDinnerCatBtn: document.getElementById("addDinnerCatBtn"),
+        toggleDinnerManageBtn: document.getElementById("toggleDinnerManageBtn"),
         dinnerCatGrid: document.getElementById("dinnerCatGrid"),
         dinnerCatManageList: document.getElementById("dinnerCatManageList"),
         currentDinnerCatLabel: document.getElementById("currentDinnerCatLabel"),
@@ -857,6 +829,7 @@
 
         newStockCatInput: document.getElementById("newStockCatInput"),
         addStockCatBtn: document.getElementById("addStockCatBtn"),
+        toggleStockManageBtn: document.getElementById("toggleStockManageBtn"),
         stockCatGrid: document.getElementById("stockCatGrid"),
         stockCatManageList: document.getElementById("stockCatManageList"),
         currentStockCatLabel: document.getElementById("currentStockCatLabel"),
@@ -865,6 +838,16 @@
         stockInput: document.getElementById("stockInput"),
         addStockBtn: document.getElementById("addStockBtn"),
         stockList: document.getElementById("stockList"),
+
+        priceSearchInput: document.getElementById("priceSearchInput"),
+        priceNameInput: document.getElementById("priceNameInput"),
+        priceValueInput: document.getElementById("priceValueInput"),
+        priceDateInput: document.getElementById("priceDateInput"),
+        priceStoreInput: document.getElementById("priceStoreInput"),
+        priceNoteInput: document.getElementById("priceNoteInput"),
+        addPriceBtn: document.getElementById("addPriceBtn"),
+        priceList: document.getElementById("priceList"),
+        priceCountLabel: document.getElementById("priceCountLabel"),
 
         memoInput: document.getElementById("memoInput"),
         addMemoBtn: document.getElementById("addMemoBtn"),
@@ -936,17 +919,6 @@
         });
       }
 
-      function updateBudgetRemain() {
-        const rows = rowsFromObj(expenseCache);
-        const used = rows.reduce(function (sum, row) {
-          return sum + Number((row.value && row.value.a) || 0);
-        }, 0);
-
-        const remain = Number(budgetCache || 0) - used;
-        els.budgetRemain.textContent = money(remain);
-        els.budgetRemain.style.color = remain < 0 ? "#ff4d4f" : "#1f2328";
-      }
-
       function showPage(pageName, btn) {
         document.querySelectorAll(".page").forEach(function (el) {
           el.classList.remove("active");
@@ -973,11 +945,11 @@
         const dinnerIds = Object.keys(dinnerCategoriesCache || {});
         const stockIds = Object.keys(stockCategoriesCache || {});
 
-        if (!dinnerIds.includes(currentDinnerCat)) {
+        if (!currentDinnerCat || !dinnerIds.includes(currentDinnerCat)) {
           currentDinnerCat = dinnerIds[0] || null;
         }
 
-        if (!stockIds.includes(currentStockCat)) {
+        if (!currentStockCat || !stockIds.includes(currentStockCat)) {
           currentStockCat = stockIds[0] || null;
         }
 
@@ -1012,6 +984,9 @@
           `;
         }).join("");
 
+        els.dinnerCatManageList.classList.toggle("show", isDinnerManageOpen);
+        els.toggleDinnerManageBtn.textContent = isDinnerManageOpen ? "收起管理" : "管理分類";
+
         if (selectedDinnerCats.length === 0) {
           els.currentDinnerCatLabel.textContent = "未選擇";
         } else {
@@ -1045,48 +1020,13 @@
           `;
         }).join("");
 
+        els.stockCatManageList.classList.toggle("show", isStockManageOpen);
+        els.toggleStockManageBtn.textContent = isStockManageOpen ? "收起管理" : "管理類別";
+
         const label = currentStockCat ? getStockCatName(currentStockCat) : "未選擇";
         els.currentStockCatLabel.textContent = label;
         els.stockAddCatLabel.textContent = "管理類別：" + label;
         els.stockListCatLabel.textContent = "管理類別：" + label;
-      }
-
-      function renderExpenses() {
-        const rows = rowsFromObj(expenseCache).sort(function (a, b) {
-          return (b.value.ts || 0) - (a.value.ts || 0);
-        });
-
-        if (rows.length === 0) {
-          els.expenseList.innerHTML = '<div class="empty">未有開支記錄</div>';
-          els.expenseTotal.textContent = "$0";
-          els.expenseLatest.textContent = "最新記錄：—";
-          updateBudgetRemain();
-          return;
-        }
-
-        const total = rows.reduce(function (sum, row) {
-          return sum + Number(row.value.a || 0);
-        }, 0);
-
-        els.expenseTotal.textContent = money(total);
-        updateBudgetRemain();
-        els.expenseLatest.textContent =
-          "最新記錄：" + (rows[0].value.n || money(rows[0].value.a));
-
-        els.expenseList.innerHTML = rows
-          .map(function (row) {
-            const dateText = row.value.date ? "｜" + esc(row.value.date) : "";
-            return `
-              <div class="item">
-                <div class="item-main">
-                  <div class="item-title">${money(row.value.a)}</div>
-                  <div class="item-sub">${esc(row.value.n || "無備註")}${dateText}</div>
-                </div>
-                <button class="small-btn" data-del-expense="${row.id}">刪除</button>
-              </div>
-            `;
-          })
-          .join("");
       }
 
       function getDinnerRowsOfCurrentCat() {
@@ -1095,7 +1035,7 @@
 
       function renderDinnerItems() {
         if (!currentDinnerCat) {
-          els.foodList.innerHTML = '<div class="empty">未有分類</div>';
+          els.foodList.innerHTML = '<div class="empty">未有大類別</div>';
           return;
         }
 
@@ -1109,7 +1049,7 @@
         els.foodList.innerHTML = rows
           .reverse()
           .map(function (row) {
-            const key = "food:" + row.id;
+            const key = "food:" + currentDinnerCat + ":" + row.id;
             const openClass = openSwipeKey === key ? " open" : "";
             const item = row.value || {};
             return `
@@ -1131,7 +1071,7 @@
 
       function renderStocks() {
         if (!currentStockCat) {
-          els.stockList.innerHTML = '<div class="empty">未有分類</div>';
+          els.stockList.innerHTML = '<div class="empty">未有類別</div>';
           return;
         }
 
@@ -1145,7 +1085,7 @@
         els.stockList.innerHTML = rows
           .reverse()
           .map(function (row) {
-            const key = "stock:" + row.id;
+            const key = "stock:" + currentStockCat + ":" + row.id;
             const openClass = openSwipeKey === key ? " open" : "";
             const item = row.value || {};
             const qty = Number(item.qty || 0);
@@ -1185,6 +1125,56 @@
           .join("");
       }
 
+      function renderPrices() {
+        const keyword = (els.priceSearchInput.value || "").trim().toLowerCase();
+
+        let rows = rowsFromObj(priceCache).sort(function (a, b) {
+          return (b.value.ts || 0) - (a.value.ts || 0);
+        });
+
+        if (keyword) {
+          rows = rows.filter(function (row) {
+            const v = row.value || {};
+            const text = [
+              v.name || "",
+              v.store || "",
+              v.note || ""
+            ].join(" ").toLowerCase();
+            return text.includes(keyword);
+          });
+        }
+
+        els.priceCountLabel.textContent = rows.length + " 項";
+
+        if (rows.length === 0) {
+          els.priceList.innerHTML = '<div class="empty">未有價格記錄</div>';
+          return;
+        }
+
+        els.priceList.innerHTML = rows.map(function (row) {
+          const key = "price:" + row.id;
+          const openClass = openSwipeKey === key ? " open" : "";
+          const item = row.value || {};
+          return `
+            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-price-id="${row.id}">
+              <div class="swipe-actions">
+                <button class="swipe-delete-btn" data-del-price="${row.id}">刪除</button>
+              </div>
+              <div class="swipe-content">
+                <div class="item-main">
+                  <div class="item-title">${esc(item.name || "")}</div>
+                  <div class="item-sub">
+                    ${item.store ? esc(item.store) : "未填商店"}${item.date ? "｜" + esc(item.date) : ""}
+                    ${item.note ? "<br>" + esc(item.note) : ""}
+                  </div>
+                </div>
+                <div class="price-big">${money(item.price || 0)}</div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
       function renderMemos() {
         const rows = rowsFromObj(memoCache).sort(function (a, b) {
           return (b.value.ts || 0) - (a.value.ts || 0);
@@ -1220,7 +1210,7 @@
       }
 
       function seedDefaultsOnce() {
-        db.ref("meta/seededV5")
+        db.ref("meta/seededV7")
           .once("value")
           .then(async function (s) {
             if (s.exists()) return;
@@ -1305,7 +1295,7 @@
               );
             }
 
-            jobs.push(db.ref("meta/seededV5").set(true));
+            jobs.push(db.ref("meta/seededV7").set(true));
             await Promise.all(jobs);
           })
           .catch(function (err) {
@@ -1317,23 +1307,12 @@
         if (initialized) return;
         initialized = true;
 
-        els.expenseDate.value = todayStr();
+        els.priceDateInput.value = todayStr();
         seedDefaultsOnce();
-
-        db.ref("budget").on("value", function (s) {
-          budgetCache = Number(s.val() || 0);
-          els.budgetInput.value = budgetCache || "";
-          els.budgetTotal.textContent = money(budgetCache);
-          updateBudgetRemain();
-        });
-
-        db.ref("expenses").on("value", function (s) {
-          expenseCache = s.val() || {};
-          renderExpenses();
-        });
 
         db.ref("dinnerCategories").on("value", function (s) {
           dinnerCategoriesCache = s.val() || {};
+          ensureCurrentCats();
           renderDinnerCategories();
           renderDinnerItems();
         });
@@ -1345,6 +1324,7 @@
 
         db.ref("stockCategories").on("value", function (s) {
           stockCategoriesCache = s.val() || {};
+          ensureCurrentCats();
           renderStockCategories();
           renderStocks();
         });
@@ -1352,6 +1332,11 @@
         db.ref("stockItems").on("value", function (s) {
           stockItemsCache = s.val() || {};
           renderStocks();
+        });
+
+        db.ref("foodPrices").on("value", function (s) {
+          priceCache = s.val() || {};
+          renderPrices();
         });
 
         db.ref("memos").on("value", function (s) {
@@ -1393,38 +1378,6 @@
         }
       }
 
-      async function saveBudget() {
-        try {
-          const val = Number(els.budgetInput.value || 0);
-          await db.ref("budget").set(val);
-        } catch (err) {
-          alert(err.code + " | " + err.message);
-        }
-      }
-
-      async function addExpense() {
-        try {
-          const amount = els.amount.value.trim();
-          const note = els.note.value.trim();
-          const date = els.expenseDate.value || todayStr();
-
-          if (!amount || Number(amount) <= 0) return;
-
-          await db.ref("expenses").push({
-            a: amount,
-            n: note,
-            date: date,
-            ts: Date.now()
-          });
-
-          els.amount.value = "";
-          els.note.value = "";
-          els.expenseDate.value = todayStr();
-        } catch (err) {
-          alert(err.code + " | " + err.message);
-        }
-      }
-
       async function addDinnerCategory() {
         try {
           const name = els.newDinnerCatInput.value.trim();
@@ -1446,7 +1399,7 @@
 
       async function deleteDinnerCategory(id) {
         const name = getDinnerCatName(id);
-        const ok = confirm("確定刪除晚餐分類「" + name + "」及入面所有菜式？");
+        const ok = confirm("確定刪除晚餐大類別「" + name + "」及入面所有菜式？");
         if (!ok) return;
 
         try {
@@ -1489,7 +1442,6 @@
 
           const name = els.foodInput.value.trim();
           const desc = els.foodDescInput.value.trim();
-
           if (!name) return;
 
           await db.ref("dinnerItems/" + currentDinnerCat).push({
@@ -1506,7 +1458,7 @@
 
       function drawFood(isRedraw) {
         if (selectedDinnerCats.length === 0) {
-          els.resultDisplay.textContent = "請先選分類";
+          els.resultDisplay.textContent = "請先選大類別";
           els.resultDesc.textContent = "";
           return;
         }
@@ -1585,7 +1537,7 @@
 
       async function deleteStockCategory(id) {
         const name = getStockCatName(id);
-        const ok = confirm("確定刪除存貨分類「" + name + "」及入面所有項目？");
+        const ok = confirm("確定刪除存貨類別「" + name + "」及入面所有項目？");
         if (!ok) return;
 
         try {
@@ -1608,7 +1560,7 @@
       async function addStock() {
         try {
           if (!currentStockCat) {
-            alert("請先新增或選擇存貨分類");
+            alert("請先新增或選擇存貨類別");
             return;
           }
 
@@ -1621,6 +1573,35 @@
           });
 
           els.stockInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addPrice() {
+        try {
+          const name = els.priceNameInput.value.trim();
+          const price = Number(els.priceValueInput.value || 0);
+          const date = els.priceDateInput.value || todayStr();
+          const store = els.priceStoreInput.value.trim();
+          const note = els.priceNoteInput.value.trim();
+
+          if (!name || !price) return;
+
+          await db.ref("foodPrices").push({
+            name: name,
+            price: price,
+            date: date,
+            store: store,
+            note: note,
+            ts: Date.now()
+          });
+
+          els.priceNameInput.value = "";
+          els.priceValueInput.value = "";
+          els.priceDateInput.value = todayStr();
+          els.priceStoreInput.value = "";
+          els.priceNoteInput.value = "";
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
@@ -1649,21 +1630,25 @@
       document.getElementById("logoutBtn3").addEventListener("click", doLogout);
       document.getElementById("logoutBtn4").addEventListener("click", doLogout);
 
-      els.saveBudgetBtn.addEventListener("click", saveBudget);
-      els.addExpenseBtn.addEventListener("click", addExpense);
-
       els.addDinnerCatBtn.addEventListener("click", addDinnerCategory);
-      els.drawBtn.addEventListener("click", function () {
-        drawFood(false);
+      els.toggleDinnerManageBtn.addEventListener("click", function () {
+        isDinnerManageOpen = !isDinnerManageOpen;
+        renderDinnerCategories();
       });
-      els.redrawBtn.addEventListener("click", function () {
-        drawFood(true);
-      });
+      els.drawBtn.addEventListener("click", function () { drawFood(false); });
+      els.redrawBtn.addEventListener("click", function () { drawFood(true); });
       els.resetTodayBtn.addEventListener("click", resetToday);
       els.addFoodBtn.addEventListener("click", addFood);
 
       els.addStockCatBtn.addEventListener("click", addStockCategory);
+      els.toggleStockManageBtn.addEventListener("click", function () {
+        isStockManageOpen = !isStockManageOpen;
+        renderStockCategories();
+      });
       els.addStockBtn.addEventListener("click", addStock);
+
+      els.addPriceBtn.addEventListener("click", addPrice);
+      els.priceSearchInput.addEventListener("input", renderPrices);
 
       els.addMemoBtn.addEventListener("click", addMemo);
 
@@ -1687,6 +1672,7 @@
           selectedDinnerCats.push(cat);
         }
 
+        closeAllSwipes();
         renderDinnerCategories();
         renderDinnerItems();
       });
@@ -1730,16 +1716,6 @@
         }
       });
 
-      els.expenseList.addEventListener("click", async function (e) {
-        const id = e.target.getAttribute("data-del-expense");
-        if (!id) return;
-        try {
-          await db.ref("expenses/" + id).remove();
-        } catch (err) {
-          alert(err.code + " | " + err.message);
-        }
-      });
-
       els.foodList.addEventListener("click", async function (e) {
         const id = e.target.getAttribute("data-del-food");
         if (!id) return;
@@ -1753,7 +1729,9 @@
           }
           delete excludedToday[drawKey];
 
-          if (openSwipeKey === "food:" + id) openSwipeKey = null;
+          if (openSwipeKey === "food:" + currentDinnerCat + ":" + id) {
+            openSwipeKey = null;
+          }
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
@@ -1764,7 +1742,9 @@
         if (delId) {
           try {
             await db.ref("stockItems/" + currentStockCat + "/" + delId).remove();
-            if (openSwipeKey === "stock:" + delId) openSwipeKey = null;
+            if (openSwipeKey === "stock:" + currentStockCat + ":" + delId) {
+              openSwipeKey = null;
+            }
           } catch (err) {
             alert(err.code + " | " + err.message);
           }
@@ -1792,6 +1772,20 @@
           } catch (err) {
             alert(err.code + " | " + err.message);
           }
+        }
+      });
+
+      els.priceList.addEventListener("click", async function (e) {
+        const id = e.target.getAttribute("data-del-price");
+        if (!id) return;
+
+        try {
+          await db.ref("foodPrices/" + id).remove();
+          if (openSwipeKey === "price:" + id) {
+            openSwipeKey = null;
+          }
+        } catch (err) {
+          alert(err.code + " | " + err.message);
         }
       });
 
@@ -1845,23 +1839,23 @@
           const changed = e.changedTouches[0];
           const dx = changed.clientX - startX;
           const dy = changed.clientY - startY;
-          const id = touchedRow.getAttribute(getIdAttrName);
+          const fullKey = touchedRow.getAttribute("data-swipe-key");
 
           if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 35) {
             if (dx < 0) {
               closeAllSwipes();
-              openSwipeKey = typeName + ":" + id;
+              openSwipeKey = fullKey;
               touchedRow.classList.add("open");
             } else {
               touchedRow.classList.remove("open");
-              if (openSwipeKey === typeName + ":" + id) {
+              if (openSwipeKey === fullKey) {
                 openSwipeKey = null;
               }
             }
           } else if (!moved) {
             const insideButton = e.target.closest("button,input,label");
             if (!insideButton) {
-              if (openSwipeKey === typeName + ":" + id) {
+              if (openSwipeKey === fullKey) {
                 openSwipeKey = null;
                 renderByType(typeName);
               }
@@ -1875,11 +1869,13 @@
       function renderByType(typeName) {
         if (typeName === "food") renderDinnerItems();
         if (typeName === "stock") renderStocks();
+        if (typeName === "price") renderPrices();
         if (typeName === "memo") renderMemos();
       }
 
       attachSwipe(els.foodList, "food", "data-food-id");
       attachSwipe(els.stockList, "stock", "data-stock-id");
+      attachSwipe(els.priceList, "price", "data-price-id");
       attachSwipe(els.memoList, "memo", "data-memo-id");
 
       document.addEventListener("click", function (e) {
