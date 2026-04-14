@@ -52,7 +52,8 @@
 
     button,
     input,
-    textarea {
+    textarea,
+    select {
       font: inherit;
     }
 
@@ -188,7 +189,8 @@
     }
 
     input,
-    textarea {
+    textarea,
+    select {
       width: 100%;
       border: 1px solid var(--ios-line);
       border-radius: 14px;
@@ -200,7 +202,8 @@
     }
 
     input:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       border-color: rgba(0, 122, 255, 0.35);
       box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
     }
@@ -653,47 +656,97 @@
       background: #fcfcfd;
     }
 
-    .official-status {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--ios-sub);
-      line-height: 1.4;
-      white-space: pre-wrap;
+    .official-head-title {
+      font-size: 16px;
+      font-weight: 750;
     }
 
-    .official-summary {
-      padding: 12px 14px 0;
-      font-size: 14px;
+    .official-head-sub {
+      margin-top: 5px;
+      font-size: 12px;
+      color: var(--ios-sub);
+      line-height: 1.45;
+    }
+
+    .official-body {
+      padding: 12px;
+    }
+
+    .official-status {
+      font-size: 13px;
+      color: var(--ios-sub);
+      line-height: 1.45;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .official-result-head {
+      padding: 12px;
+      border: 1px solid var(--ios-line);
+      border-radius: 14px;
+      background: #fafbff;
+      margin-bottom: 10px;
+    }
+
+    .official-result-title {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    .official-cheapest {
+      font-size: 15px;
       font-weight: 700;
+      color: var(--ios-blue);
+    }
+
+    .official-updated {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--ios-sub);
     }
 
     .official-list {
-      padding: 8px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .official-rank {
-      font-size: 11px;
-      color: var(--ios-sub);
-      margin-top: 3px;
+    .official-item {
+      border: 1px solid var(--ios-line);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
     }
 
-    .official-empty {
-      padding: 14px;
-      color: var(--ios-sub);
-      font-size: 14px;
+    .official-item-left {
+      min-width: 0;
+      flex: 1;
     }
 
-    .tag {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: #eef5ff;
-      color: var(--ios-blue);
-      font-size: 11px;
+    .official-item-store {
+      font-size: 15px;
       font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .official-item-sub {
+      font-size: 12px;
+      color: var(--ios-sub);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .official-item-price {
+      flex: 0 0 auto;
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     .tabbar {
@@ -899,7 +952,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">價格</h1>
-              <div class="page-sub">可記錄自己價格，亦可查官方格價最平邊度買。</div>
+              <div class="page-sub">手動記錄價格，同時可查官方格價結果。</div>
             </div>
             <button id="logoutBtn3" class="icon-btn">登出</button>
           </div>
@@ -907,7 +960,7 @@
 
         <div class="panel">
           <div class="field" style="margin-bottom:0;">
-            <div class="label">搜尋自己記錄</div>
+            <div class="label">搜尋手動記錄</div>
             <input id="priceSearchInput" type="text" placeholder="搜尋食物名稱 / 商店 / 備註" />
           </div>
         </div>
@@ -939,36 +992,37 @@
             <textarea id="priceNoteInput" placeholder="例如：特價、兩件裝、街市檔口"></textarea>
           </div>
 
-          <button id="addPriceBtn">新增價格記錄</button>
+          <button id="addPriceBtn">新增手動價格記錄</button>
         </div>
 
         <div class="panel">
-          <div class="section-head">
-            <div class="section-title">官方格價搜尋</div>
-            <div class="section-meta">消委會 open data</div>
-          </div>
-
-          <div class="field">
-            <div class="label">查官方最平</div>
-            <div class="inline-row">
-              <input id="officialSearchInput" type="text" placeholder="例如：雞蛋、可樂、菜心" />
-              <button id="officialSearchBtn" class="btn-mini">查</button>
-            </div>
-          </div>
-
           <div class="official-box">
             <div class="official-head">
-              <div class="section-title" style="margin:0;">官方結果</div>
-              <div id="officialStatus" class="official-status">未查詢</div>
+              <div class="official-head-title">官方格價查詢</div>
+              <div class="official-head-sub">已接你個 Cloudflare Worker。輸入「雞蛋」即可找官方最平結果。</div>
             </div>
-            <div id="officialSummary" class="official-summary hidden"></div>
-            <div id="officialList" class="official-list"></div>
+            <div class="official-body">
+              <div class="inline-row">
+                <input id="officialKeywordInput" type="text" placeholder="例如：雞蛋、白米、廁紙" />
+                <button id="officialSearchBtn" class="btn-mini">查詢</button>
+              </div>
+
+              <div style="height:10px;"></div>
+
+              <div class="inline-row">
+                <button id="officialRefreshBtn" class="btn-mini btn-soft">重新抓取</button>
+                <button id="openOfficialSiteBtn" class="btn-mini btn-plain" style="width:auto;">開官方網站</button>
+              </div>
+
+              <div id="officialStatus" class="official-status" style="margin-top:12px;">未查詢</div>
+              <div id="officialResult"></div>
+            </div>
           </div>
         </div>
 
         <div class="panel">
           <div class="section-head">
-            <div class="section-title">自己記錄歷史比較</div>
+            <div class="section-title">手動價格歷史</div>
             <div id="priceCountLabel" class="section-meta">0 組</div>
           </div>
           <div id="priceList" class="list"></div>
@@ -1042,25 +1096,30 @@
         personal: { name: "個人護理" }
       };
 
-      const MARKET_NAME_MAP = {
+      const OFFICIAL_PROXY_URL = "https://young-bush-89a9.oscarwai1994.workers.dev/";
+      const OFFICIAL_SITE_URL = "https://online-price-watch.consumer.org.hk/opw/";
+
+      const STORE_NAME_MAP = {
         WELLCOME: "惠康",
         PARKNSHOP: "百佳",
-        AEON: "AEON",
-        DCHFOOD: "大昌食品",
         JASONS: "Jasons",
         WATSONS: "屈臣氏",
-        USELECT: "U購 select",
+        AEON: "AEON",
+        DCHFOOD: "大昌食品市場",
         MARKETPLACE: "Market Place",
-        PARKNSHOP_FROZEN: "百佳冷凍",
+        TASTE: "Taste",
+        FUSION: "Fusion",
+        GREAT: "Great",
+        MNS: "Marks & Spencer",
+        USELECT: "U Select",
         BESTMART360: "優品360",
-        YATA: "一田",
+        PRIZEMART: "PrizeMart",
         HKTVMALL: "HKTVmall",
         APITA: "APITA",
-        DONKI: "DON DON DONKI",
-        CRVANGUARD: "華潤萬家"
+        YATA: "YATA",
+        CRVANGUARD: "華潤萬家",
+        CRSUPERSHOP: "華潤超級市場"
       };
-
-      const OFFICIAL_JSON_URL = "https://young-bush-89a9.oscarwai1994.workers.dev/";
 
       const firebaseConfig = {
         apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
@@ -1093,9 +1152,8 @@
       let isDinnerManageOpen = false;
       let isStockManageOpen = false;
 
-      let officialPriceDataCache = null;
-      let officialPriceDataLoadedAt = null;
-      let officialPriceLoading = false;
+      let officialDataCache = null;
+      let officialFetchedAt = null;
 
       const els = {
         loginWrap: document.getElementById("loginWrap"),
@@ -1146,11 +1204,12 @@
         priceList: document.getElementById("priceList"),
         priceCountLabel: document.getElementById("priceCountLabel"),
 
-        officialSearchInput: document.getElementById("officialSearchInput"),
+        officialKeywordInput: document.getElementById("officialKeywordInput"),
         officialSearchBtn: document.getElementById("officialSearchBtn"),
+        officialRefreshBtn: document.getElementById("officialRefreshBtn"),
         officialStatus: document.getElementById("officialStatus"),
-        officialSummary: document.getElementById("officialSummary"),
-        officialList: document.getElementById("officialList"),
+        officialResult: document.getElementById("officialResult"),
+        openOfficialSiteBtn: document.getElementById("openOfficialSiteBtn"),
 
         memoInput: document.getElementById("memoInput"),
         addMemoBtn: document.getElementById("addMemoBtn"),
@@ -1193,15 +1252,6 @@
         const h = String(d.getHours()).padStart(2, "0");
         const min = String(d.getMinutes()).padStart(2, "0");
         return y + "/" + m + "/" + day + " " + h + ":" + min;
-      }
-
-      function dateOnlyStr(ts) {
-        if (!ts) return "";
-        const d = new Date(ts);
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return y + "/" + m + "/" + day;
       }
 
       function money(n) {
@@ -1594,9 +1644,174 @@
         }).join("");
       }
 
+      function normalizeText(v) {
+        return String(v || "").trim().toLowerCase();
+      }
+
+      function extractLocalizedText(value) {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        return value["zh-Hant"] || value["zh-Hans"] || value["en"] || "";
+      }
+
+      function getStoreName(code) {
+        return STORE_NAME_MAP[code] || code || "未明商店";
+      }
+
+      function flattenOfficialRows(items) {
+        const rows = [];
+
+        items.forEach(function (item) {
+          const brand = extractLocalizedText(item.brand);
+          const name = extractLocalizedText(item.name);
+          const cat1 = extractLocalizedText(item.cat1Name);
+          const cat2 = extractLocalizedText(item.cat2Name);
+          const cat3 = extractLocalizedText(item.cat3Name);
+          const prices = Array.isArray(item.prices) ? item.prices : [];
+
+          prices.forEach(function (p) {
+            const priceNum = Number(p.price || 0);
+            if (!priceNum) return;
+
+            rows.push({
+              brand: brand,
+              name: name,
+              cat1: cat1,
+              cat2: cat2,
+              cat3: cat3,
+              storeCode: p.supermarketCode || "",
+              storeName: getStoreName(p.supermarketCode || ""),
+              price: priceNum
+            });
+          });
+        });
+
+        return rows.sort(function (a, b) {
+          return a.price - b.price;
+        });
+      }
+
+      function filterOfficialItems(data, keyword) {
+        const key = normalizeText(keyword);
+        if (!key) return [];
+
+        return (data || []).filter(function (item) {
+          const text = [
+            extractLocalizedText(item.brand),
+            extractLocalizedText(item.name),
+            extractLocalizedText(item.cat1Name),
+            extractLocalizedText(item.cat2Name),
+            extractLocalizedText(item.cat3Name)
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return text.includes(key);
+        });
+      }
+
+      function renderOfficialResult(keyword, items) {
+        if (!items || items.length === 0) {
+          els.officialResult.innerHTML = '<div class="empty">搵唔到相關官方商品</div>';
+          return;
+        }
+
+        const rows = flattenOfficialRows(items);
+
+        if (rows.length === 0) {
+          els.officialResult.innerHTML = '<div class="empty">搵到商品，但未有可用價格</div>';
+          return;
+        }
+
+        const cheapest = rows[0];
+        const top10 = rows.slice(0, 10);
+
+        els.officialResult.innerHTML = `
+          <div class="official-result-head">
+            <div class="official-result-title">${esc(keyword)}｜官方格價結果</div>
+            <div class="official-cheapest">最平：${esc(cheapest.storeName)} ${money(cheapest.price)}</div>
+            <div class="official-updated">${officialFetchedAt ? "資料抓取：" + timeStr(officialFetchedAt) : ""}</div>
+          </div>
+          <div class="official-list">
+            ${top10.map(function (row) {
+              const cats = [row.cat1, row.cat2, row.cat3].filter(Boolean).join(" / ");
+              return `
+                <div class="official-item">
+                  <div class="official-item-left">
+                    <div class="official-item-store">${esc(row.storeName)}</div>
+                    <div class="official-item-sub">${esc([row.brand, row.name].filter(Boolean).join("｜"))}${cats ? "<br>" + esc(cats) : ""}</div>
+                  </div>
+                  <div class="official-item-price">${money(row.price)}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      async function fetchOfficialData(forceRefresh) {
+        if (!forceRefresh && officialDataCache && Array.isArray(officialDataCache)) {
+          return officialDataCache;
+        }
+
+        setOfficialStatus("正在抓取官方資料…");
+
+        const res = await fetch(OFFICIAL_PROXY_URL, {
+          method: "GET",
+          cache: "no-store"
+        });
+
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+
+        const json = await res.json();
+
+        let data = [];
+        if (Array.isArray(json)) {
+          data = json;
+        } else if (Array.isArray(json.data)) {
+          data = json.data;
+        } else if (Array.isArray(json.items)) {
+          data = json.items;
+        }
+
+        officialDataCache = data;
+        officialFetchedAt = Date.now();
+
+        setOfficialStatus("官方資料已抓取，共 " + data.length + " 件商品。");
+        return data;
+      }
+
+      async function searchOfficialPrice(forceRefresh) {
+        const keyword = (els.officialKeywordInput.value || "").trim();
+        if (!keyword) {
+          setOfficialStatus("請先輸入關鍵字");
+          els.officialResult.innerHTML = "";
+          return;
+        }
+
+        try {
+          const data = await fetchOfficialData(forceRefresh);
+          const matches = filterOfficialItems(data, keyword);
+
+          if (matches.length === 0) {
+            setOfficialStatus("官方資料中找不到「" + keyword + "」");
+            els.officialResult.innerHTML = '<div class="empty">找不到相關官方商品</div>';
+            return;
+          }
+
+          setOfficialStatus("找到 " + matches.length + " 件相關官方商品。");
+          renderOfficialResult(keyword, matches);
+        } catch (err) {
+          setOfficialStatus("官方資料讀取失敗。請檢查 Worker 或網絡。");
+          els.officialResult.innerHTML = '<div class="empty">未能讀取官方資料，可按上方按鈕打開官方網站。</div>';
+        }
+      }
+
       async function seedDefaultsOnce() {
         try {
-          const seededSnap = await db.ref("meta/seededV11").once("value");
+          const seededSnap = await db.ref("meta/seededV12").once("value");
           if (seededSnap.exists()) return;
 
           const dinnerCategoriesSnapshot = await db.ref("dinnerCategories").once("value");
@@ -1679,200 +1894,11 @@
             );
           }
 
-          jobs.push(db.ref("meta/seededV11").set(true));
+          jobs.push(db.ref("meta/seededV12").set(true));
           await Promise.all(jobs);
         } catch (err) {
           setError(err.code + " | " + err.message);
         }
-      }
-
-      async function ensureOfficialPriceData() {
-        if (officialPriceDataCache) return officialPriceDataCache;
-        if (officialPriceLoading) {
-          return null;
-        }
-
-        officialPriceLoading = true;
-        setOfficialStatus("載入官方格價資料中…");
-
-        try {
-          const res = await fetch(OFFICIAL_PRICE_JSON_URL, {
-            method: "GET",
-            cache: "no-store"
-          });
-
-          if (!res.ok) {
-            throw new Error("HTTP " + res.status);
-          }
-
-          const data = await res.json();
-          officialPriceDataCache = Array.isArray(data)
-            ? data
-            : Array.isArray(data && data.items)
-            ? data.items
-            : Array.isArray(data && data.data)
-            ? data.data
-            : [];
-
-          officialPriceDataLoadedAt = Date.now();
-          setOfficialStatus("官方資料已載入：" + dateOnlyStr(officialPriceDataLoadedAt));
-          return officialPriceDataCache;
-        } catch (err) {
-          setOfficialStatus("官方格價讀取失敗。\n如瀏覽器阻擋跨域讀取，之後要加 proxy / Cloudflare Worker / Firebase Function。");
-          return null;
-        } finally {
-          officialPriceLoading = false;
-        }
-      }
-
-      function getLocalizedText(value) {
-        if (!value) return "";
-        if (typeof value === "string") return value;
-        if (typeof value === "object") {
-          return (
-            value["zh-Hant"] ||
-            value["zh_TW"] ||
-            value["zh-HK"] ||
-            value.zh ||
-            value.en ||
-            ""
-          );
-        }
-        return "";
-      }
-
-      function getItemNameText(item) {
-        const brand = getLocalizedText(item.brand);
-        const name = getLocalizedText(item.name);
-        const cat1 = getLocalizedText(item.cat1Name);
-        const cat2 = getLocalizedText(item.cat2Name);
-        const cat3 = getLocalizedText(item.cat3Name);
-        return [brand, name, cat1, cat2, cat3].filter(Boolean).join(" ");
-      }
-
-      function normalizeOfficialResult(item) {
-        const brand = getLocalizedText(item.brand);
-        const name = getLocalizedText(item.name);
-        const cat1 = getLocalizedText(item.cat1Name);
-        const cat2 = getLocalizedText(item.cat2Name);
-        const cat3 = getLocalizedText(item.cat3Name);
-        const prices = Array.isArray(item.prices) ? item.prices : [];
-
-        const normalizedPrices = prices
-          .map(function (p) {
-            const priceNum = Number(p.price || 0);
-            if (!priceNum) return null;
-            const code = p.supermarketCode || "";
-            return {
-              code: code,
-              storeName: MARKET_NAME_MAP[code] || code || "未明商店",
-              price: priceNum
-            };
-          })
-          .filter(Boolean)
-          .sort(function (a, b) {
-            return a.price - b.price;
-          });
-
-        if (normalizedPrices.length === 0) return null;
-
-        return {
-          title: [brand, name].filter(Boolean).join(" "),
-          pureName: name || brand || "",
-          categories: [cat1, cat2, cat3].filter(Boolean).join(" / "),
-          prices: normalizedPrices,
-          cheapest: normalizedPrices[0]
-        };
-      }
-
-      function officialSearchScore(itemText, query) {
-        const text = itemText.toLowerCase();
-        if (text === query) return 100;
-        if (text.startsWith(query)) return 80;
-        if (text.includes(query)) return 60;
-        return 0;
-      }
-
-      async function searchOfficialPrice() {
-        const query = (els.officialSearchInput.value || "").trim().toLowerCase();
-        els.officialSummary.classList.add("hidden");
-        els.officialSummary.textContent = "";
-        els.officialList.innerHTML = "";
-
-        if (!query) {
-          setOfficialStatus("請先輸入食物名稱");
-          return;
-        }
-
-        const data = await ensureOfficialPriceData();
-        if (!data) return;
-
-        const matched = data
-          .map(function (item) {
-            const text = getItemNameText(item);
-            const score = officialSearchScore(text, query);
-            return { item, text, score };
-          })
-          .filter(function (x) {
-            return x.score > 0;
-          })
-          .sort(function (a, b) {
-            return b.score - a.score;
-          })
-          .slice(0, 20)
-          .map(function (x) {
-            return normalizeOfficialResult(x.item);
-          })
-          .filter(Boolean);
-
-        if (matched.length === 0) {
-          setOfficialStatus("搵唔到相關官方格價結果");
-          return;
-        }
-
-        const best = matched
-          .map(function (x) {
-            return {
-              ...x,
-              minPrice: x.cheapest.price
-            };
-          })
-          .sort(function (a, b) {
-            return a.minPrice - b.minPrice;
-          });
-
-        const top = best[0];
-        setOfficialStatus(
-          "已讀取官方格價資料" +
-            (officialPriceDataLoadedAt ? "｜本機載入：" + dateOnlyStr(officialPriceDataLoadedAt) : "")
-        );
-
-        els.officialSummary.classList.remove("hidden");
-        els.officialSummary.innerHTML =
-          `<span class="tag">最平</span> ` +
-          `${esc(top.title || top.pureName)}：${esc(top.cheapest.storeName)} ${money(top.cheapest.price)}`;
-
-        els.officialList.innerHTML = best.map(function (row, index) {
-          const moreStores = row.prices.slice(1, 5).map(function (p) {
-            return `${esc(p.storeName)} ${money(p.price)}`;
-          }).join("｜");
-
-          return `
-            <div class="swipe-row">
-              <div class="swipe-content" style="transform:none;">
-                <div class="cell-main">
-                  <div class="cell-title">${esc(row.title || row.pureName)}</div>
-                  <div class="cell-sub">
-                    ${row.categories ? esc(row.categories) + "<br>" : ""}
-                    最平：${esc(row.cheapest.storeName)} ${money(row.cheapest.price)}
-                    ${moreStores ? "<br>其他：" + moreStores : ""}
-                  </div>
-                </div>
-                <div class="cell-price">#${index + 1}</div>
-              </div>
-            </div>
-          `;
-        }).join("");
       }
 
       function initApp() {
@@ -2236,11 +2262,19 @@
       els.addPriceBtn.addEventListener("click", addPrice);
       els.priceSearchInput.addEventListener("input", renderPrices);
 
-      els.officialSearchBtn.addEventListener("click", searchOfficialPrice);
-      els.officialSearchInput.addEventListener("keydown", function (e) {
+      els.officialSearchBtn.addEventListener("click", function () {
+        searchOfficialPrice(false);
+      });
+      els.officialRefreshBtn.addEventListener("click", function () {
+        searchOfficialPrice(true);
+      });
+      els.openOfficialSiteBtn.addEventListener("click", function () {
+        window.open(OFFICIAL_SITE_URL, "_blank");
+      });
+      els.officialKeywordInput.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
-          searchOfficialPrice();
+          searchOfficialPrice(false);
         }
       });
 
