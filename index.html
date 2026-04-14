@@ -1,1 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#5c67f2">
+  <title>家庭小工具</title>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    :root{
+      --primary:#5c67f2;
+      --primary-soft:#eef0ff;
+      --danger:#ff4d4f;
+      --success:#52c41a;
+      --bg:#f3f5f9;
+      --card:#ffffff;
+      --text:#1f2328;
+      --muted:#7a7f87;
+      --line:#e8ebf0;
+      --shadow:0 8px 24px rgba(22,29,37,.08);
+      --radius:18px;
+      --nav-h:84px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    }
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+      min-height:100vh;
+      padding:16px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+    }
+    .page{display:none}
+    .page.active{display:block}
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:14px;
+    }
+    .title{
+      margin:0;
+      font-size:30px;
+      font-weight:800;
+      line-height:1.15;
+    }
+    .sub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+    .field{margin-bottom:12px}
+    .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+    input, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      color:var(--text);
+      padding:14px;
+      font-size:16px;
+      outline:none;
+    }
+    textarea{
+      min-height:220px;
+      resize:none;
+      line-height:1.6;
+    }
+    button{
+      border:none;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+      width:100%;
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn-soft{background:var(--primary-soft);color:var(--primary)}
+    .btn-success{background:var(--success);color:#fff}
+    .btn-danger{background:#fff1f1;color:var(--danger)}
+    .row{display:flex;gap:10px}
+    .row > *{flex:1}
+    .row-tight{display:flex;gap:10px;align-items:center}
+    .row-tight input{flex:1}
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .header-btn{
+      width:auto;
+      padding:10px 14px;
+      border-radius:12px;
+      background:#f3f4f8;
+      color:var(--text);
+      font-size:14px;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .stat{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:#fafbff;
+    }
+    .stat-label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+    .stat-value{
+      font-size:26px;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .big-stat{
+      margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:#fafbff;
+    }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      background:#fcfcfd;
+    }
+    .item-main{flex:1;min-width:0}
+    .item-title{
+      font-size:16px;
+      font-weight:700;
+      word-break:break-word;
+    }
+    .item-sub{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+      word-break:break-word;
+    }
+    .small-btn{
+      width:auto;
+      padding:6px 4px;
+      background:transparent;
+      color:var(--danger);
+      font-size:14px;
+    }
+    .result{
+      border:1px solid #dbe9ff;
+      border-radius:18px;
+      background:linear-gradient(180deg,#f7faff 0%,#eef6ff 100%);
+      text-align:center;
+      padding:24px 16px;
+      margin-bottom:12px;
+    }
+    .result-text{
+      font-size:30px;
+      font-weight:900;
+      color:var(--primary);
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      word-break:break-word;
+    }
+    .toggle{
+      position:relative;
+      width:52px;
+      height:32px;
+      flex-shrink:0;
+    }
+    .toggle input{display:none}
+    .slider{
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      background:#d7dbe2;
+    }
+    .slider:before{
+      content:"";
+      position:absolute;
+      width:28px;
+      height:28px;
+      left:2px;
+      top:2px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 1px 4px rgba(0,0,0,.16);
+      transition:.2s;
+    }
+    .toggle input:checked + .slider{background:var(--success)}
+    .toggle input:checked + .slider:before{transform:translateX(20px)}
+    .nav{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      display:flex;
+      justify-content:center;
+    }
+    .nav-inner{
+      width:min(520px,100%);
+      background:rgba(255,255,255,.96);
+      border-top:1px solid var(--line);
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);
+    }
+    .nav-btn{
+      background:transparent;
+      color:var(--muted);
+      font-size:12px;
+      padding:8px 4px;
+    }
+    .nav-btn.active{color:var(--primary)}
+    .banner{
+      display:none;
+      background:#fff7e6;
+      color:#8a5a00;
+      border:1px solid #ffd591;
+      padding:12px 14px;
+      border-radius:14px;
+      margin-bottom:14px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .banner.show{display:block}
+    .empty{
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:16px;
+      text-align:center;
+      color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginWrap" class="wrap">
+    <div class="card">
+      <h1 class="title">登入</h1>
+      <div class="sub">只限指定帳戶使用。先註冊，再登入。</div>
+
+      <div id="debugBanner" class="banner show">JS 已載入</div>
+
+      <div class="field">
+        <div class="label">Email</div>
+        <input id="loginEmail" type="email" placeholder="你的 Gmail">
+      </div>
+
+      <div class="field">
+        <div class="label">Password</div>
+        <input id="loginPassword" type="password" placeholder="密碼">
+      </div>
+
+      <div class="row">
+        <button id="loginBtn">登入</button>
+        <button id="signupBtn" class="btn-soft">註冊</button>
+      </div>
+
+      <div id="loginMsg" class="sub" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <div id="appWrap" style="display:none;">
+    <div class="wrap">
+      <div id="errorBanner" class="banner"></div>
+
+      <section id="page-expense" class="page active">
+        <div class="card">
+          <div class="header">
+            <div>
+              <h1 class="title">家庭開支</h1>
+              <div class="sub">兩部手機共用同一份記錄</div>
+            </div>
+            <button id="logoutBtn1" class="header-btn">登出</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <div class="label">預算</div>
+            <div class="row-tight">
+              <input id="budgetInput" type="number" placeholder="例如：5000">
+              <button id="saveBudgetBtn" style="width:auto;padding:14px 18px;">儲存</button>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">預算</div>
+              <div id="budgetTotal" class="stat-value">$0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">已用</div>
+              <div id="expenseTotal" class="stat-value">$0</div>
+            </div>
+          </div>
+
+          <div class="big-stat">
+            <div class="stat-label">結餘</div>
+            <div id="budgetRemain" class="stat-value">$0</div>
+          </div>
+
+          <div id="expenseLatest" class="sub" style="margin-top:10px;">最新記錄：—</div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <div class="label">金額</div>
+            <input id="amount" type="number" placeholder="例如：86">
+          </div>
+          <div class="field">
+            <div class="label">備註</div>
+            <input id="note" type="text" placeholder="例如：買餸、交租、日用品">
+          </div>
+          <div class="field">
+            <div class="label">日期</div>
+            <input id="expenseDate" type="date">
+          </div>
+          <button id="addExpenseBtn">新增記錄</button>
+        </div>
+
+        <div class="card">
+          <div class="label">開支列表</div>
+          <div id="expenseList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="page-dinner" class="page">
+        <div class="card">
+          <div class="header">
+            <div>
+              <h1 class="title">今晚煮咩</h1>
+              <div class="sub">雲端同步晚餐菜單</div>
+            </div>
+            <button id="logoutBtn2" class="header-btn">登出</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="result">
+            <div class="sub" style="margin-bottom:10px;">隨機抽選結果</div>
+            <div id="resultDisplay" class="result-text">🎲 準備好未？</div>
+          </div>
+          <div class="row">
+            <button id="drawBtn" class="btn-success">隨機抽選</button>
+            <button id="redrawBtn" class="btn-soft">再抽一次</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <div class="label">加入菜式</div>
+            <div class="row-tight">
+              <input id="foodInput" type="text" placeholder="例如：洋蔥牛仔骨">
+              <button id="addFoodBtn" style="width:auto;padding:14px 18px;">新增</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">菜式清單</div>
+          <div id="foodList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="page-stock" class="page">
+        <div class="card">
+          <div class="header">
+            <div>
+              <h1 class="title">存貨清單</h1>
+              <div class="sub">開關式顯示，開 = 屋企有</div>
+            </div>
+            <button id="logoutBtn3" class="header-btn">登出</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <div class="label">新增食材 / 用品</div>
+            <div class="row-tight">
+              <input id="stockInput" type="text" placeholder="例如：雞蛋、豆腐、廁紙">
+              <button id="addStockBtn" style="width:auto;padding:14px 18px;">新增</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">存貨列表</div>
+          <div id="stockList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="page-memo" class="page">
+        <div class="card">
+          <div class="header">
+            <div>
+              <h1 class="title">備忘錄</h1>
+              <div class="sub">輸入後即時自動保存到雲端</div>
+            </div>
+            <button id="logoutBtn4" class="header-btn">登出</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">共用備忘</div>
+          <textarea id="memoInput" placeholder="寫下任何事，例如：
+今晚記得解凍雞翼
+買廁紙
+星期六去超市"></textarea>
+          <div class="row-tight" style="justify-content:space-between;margin-top:12px;">
+            <div id="memoStatus" class="sub">最後更新：未有內容</div>
+            <button id="clearMemoBtn" class="btn-danger" style="width:auto;padding:10px 14px;">清空</button>
+          </div>
+          <div id="currentUserLine" class="sub" style="margin-top:10px;"></div>
+        </div>
+      </section>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-inner">
+        <button class="nav-btn active" data-page="expense">開支</button>
+        <button class="nav-btn" data-page="dinner">晚餐</button>
+        <button class="nav-btn" data-page="stock">存貨</button>
+        <button class="nav-btn" data-page="memo">備忘</button>
+      </div>
+    </nav>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
+    authDomain: "family-958f6.firebaseapp.com",
+    databaseURL: "https://family-958f6-default-rtdb.firebaseio.com",
+    projectId: "family-958f6",
+    storageBucket: "family-958f6.firebasestorage.app",
+    messagingSenderId: "297002821278",
+    appId: "1:297002821278:web:49f14e9d1f609fa10c3d8f"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  let initialized = false;
+  let budgetCache = 0;
+  let expenseCache = {};
+  let foodCache = {};
+  let stockCache = {};
+  let memoTimer = null;
+
+  const defaultFoods = [
+    "洋蔥牛仔骨","煎豬扒","焗雞扒","手撕雞","雞翼","三文魚",
+    "煎蛋","炒蛋","炒肉碎","蒸水蛋","蒸魚","食海鮮"
+  ];
+
+  const defaultStocks = [
+    { name:"雞蛋", on:true },
+    { name:"洋蔥", on:true },
+    { name:"雞翼", on:false },
+    { name:"三文魚", on:false },
+    { name:"豬扒", on:false },
+    { name:"豆腐", on:false },
+    { name:"米", on:true },
+    { name:"麵", on:true },
+    { name:"廁紙", on:true }
+  ];
+
+  const els = {
+    loginWrap: document.getElementById("loginWrap"),
+    appWrap: document.getElementById("appWrap"),
+    loginEmail: document.getElementById("loginEmail"),
+    loginPassword: document.getElementById("loginPassword"),
+    loginBtn: document.getElementById("loginBtn"),
+    signupBtn: document.getElementById("signupBtn"),
+    loginMsg: document.getElementById("loginMsg"),
+    errorBanner: document.getElementById("errorBanner"),
+    debugBanner: document.getElementById("debugBanner"),
+    currentUserLine: document.getElementById("currentUserLine"),
+
+    budgetInput: document.getElementById("budgetInput"),
+    saveBudgetBtn: document.getElementById("saveBudgetBtn"),
+    budgetTotal: document.getElementById("budgetTotal"),
+    expenseTotal: document.getElementById("expenseTotal"),
+    budgetRemain: document.getElementById("budgetRemain"),
+    expenseLatest: document.getElementById("expenseLatest"),
+
+    amount: document.getElementById("amount"),
+    note: document.getElementById("note"),
+    expenseDate: document.getElementById("expenseDate"),
+    addExpenseBtn: document.getElementById("addExpenseBtn"),
+    expenseList: document.getElementById("expenseList"),
+
+    resultDisplay: document.getElementById("resultDisplay"),
+    drawBtn: document.getElementById("drawBtn"),
+    redrawBtn: document.getElementById("redrawBtn"),
+    foodInput: document.getElementById("foodInput"),
+    addFoodBtn: document.getElementById("addFoodBtn"),
+    foodList: document.getElementById("foodList"),
+
+    stockInput: document.getElementById("stockInput"),
+    addStockBtn: document.getElementById("addStockBtn"),
+    stockList: document.getElementById("stockList"),
+
+    memoInput: document.getElementById("memoInput"),
+    memoStatus: document.getElementById("memoStatus"),
+    clearMemoBtn: document.getElementById("clearMemoBtn")
+  };
+
+  function setError(msg){
+    if(!msg){
+      els.errorBanner.classList.remove("show");
+      els.errorBanner.textContent = "";
+      return;
+    }
+    els.errorBanner.textContent = msg;
+    els.errorBanner.classList.add("show");
+  }
+
+  function setLoginMsg(msg){
+    els.loginMsg.textContent = msg || "";
+  }
+
+  function todayStr(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+
+  function timeStr(ts){
+    if(!ts) return "未有內容";
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const h = String(d.getHours()).padStart(2, "0");
+    const min = String(d.getMinutes()).padStart(2, "0");
+    return y + "/" + m + "/" + day + " " + h + ":" + min;
+  }
+
+  function money(n){
+    return "$" + Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+  }
+
+  function esc(str){
+    return String(str || "").replace(/[&<>"']/g, function(s){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s];
+    });
+  }
+
+  function rowsFromObj(obj){
+    return Object.keys(obj || {}).map(function(k){
+      return { id:k, value: obj[k] };
+    });
+  }
+
+  function updateBudgetRemain(){
+    const rows = rowsFromObj(expenseCache);
+    const used = rows.reduce(function(sum, row){
+      return sum + Number((row.value && row.value.a) || 0);
+    }, 0);
+    const remain = Number(budgetCache || 0) - used;
+    els.budgetRemain.textContent = money(remain);
+    els.budgetRemain.style.color = remain < 0 ? "#ff4d4f" : "#1f2328";
+  }
+
+  function showPage(pageName, btn){
+    document.querySelectorAll(".page").forEach(function(el){
+      el.classList.remove("active");
+    });
+    document.getElementById("page-" + pageName).classList.add("active");
+
+    document.querySelectorAll(".nav-btn").forEach(function(el){
+      el.classList.remove("active");
+    });
+    btn.classList.add("active");
+  }
+
+  function seedDefaultsOnce(){
+    db.ref("meta/seeded").once("value").then(function(s){
+      if(s.exists()) return;
+
+      const foodsObj = {};
+      defaultFoods.forEach(function(name){
+        foodsObj[db.ref("foods").push().key] = name;
+      });
+
+      const stocksObj = {};
+      defaultStocks.forEach(function(item){
+        stocksObj[db.ref("stocks").push().key] = item;
+      });
+
+      return Promise.all([
+        db.ref("foods").set(foodsObj),
+        db.ref("stocks").set(stocksObj),
+        db.ref("meta/seeded").set(true)
+      ]);
+    }).catch(function(err){
+      setError(err.code + " | " + err.message);
+    });
+  }
+
+  function renderExpenses(){
+    const rows = rowsFromObj(expenseCache).sort(function(a,b){
+      return (b.value.ts || 0) - (a.value.ts || 0);
+    });
+
+    if(rows.length === 0){
+      els.expenseList.innerHTML = '<div class="empty">未有開支記錄</div>';
+      els.expenseTotal.textContent = "$0";
+      els.expenseLatest.textContent = "最新記錄：—";
+      updateBudgetRemain();
+      return;
+    }
+
+    const total = rows.reduce(function(sum, row){
+      return sum + Number(row.value.a || 0);
+    }, 0);
+
+    els.expenseTotal.textContent = money(total);
+    updateBudgetRemain();
+    els.expenseLatest.textContent = "最新記錄：" + (rows[0].value.n || money(rows[0].value.a));
+
+    els.expenseList.innerHTML = rows.map(function(row){
+      const dateText = row.value.date ? "｜" + esc(row.value.date) : "";
+      return '<div class="item"><div class="item-main"><div class="item-title">' + money(row.value.a) + '</div><div class="item-sub">' + esc(row.value.n || "無備註") + dateText + '</div></div><button class="small-btn" data-del-expense="' + row.id + '">刪除</button></div>';
+    }).join("");
+  }
+
+  function renderFoods(){
+    const rows = rowsFromObj(foodCache);
+    if(rows.length === 0){
+      els.foodList.innerHTML = '<div class="empty">未有菜式</div>';
+      return;
+    }
+    els.foodList.innerHTML = rows.reverse().map(function(row){
+      return '<div class="item"><div class="item-main"><div class="item-title">' + esc(row.value) + '</div></div><button class="small-btn" data-del-food="' + row.id + '">刪除</button></div>';
+    }).join("");
+  }
+
+  function renderStocks(){
+    const rows = rowsFromObj(stockCache);
+    if(rows.length === 0){
+      els.stockList.innerHTML = '<div class="empty">未有存貨項目</div>';
+      return;
+    }
+    els.stockList.innerHTML = rows.reverse().map(function(row){
+      const item = row.value || {};
+      const name = esc(item.name || "");
+      const on = !!item.on;
+      return '<div class="item"><div class="item-main"><div class="item-title">' + name + '</div><div class="item-sub">' + (on ? "屋企有" : "屋企冇") + '</div></div><div class="item-right"><label class="toggle"><input type="checkbox" data-toggle-stock="' + row.id + '" ' + (on ? 'checked' : '') + '><span class="slider"></span></label><button class="small-btn" data-del-stock="' + row.id + '">刪除</button></div></div>';
+    }).join("");
+  }
+
+  function initApp(){
+    if(initialized) return;
+    initialized = true;
+
+    els.expenseDate.value = todayStr();
+
+    seedDefaultsOnce();
+
+    db.ref("budget").on("value", function(s){
+      budgetCache = Number(s.val() || 0);
+      els.budgetInput.value = budgetCache || "";
+      els.budgetTotal.textContent = money(budgetCache);
+      updateBudgetRemain();
+    });
+
+    db.ref("expenses").on("value", function(s){
+      expenseCache = s.val() || {};
+      renderExpenses();
+    });
+
+    db.ref("foods").on("value", function(s){
+      foodCache = s.val() || {};
+      renderFoods();
+    });
+
+    db.ref("stocks").on("value", function(s){
+      stockCache = s.val() || {};
+      renderStocks();
+    });
+
+    db.ref("memo").on("value", function(s){
+      const data = s.val() || { text:"", updatedAt:null };
+      if(document.activeElement !== els.memoInput){
+        els.memoInput.value = data.text || "";
+      }
+      els.memoStatus.textContent = "最後更新：" + timeStr(data.updatedAt);
+    });
+
+    els.currentUserLine.textContent = "目前登入：" + (auth.currentUser ? auth.currentUser.email : "");
+  }
+
+  async function doSignup(){
+    const email = els.loginEmail.value.trim();
+    const password = els.loginPassword.value;
+    if(!email || !password){
+      setLoginMsg("請輸入 email 同 password");
+      return;
+    }
+    try{
+      const r = await auth.createUserWithEmailAndPassword(email, password);
+      setLoginMsg("註冊成功：" + r.user.email);
+    }catch(err){
+      setLoginMsg(err.code + " | " + err.message);
+      alert("Signup Error: " + err.code + " | " + err.message);
+    }
+  }
+
+  async function doLogin(){
+    const email = els.loginEmail.value.trim();
+    const password = els.loginPassword.value;
+    if(!email || !password){
+      setLoginMsg("請輸入 email 同 password");
+      return;
+    }
+    try{
+      const r = await auth.signInWithEmailAndPassword(email, password);
+      setLoginMsg("登入成功：" + r.user.email);
+    }catch(err){
+      setLoginMsg(err.code + " | " + err.message);
+      alert("Login Error: " + err.code + " | " + err.message);
+    }
+  }
+
+  async function doLogout(){
+    try{
+      await auth.signOut();
+      els.loginPassword.value = "";
+      setLoginMsg("已登出");
+    }catch(err){
+      alert("Logout Error: " + err.code + " | " + err.message);
+    }
+  }
+
+  async function saveBudget(){
+    try{
+      const val = Number(els.budgetInput.value || 0);
+      await db.ref("budget").set(val);
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  }
+
+  async function addExpense(){
+    try{
+      const amount = els.amount.value.trim();
+      const note = els.note.value.trim();
+      const date = els.expenseDate.value || todayStr();
+      if(!amount || Number(amount) <= 0) return;
+
+      await db.ref("expenses").push({
+        a: amount,
+        n: note,
+        date: date,
+        ts: Date.now()
+      });
+
+      els.amount.value = "";
+      els.note.value = "";
+      els.expenseDate.value = todayStr();
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  }
+
+  async function addFood(){
+    try{
+      const val = els.foodInput.value.trim();
+      if(!val) return;
+      await db.ref("foods").push(val);
+      els.foodInput.value = "";
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  }
+
+  async function addStock(){
+    try{
+      const val = els.stockInput.value.trim();
+      if(!val) return;
+      await db.ref("stocks").push({ name: val, on: true });
+      els.stockInput.value = "";
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  }
+
+  function drawFood(){
+    const rows = rowsFromObj(foodCache);
+    if(rows.length === 0){
+      els.resultDisplay.textContent = "請先加入菜式";
+      return;
+    }
+    const arr = rows.map(function(r){ return r.value; });
+    let count = 0;
+    const timer = setInterval(function(){
+      els.resultDisplay.textContent = arr[Math.floor(Math.random() * arr.length)];
+      count++;
+      if(count > 12) clearInterval(timer);
+    }, 60);
+  }
+
+  async function clearMemo(){
+    try{
+      await db.ref("memo").set({
+        text: "",
+        updatedAt: Date.now()
+      });
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  }
+
+  els.memoInput.addEventListener("input", function(){
+    clearTimeout(memoTimer);
+    const val = this.value;
+    memoTimer = setTimeout(async function(){
+      try{
+        await db.ref("memo").set({
+          text: val,
+          updatedAt: Date.now()
+        });
+      }catch(err){
+        alert(err.code + " | " + err.message);
+      }
+    }, 180);
+  });
+
+  els.loginBtn.addEventListener("click", doLogin);
+  els.signupBtn.addEventListener("click", doSignup);
+
+  document.getElementById("logoutBtn1").addEventListener("click", doLogout);
+  document.getElementById("logoutBtn2").addEventListener("click", doLogout);
+  document.getElementById("logoutBtn3").addEventListener("click", doLogout);
+  document.getElementById("logoutBtn4").addEventListener("click", doLogout);
+
+  els.saveBudgetBtn.addEventListener("click", saveBudget);
+  els.addExpenseBtn.addEventListener("click", addExpense);
+  els.addFoodBtn.addEventListener("click", addFood);
+  els.addStockBtn.addEventListener("click", addStock);
+  els.drawBtn.addEventListener("click", drawFood);
+  els.redrawBtn.addEventListener("click", drawFood);
+  els.clearMemoBtn.addEventListener("click", clearMemo);
+
+  document.querySelectorAll(".nav-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      showPage(btn.dataset.page, btn);
+    });
+  });
+
+  els.expenseList.addEventListener("click", async function(e){
+    const id = e.target.getAttribute("data-del-expense");
+    if(!id) return;
+    try{
+      await db.ref("expenses/" + id).remove();
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  });
+
+  els.foodList.addEventListener("click", async function(e){
+    const id = e.target.getAttribute("data-del-food");
+    if(!id) return;
+    try{
+      await db.ref("foods/" + id).remove();
+    }catch(err){
+      alert(err.code + " | " + err.message);
+    }
+  });
+
+  els.stockList.addEventListener("click", async function(e){
+    const delId = e.target.getAttribute("data-del-stock");
+    if(delId){
+      try{
+        await db.ref("stocks/" + delId).remove();
+      }catch(err){
+        alert(err.code + " | " + err.message);
+      }
+      return;
+    }
+
+    const toggleId = e.target.getAttribute("data-toggle-stock");
+    if(toggleId){
+      try{
+        const item = stockCache[toggleId];
+        if(!item) return;
+        await db.ref("stocks/" + toggleId + "/on").set(!item.on);
+      }catch(err){
+        alert(err.code + " | " + err.message);
+      }
+    }
+  });
+
+  auth.onAuthStateChanged(function(user){
+    if(user){
+      els.loginWrap.style.display = "none";
+      els.appWrap.style.display = "block";
+      initApp();
+    }else{
+      els.loginWrap.style.display = "block";
+      els.appWrap.style.display = "none";
+    }
+  });
+
+});
+</script>
+</body>
+</html>
