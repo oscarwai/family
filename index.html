@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
     :root {
@@ -58,9 +59,7 @@
       font: inherit;
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     .login-shell {
       min-height: 100vh;
@@ -89,14 +88,8 @@
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .panel {
@@ -107,17 +100,9 @@
       padding: 18px;
     }
 
-    .panel + .panel {
-      margin-top: 12px;
-    }
-
-    .status-banner {
-      margin: 12px 14px 0;
-    }
-
-    .page-head {
-      padding: 10px 2px 12px;
-    }
+    .panel + .panel { margin-top: 12px; }
+    .status-banner { margin: 12px 14px 0; }
+    .page-head { padding: 10px 2px 12px; }
 
     .topbar {
       display: flex;
@@ -156,13 +141,9 @@
       margin: 0 0 18px;
     }
 
-    .field {
-      margin-bottom: 12px;
-    }
-
-    .field:last-child {
-      margin-bottom: 0;
-    }
+    .field { margin-bottom: 12px; }
+    .field:last-child { margin-bottom: 0; }
+    .row .field { margin-bottom: 0; }
 
     .label {
       margin-bottom: 8px;
@@ -181,6 +162,9 @@
       padding: 14px;
       font-size: 16px;
       outline: none;
+      min-height: 52px;
+      appearance: none;
+      -webkit-appearance: none;
     }
 
     input:focus,
@@ -194,6 +178,15 @@
       min-height: 96px;
       line-height: 1.55;
     }
+
+    input[type="date"] {
+      min-height: 52px;
+      line-height: 1.2;
+      display: block;
+    }
+
+    input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.7; }
 
     button {
       border: none;
@@ -209,29 +202,12 @@
       transition: transform 0.14s ease, opacity 0.14s ease, background 0.14s ease;
     }
 
-    button:active {
-      transform: scale(0.96);
-    }
+    button:active { transform: scale(0.96); }
 
-    .btn-soft {
-      background: var(--blue-soft);
-      color: var(--blue);
-    }
-
-    .btn-plain {
-      background: #f4f5f7;
-      color: var(--text);
-    }
-
-    .btn-danger {
-      background: var(--red-soft);
-      color: var(--red);
-    }
-
-    .btn-green {
-      background: var(--green);
-      color: #fff;
-    }
+    .btn-soft { background: var(--blue-soft); color: var(--blue); }
+    .btn-plain { background: #f4f5f7; color: var(--text); }
+    .btn-danger { background: var(--red-soft); color: var(--red); }
+    .btn-green { background: var(--green); color: #fff; }
 
     .btn-mini {
       width: auto;
@@ -250,15 +226,8 @@
       font-size: 13px;
     }
 
-    .row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .row > * {
-      flex: 1;
-      min-width: 0;
-    }
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
     .inline-row {
       display: flex;
@@ -266,10 +235,7 @@
       align-items: center;
     }
 
-    .inline-row > *:first-child {
-      flex: 1;
-      min-width: 0;
-    }
+    .inline-row > *:first-child { flex: 1; min-width: 0; }
 
     .section-head {
       display: flex;
@@ -323,9 +289,7 @@
       margin-top: 12px;
     }
 
-    .manage-list.show {
-      display: flex;
-    }
+    .manage-list.show { display: flex; }
 
     .manage-row {
       display: flex;
@@ -409,30 +373,11 @@
       gap: 8px;
     }
 
-    .list.light .swipe-content {
-      padding: 10px 12px;
-    }
-
-    .list.light .cell-title {
-      font-size: 15px;
-      font-weight: 650;
-    }
-
-    .list.light .cell-sub {
-      margin-top: 4px;
-      font-size: 12px;
-    }
-
-    .list.light .qty-btn {
-      width: 28px;
-      height: 28px;
-      font-size: 16px;
-    }
-
-    .list.light .qty-num {
-      font-size: 14px;
-      min-width: 22px;
-    }
+    .list.light .swipe-content { padding: 10px 12px; }
+    .list.light .cell-title { font-size: 15px; font-weight: 650; }
+    .list.light .cell-sub { margin-top: 4px; font-size: 12px; }
+    .list.light .qty-btn { width: 28px; height: 28px; font-size: 16px; }
+    .list.light .qty-num { font-size: 14px; min-width: 22px; }
 
     .empty {
       padding: 18px 14px;
@@ -488,10 +433,7 @@
       transform: translateX(calc(var(--swipe-w) * -1));
     }
 
-    .cell-main {
-      flex: 1;
-      min-width: 0;
-    }
+    .cell-main { flex: 1; min-width: 0; }
 
     .cell-title {
       font-size: 16px;
@@ -543,24 +485,15 @@
       font-weight: 700;
     }
 
-    .low {
-      color: var(--red);
-      font-weight: 700;
-    }
-
-    .warn {
-      color: var(--orange);
-      font-weight: 700;
-    }
+    .low { color: var(--red); font-weight: 700; }
+    .warn { color: var(--orange); font-weight: 700; }
 
     .memo-done .cell-title {
       text-decoration: line-through;
       color: var(--sub);
     }
 
-    .memo-done .cell-sub {
-      color: #8f8f95;
-    }
+    .memo-done .cell-sub { color: #8f8f95; }
 
     .price-group {
       border: 1px solid var(--line);
@@ -645,9 +578,7 @@
       line-height: 1.45;
     }
 
-    .official-body {
-      padding: 12px;
-    }
+    .official-body { padding: 12px; }
 
     .official-status {
       font-size: 13px;
@@ -701,10 +632,7 @@
       background: #fff;
     }
 
-    .official-item-left {
-      min-width: 0;
-      flex: 1;
-    }
+    .official-item-left { min-width: 0; flex: 1; }
 
     .official-item-store {
       font-size: 15px;
@@ -724,6 +652,85 @@
       font-size: 18px;
       font-weight: 800;
       white-space: nowrap;
+    }
+
+    .scanner-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.42);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .scanner-sheet {
+      width: min(560px, 100%);
+      background: #fff;
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      animation: scannerUp 0.18s ease;
+    }
+
+    @keyframes scannerUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scanner-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .scanner-title {
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .scanner-sub {
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .scanner-reader {
+      width: 100%;
+      min-height: 260px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #f4f5f7;
+      border: 1px solid var(--line);
+    }
+
+    .scanner-reader video { border-radius: 18px; }
+
+    .scanner-hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    #scannerReader__scan_region {
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    #scannerReader__dashboard {
+      padding: 10px 0 0 !important;
+    }
+
+    #scannerReader__dashboard_section_csr button,
+    #scannerReader__dashboard_section_swaplink {
+      border-radius: 12px !important;
+      font-size: 13px !important;
     }
 
     .tabbar {
@@ -761,9 +768,7 @@
       min-height: 40px;
     }
 
-    .tab-btn.active {
-      color: var(--blue);
-    }
+    .tab-btn.active { color: var(--blue); }
   </style>
 </head>
 <body>
@@ -929,7 +934,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">價格</h1>
-              <div class="page-sub">決策用價格頁：最近、最低、差價、建議。</div>
+              <div class="page-sub">決策用價格頁：最近、最低、差價、建議、掃碼。</div>
             </div>
             <button id="logoutBtn3" class="btn-icon">登出</button>
           </div>
@@ -976,7 +981,7 @@
           <div class="official-box">
             <div class="official-head">
               <div class="official-head-title">官方格價查詢</div>
-              <div class="official-head-sub">已接你個 Worker。</div>
+              <div class="official-head-sub">已接你個 Worker，可手動搜尋，亦可直接掃 QR / barcode。</div>
             </div>
             <div class="official-body">
               <div class="inline-row">
@@ -986,9 +991,10 @@
 
               <div style="height:10px;"></div>
 
-              <div class="inline-row">
-                <button id="officialRefreshBtn" class="btn-mini btn-soft">重新抓取</button>
-                <button id="openOfficialSiteBtn" class="btn-mini btn-plain" style="width:auto;">開官方網站</button>
+              <div class="row">
+                <button id="openScannerBtn" class="btn-soft">掃碼搜尋</button>
+                <button id="officialRefreshBtn" class="btn-soft">重新抓取</button>
+                <button id="openOfficialSiteBtn" class="btn-plain">開官方網站</button>
               </div>
 
               <div id="officialStatus" class="official-status" style="margin-top:12px;">未查詢</div>
@@ -1045,6 +1051,22 @@
     </nav>
   </div>
 
+  <div id="scannerModal" class="scanner-modal hidden">
+    <div class="scanner-sheet">
+      <div class="scanner-head">
+        <div class="scanner-title">掃 QR / barcode</div>
+        <button id="closeScannerBtn" class="btn-icon">關閉</button>
+      </div>
+
+      <div class="scanner-sub">
+        對準商品 QR code 或 barcode。掃到後會自動填入官方價格搜尋。
+      </div>
+
+      <div id="scannerReader" class="scanner-reader"></div>
+      <div id="scannerHint" class="scanner-hint">等待相機啟動…</div>
+    </div>
+  </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const ALLOWED_EMAILS = [
@@ -1098,6 +1120,8 @@
         CRSUPERSHOP: "華潤超級市場"
       };
 
+      const BARCODE_KEYWORD_MAP = {};
+
       const firebaseConfig = {
         apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
         authDomain: "family-958f6.firebaseapp.com",
@@ -1128,9 +1152,10 @@
       let openSwipeKey = null;
       let isDinnerManageOpen = false;
       let isStockManageOpen = false;
-
       let officialDataCache = null;
       let officialFetchedAt = null;
+      let scannerInstance = null;
+      let scannerRunning = false;
 
       const els = {
         loginWrap: document.getElementById("loginWrap"),
@@ -1191,7 +1216,13 @@
         memoInput: document.getElementById("memoInput"),
         addMemoBtn: document.getElementById("addMemoBtn"),
         memoList: document.getElementById("memoList"),
-        memoCountLabel: document.getElementById("memoCountLabel")
+        memoCountLabel: document.getElementById("memoCountLabel"),
+
+        openScannerBtn: document.getElementById("openScannerBtn"),
+        scannerModal: document.getElementById("scannerModal"),
+        closeScannerBtn: document.getElementById("closeScannerBtn"),
+        scannerReader: document.getElementById("scannerReader"),
+        scannerHint: document.getElementById("scannerHint")
       };
 
       function setError(msg) {
@@ -1279,6 +1310,10 @@
         btn.classList.add("active");
 
         closeAllSwipes();
+
+        if (pageName !== "price") {
+          closeScannerModal();
+        }
       }
 
       function getDinnerCatName(id) {
@@ -1690,7 +1725,6 @@
         }
 
         const rows = flattenOfficialRows(items);
-
         if (rows.length === 0) {
           els.officialResult.innerHTML = '<div class="empty">搵到商品，但未有可用價格</div>';
           return;
@@ -1728,11 +1762,7 @@
         }
 
         setOfficialStatus("正在抓取官方資料…");
-
-        const res = await fetch(OFFICIAL_PROXY_URL, {
-          method: "GET",
-          cache: "no-store"
-        });
+        const res = await fetch(OFFICIAL_PROXY_URL, { method: "GET", cache: "no-store" });
 
         if (!res.ok) {
           throw new Error("HTTP " + res.status);
@@ -1741,17 +1771,12 @@
         const json = await res.json();
         let data = [];
 
-        if (Array.isArray(json)) {
-          data = json;
-        } else if (Array.isArray(json.data)) {
-          data = json.data;
-        } else if (Array.isArray(json.items)) {
-          data = json.items;
-        }
+        if (Array.isArray(json)) data = json;
+        else if (Array.isArray(json.data)) data = json.data;
+        else if (Array.isArray(json.items)) data = json.items;
 
         officialDataCache = data;
         officialFetchedAt = Date.now();
-
         setOfficialStatus("官方資料已抓取，共 " + data.length + " 件商品。");
         return data;
       }
@@ -1783,9 +1808,91 @@
         }
       }
 
+      function normalizeScanResult(rawText) {
+        const text = String(rawText || "").trim();
+        if (!text) return "";
+
+        if (/^https?:\/\//i.test(text)) {
+          try {
+            const url = new URL(text);
+            const parts = decodeURIComponent(url.pathname + " " + url.search);
+            return parts.replace(/[-_/=&?]/g, " ").trim();
+          } catch (e) {
+            return text;
+          }
+        }
+
+        if (/^\d{8,14}$/.test(text)) {
+          return BARCODE_KEYWORD_MAP[text] || text;
+        }
+
+        return text;
+      }
+
+      async function stopScanner() {
+        if (scannerInstance && scannerRunning) {
+          try { await scannerInstance.stop(); } catch (e) {}
+        }
+
+        if (scannerInstance) {
+          try { await scannerInstance.clear(); } catch (e) {}
+        }
+
+        scannerInstance = null;
+        scannerRunning = false;
+      }
+
+      async function closeScannerModal() {
+        await stopScanner();
+        els.scannerModal.classList.add("hidden");
+        els.scannerHint.textContent = "等待相機啟動…";
+        els.scannerReader.innerHTML = "";
+      }
+
+      async function handleScanSuccess(decodedText) {
+        const keyword = normalizeScanResult(decodedText);
+        els.scannerHint.textContent = "已掃到：" + keyword;
+        await closeScannerModal();
+        els.officialKeywordInput.value = keyword;
+        searchOfficialPrice(false);
+      }
+
+      async function openScannerModal() {
+        els.scannerModal.classList.remove("hidden");
+        els.scannerHint.textContent = "正在啟動相機…";
+        els.scannerReader.innerHTML = "";
+
+        try {
+          scannerInstance = new Html5Qrcode("scannerReader");
+          const config = {
+            fps: 10,
+            qrbox: { width: 220, height: 220 },
+            rememberLastUsedCamera: true,
+            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+          };
+
+          await scannerInstance.start(
+            { facingMode: "environment" },
+            config,
+            function (decodedText) {
+              if (!scannerRunning) return;
+              scannerRunning = false;
+              handleScanSuccess(decodedText);
+            },
+            function () {}
+          );
+
+          scannerRunning = true;
+          els.scannerHint.textContent = "請將 QR / barcode 放入框內";
+        } catch (err) {
+          els.scannerHint.textContent = "相機開啟失敗，請檢查瀏覽器相機權限。";
+          console.error(err);
+        }
+      }
+
       async function seedDefaultsOnce() {
         try {
-          const seededSnap = await db.ref("meta/seededNoMemoCircleV1").once("value");
+          const seededSnap = await db.ref("meta/seededScannerFullV2").once("value");
           if (seededSnap.exists()) return;
 
           const dinnerCategoriesSnapshot = await db.ref("dinnerCategories").once("value");
@@ -1810,24 +1917,12 @@
                   a1: { name: "蒸魚", desc: "魚加薑蔥蒸 8-10 分鐘，蒸好再淋熟油及豉油。" },
                   a2: { name: "白酒煮蜆", desc: "蒜蓉炒香後加蜆同白酒，開口後即熄火。" }
                 },
-                pork: {
-                  b1: { name: "煎豬扒", desc: "豬扒醃味後煎至兩面金黃。" }
-                },
-                beef: {
-                  c1: { name: "洋蔥牛仔骨", desc: "先醃牛仔骨，煎香後加洋蔥炒至軟身。" }
-                },
-                chicken: {
-                  d1: { name: "焗雞扒", desc: "雞扒調味後焗熟，最後灑少量香草。" }
-                },
-                vegetable: {
-                  e1: { name: "蒜蓉炒菜心", desc: "蒜蓉起鑊，大火快炒菜心至熟。" }
-                },
-                western: {
-                  f1: { name: "白汁焗蘑菇雞", desc: "雞件煎香後加白汁及蘑菇焗熟。" }
-                },
-                pasta: {
-                  g1: { name: "番茄肉醬意粉", desc: "先炒肉碎，再加番茄醬煮滾後拌意粉。" }
-                }
+                pork: { b1: { name: "煎豬扒", desc: "豬扒醃味後煎至兩面金黃。" } },
+                beef: { c1: { name: "洋蔥牛仔骨", desc: "先醃牛仔骨，煎香後加洋蔥炒至軟身。" } },
+                chicken: { d1: { name: "焗雞扒", desc: "雞扒調味後焗熟，最後灑少量香草。" } },
+                vegetable: { e1: { name: "蒜蓉炒菜心", desc: "蒜蓉起鑊，大火快炒菜心至熟。" } },
+                western: { f1: { name: "白汁焗蘑菇雞", desc: "雞件煎香後加白汁及蘑菇焗熟。" } },
+                pasta: { g1: { name: "番茄肉醬意粉", desc: "先炒肉碎，再加番茄醬煮滾後拌意粉。" } }
               })
             );
           }
@@ -1835,40 +1930,19 @@
           if (!stockItemsSnapshot.exists()) {
             jobs.push(
               db.ref("stockItems").set({
-                drinks: {
-                  s1: { name: "可樂", qty: 2 },
-                  s2: { name: "牛奶", qty: 1 }
-                },
-                meat: {
-                  s3: { name: "雞翼", qty: 5 },
-                  s4: { name: "豬扒", qty: 2 }
-                },
-                vegetables: {
-                  s5: { name: "洋蔥", qty: 2 },
-                  s6: { name: "菜心", qty: 1 }
-                },
-                staples: {
-                  s7: { name: "米", qty: 1 },
-                  s8: { name: "意粉", qty: 2 }
-                },
-                seasoning: {
-                  s9: { name: "豉油", qty: 1 },
-                  s10: { name: "鹽", qty: 1 }
-                },
-                daily: {
-                  s11: { name: "廁紙", qty: 5 }
-                },
-                cleaning: {
-                  s12: { name: "洗潔精", qty: 1 }
-                },
-                personal: {
-                  s13: { name: "牙膏", qty: 1 }
-                }
+                drinks: { s1: { name: "可樂", qty: 2 }, s2: { name: "牛奶", qty: 1 } },
+                meat: { s3: { name: "雞翼", qty: 5 }, s4: { name: "豬扒", qty: 2 } },
+                vegetables: { s5: { name: "洋蔥", qty: 2 }, s6: { name: "菜心", qty: 1 } },
+                staples: { s7: { name: "米", qty: 1 }, s8: { name: "意粉", qty: 2 } },
+                seasoning: { s9: { name: "豉油", qty: 1 }, s10: { name: "鹽", qty: 1 } },
+                daily: { s11: { name: "廁紙", qty: 5 } },
+                cleaning: { s12: { name: "洗潔精", qty: 1 } },
+                personal: { s13: { name: "牙膏", qty: 1 } }
               })
             );
           }
 
-          jobs.push(db.ref("meta/seededNoMemoCircleV1").set(true));
+          jobs.push(db.ref("meta/seededScannerFullV2").set(true));
           await Promise.all(jobs);
         } catch (err) {
           setError(err.code + " | " + err.message);
@@ -1878,7 +1952,6 @@
       function initApp() {
         if (initialized) return;
         initialized = true;
-
         els.priceDateInput.value = todayStr();
         seedDefaultsOnce();
 
@@ -1942,6 +2015,7 @@
 
       async function doLogout() {
         try {
+          await stopScanner();
           await auth.signOut();
           els.loginPassword.value = "";
           setLoginMsg("已登出");
@@ -2063,9 +2137,7 @@
         }
 
         const picked = pool[Math.floor(Math.random() * pool.length)];
-        const names = pool.map(function (item) {
-          return item.name || "";
-        });
+        const names = pool.map(function (item) { return item.name || ""; });
 
         let count = 0;
         const timer = setInterval(function () {
@@ -2104,7 +2176,6 @@
 
           const ref = db.ref("stockCategories").push();
           await ref.set({ name: name });
-
           currentStockCat = ref.key;
           els.newStockCatInput.value = "";
         } catch (err) {
@@ -2212,7 +2283,6 @@
       }
 
       els.loginBtn.addEventListener("click", doLogin);
-
       document.getElementById("logoutBtn1").addEventListener("click", doLogout);
       document.getElementById("logoutBtn2").addEventListener("click", doLogout);
       document.getElementById("logoutBtn3").addEventListener("click", doLogout);
@@ -2223,12 +2293,8 @@
         isDinnerManageOpen = !isDinnerManageOpen;
         renderDinnerCategories();
       });
-      els.drawBtn.addEventListener("click", function () {
-        drawFood(false);
-      });
-      els.redrawBtn.addEventListener("click", function () {
-        drawFood(true);
-      });
+      els.drawBtn.addEventListener("click", function () { drawFood(false); });
+      els.redrawBtn.addEventListener("click", function () { drawFood(true); });
       els.resetTodayBtn.addEventListener("click", resetToday);
       els.addFoodBtn.addEventListener("click", addFood);
 
@@ -2255,6 +2321,20 @@
         if (e.key === "Enter") {
           e.preventDefault();
           searchOfficialPrice(false);
+        }
+      });
+
+      els.openScannerBtn.addEventListener("click", function () {
+        openScannerModal();
+      });
+
+      els.closeScannerBtn.addEventListener("click", function () {
+        closeScannerModal();
+      });
+
+      els.scannerModal.addEventListener("click", function (e) {
+        if (e.target === els.scannerModal) {
+          closeScannerModal();
         }
       });
 
@@ -2386,7 +2466,7 @@
         }
       });
 
-      function attachSwipe(container, typeName) {
+      function attachSwipe(container) {
         let startX = 0;
         let startY = 0;
         let row = null;
@@ -2451,10 +2531,10 @@
         });
       }
 
-      attachSwipe(els.foodList, "food");
-      attachSwipe(els.stockList, "stock");
-      attachSwipe(els.priceList, "price");
-      attachSwipe(els.memoList, "memo");
+      attachSwipe(els.foodList);
+      attachSwipe(els.stockList);
+      attachSwipe(els.priceList);
+      attachSwipe(els.memoList);
 
       document.addEventListener("click", function (e) {
         const insideSwipe = e.target.closest(".swipe-row");
