@@ -21,7 +21,7 @@
       --text: #111111;
       --sub: #6e6e73;
       --line: rgba(60, 60, 67, 0.12);
-      --line-strong: rgba(60, 60, 67, 0.2);
+      --line-strong: rgba(60, 60, 67, 0.22);
       --blue: #007aff;
       --blue-soft: #eaf3ff;
       --green: #34c759;
@@ -87,7 +87,7 @@
 
     .screen.active {
       display: block;
-      animation: fadeIn 0.16s ease;
+      animation: fadeIn 0.18s ease;
     }
 
     @keyframes fadeIn {
@@ -106,15 +106,26 @@
       border-radius: 22px;
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
-      padding: 16px;
+      padding: 18px;
     }
 
     .panel + .panel {
       margin-top: 12px;
     }
 
+    .status-banner {
+      margin: 12px 14px 0;
+    }
+
     .page-head {
       padding: 10px 2px 12px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
     }
 
     .page-title {
@@ -132,11 +143,19 @@
       line-height: 1.45;
     }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
+    .hero-title {
+      margin: 0 0 6px;
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-sub {
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.45;
+      margin: 0 0 18px;
     }
 
     .field {
@@ -189,6 +208,11 @@
       letter-spacing: -0.01em;
       cursor: pointer;
       width: 100%;
+      transition: transform 0.14s ease, opacity 0.14s ease, background 0.14s ease;
+    }
+
+    button:active {
+      transform: scale(0.96);
     }
 
     .btn-soft {
@@ -349,6 +373,7 @@
       text-align: center;
       word-break: break-word;
       letter-spacing: -0.02em;
+      transition: transform 0.25s ease, opacity 0.25s ease;
     }
 
     .hero-result-sub {
@@ -457,7 +482,7 @@
       align-items: center;
       gap: 12px;
       transform: translateX(0);
-      transition: transform 0.22s ease;
+      transition: transform 0.25s cubic-bezier(.22,1,.36,1), opacity 0.18s ease;
       touch-action: pan-y;
     }
 
@@ -505,7 +530,8 @@
       height: 30px;
       padding: 0;
       border-radius: 50%;
-      background: #eef1f5;
+      background: #f2f2f7;
+      border: 1px solid rgba(60, 60, 67, 0.2);
       color: var(--text);
       font-size: 18px;
       font-weight: 800;
@@ -609,6 +635,12 @@
       font-size: 14px;
       font-weight: 700;
       line-height: 1.3;
+    }
+
+    .price-advice {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .price-history {
@@ -724,10 +756,6 @@
       white-space: nowrap;
     }
 
-    .status-banner {
-      margin: 12px 14px 0;
-    }
-
     .tabbar {
       position: fixed;
       left: 0;
@@ -798,7 +826,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">今晚煮咩</h1>
-              <div class="page-sub">完整多分類、抽選、管理、狀態。</div>
+              <div class="page-sub">完整架構、多分類、gesture、抽選狀態。</div>
             </div>
             <button id="logoutBtn1" class="btn-icon">登出</button>
           </div>
@@ -877,7 +905,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">存貨</h1>
-              <div class="page-sub">分類、數量、低庫存、刪除操作已整合。</div>
+              <div class="page-sub">分類、步進、低庫存、gesture。</div>
             </div>
             <button id="logoutBtn2" class="btn-icon">登出</button>
           </div>
@@ -931,7 +959,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">價格</h1>
-              <div class="page-sub">手動價格歷史 + 官方格價搜尋。</div>
+              <div class="page-sub">決策用價格頁：最近、最低、差價、建議。</div>
             </div>
             <button id="logoutBtn3" class="btn-icon">登出</button>
           </div>
@@ -978,7 +1006,7 @@
           <div class="official-box">
             <div class="official-head">
               <div class="official-head-title">官方格價查詢</div>
-              <div class="official-head-sub">已使用 Cloudflare Worker 代理讀取消委會公開資料。</div>
+              <div class="official-head-sub">已接你個 Worker。</div>
             </div>
             <div class="official-body">
               <div class="inline-row">
@@ -1013,7 +1041,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">備忘</h1>
-              <div class="page-sub">完成狀態、刪除、排序已整合。</div>
+              <div class="page-sub">未完成優先、完成狀態、gesture。</div>
             </div>
             <button id="logoutBtn4" class="btn-icon">登出</button>
           </div>
@@ -1261,6 +1289,11 @@
         openSwipeKey = null;
         document.querySelectorAll(".swipe-row.open").forEach(function (el) {
           el.classList.remove("open");
+          const content = el.querySelector(".swipe-content");
+          if (content) {
+            content.style.transform = "";
+            content.style.transition = "transform 0.25s cubic-bezier(.22,1,.36,1)";
+          }
         });
       }
 
@@ -1375,12 +1408,9 @@
         }
 
         let groups = {};
-
         selectedDinnerCats.forEach(function (catId) {
           const rows = rowsFromObj(dinnerItemsCache[catId] || {});
-          if (rows.length > 0) {
-            groups[catId] = rows;
-          }
+          if (rows.length > 0) groups[catId] = rows;
         });
 
         const groupIds = Object.keys(groups);
@@ -1428,7 +1458,6 @@
         }
 
         const rows = rowsFromObj(stockItemsCache[currentStockCat] || {});
-
         if (rows.length === 0) {
           els.stockList.innerHTML = '<div class="empty">未有存貨項目</div>';
           return;
@@ -1442,12 +1471,14 @@
 
           let sub = "";
           let cls = "";
+          let opacity = "";
 
           if (qty === 0) {
-            sub = "❌ 無存貨";
+            sub = "無存貨";
             cls = "low";
+            opacity = "opacity:0.5;";
           } else if (qty <= 1) {
-            sub = "⚠️ 快用完";
+            sub = "快用完";
             cls = "warn";
           } else {
             sub = "屋企有";
@@ -1458,7 +1489,7 @@
               <div class="swipe-actions">
                 <button class="swipe-delete-btn" data-del-stock="${row.id}">刪除</button>
               </div>
-              <div class="swipe-content">
+              <div class="swipe-content" style="${opacity}">
                 <div class="cell-main">
                   <div class="cell-title">${esc(item.name || "")}</div>
                   <div class="cell-sub ${cls}">${sub}</div>
@@ -1481,10 +1512,7 @@
           const key = (v.name || "").trim().toLowerCase();
           if (!key) return;
           if (!groups[key]) {
-            groups[key] = {
-              displayName: v.name || "",
-              rows: []
-            };
+            groups[key] = { displayName: v.name || "", rows: [] };
           }
           groups[key].rows.push(row);
         });
@@ -1498,7 +1526,6 @@
 
       function renderPrices() {
         const keyword = (els.priceSearchInput.value || "").trim().toLowerCase();
-
         let rows = rowsFromObj(priceCache).sort(function (a, b) {
           return (b.value.ts || 0) - (a.value.ts || 0);
         });
@@ -1534,6 +1561,13 @@
             return (r.value.store || "").trim();
           }).filter(Boolean)));
 
+          const diff = Number(latest.price || 0) - Number(lowestRow ? lowestRow.value.price : 0);
+          const diffText = diff > 0 ? "+$" + diff.toFixed(1) : "最平";
+          const buyAdvice =
+            Number(latest.price || 0) <= Number(lowestRow ? lowestRow.value.price : latest.price || 0)
+              ? "建議購買"
+              : "建議等等";
+
           return `
             <div class="price-group">
               <div class="price-group-head">
@@ -1548,20 +1582,18 @@
                     <div class="price-meta-value">${money(lowestRow ? lowestRow.value.price : 0)}</div>
                   </div>
                   <div class="price-meta-box">
-                    <div class="price-meta-label">商店</div>
-                    <div class="price-meta-value">${stores.length || 1} 間</div>
+                    <div class="price-meta-label">差價</div>
+                    <div class="price-meta-value">${diffText}</div>
                   </div>
                 </div>
+                <div class="price-advice">${buyAdvice}</div>
               </div>
               <div class="price-history">
                 ${histories.map(function (row) {
                   const key = "price:" + row.id;
                   const openClass = openSwipeKey === key ? " open" : "";
                   const item = row.value || {};
-                  const meta = [
-                    item.store || "未填商店",
-                    item.date || ""
-                  ].filter(Boolean).join("｜");
+                  const meta = [item.store || "未填商店", item.date || ""].filter(Boolean).join("｜");
 
                   return `
                     <div class="swipe-row${openClass}" data-swipe-key="${key}" data-price-id="${row.id}">
@@ -1586,20 +1618,21 @@
 
       function renderMemos() {
         const rows = rowsFromObj(memoCache).sort(function (a, b) {
-          const aDone = !!(a.value && a.value.done);
-          const bDone = !!(b.value && b.value.done);
-          if (aDone !== bDone) return aDone - bDone;
           return (b.value.ts || 0) - (a.value.ts || 0);
         });
 
-        els.memoCountLabel.textContent = rows.length + " 項";
+        const pending = rows.filter(function (r) { return !r.value.done; });
+        const done = rows.filter(function (r) { return !!r.value.done; });
+        const finalRows = pending.concat(done);
 
-        if (rows.length === 0) {
+        els.memoCountLabel.textContent = finalRows.length + " 項";
+
+        if (finalRows.length === 0) {
           els.memoList.innerHTML = '<div class="empty">未有備忘</div>';
           return;
         }
 
-        els.memoList.innerHTML = rows.map(function (row) {
+        els.memoList.innerHTML = finalRows.map(function (row) {
           const key = "memo:" + row.id;
           const openClass = openSwipeKey === key ? " open" : "";
           const item = row.value || {};
@@ -1639,7 +1672,6 @@
 
       function flattenOfficialRows(items) {
         const rows = [];
-
         items.forEach(function (item) {
           const brand = extractLocalizedText(item.brand);
           const name = extractLocalizedText(item.name);
@@ -1743,8 +1775,8 @@
         }
 
         const json = await res.json();
-
         let data = [];
+
         if (Array.isArray(json)) {
           data = json;
         } else if (Array.isArray(json.data)) {
@@ -1783,12 +1815,13 @@
         } catch (err) {
           setOfficialStatus("官方資料讀取失敗。請檢查 Worker 或網絡。");
           els.officialResult.innerHTML = '<div class="empty">未能讀取官方資料，可按上方按鈕打開官方網站。</div>';
+          console.error(err);
         }
       }
 
       async function seedDefaultsOnce() {
         try {
-          const seededSnap = await db.ref("meta/seededUltimateV1").once("value");
+          const seededSnap = await db.ref("meta/seededUltimateV2").once("value");
           if (seededSnap.exists()) return;
 
           const dinnerCategoriesSnapshot = await db.ref("dinnerCategories").once("value");
@@ -1871,7 +1904,7 @@
             );
           }
 
-          jobs.push(db.ref("meta/seededUltimateV1").set(true));
+          jobs.push(db.ref("meta/seededUltimateV2").set(true));
           await Promise.all(jobs);
         } catch (err) {
           setError(err.code + " | " + err.message);
@@ -2038,7 +2071,6 @@
         }
 
         let pool = [];
-
         selectedDinnerCats.forEach(function (cat) {
           const rows = rowsFromObj(dinnerItemsCache[cat] || {});
           rows.forEach(function (row) {
@@ -2073,16 +2105,23 @@
 
         let count = 0;
         const timer = setInterval(function () {
-          els.resultDisplay.textContent =
-            names[Math.floor(Math.random() * names.length)] || "未有結果";
+          els.resultDisplay.textContent = names[Math.floor(Math.random() * names.length)] || "未有結果";
           els.resultDesc.textContent = "";
           count++;
           if (count > 12) {
             clearInterval(timer);
             excludedToday[picked.excludeKey] = true;
             lastDrawKey = picked.excludeKey;
-            els.resultDisplay.textContent = picked.name || "未有結果";
-            els.resultDesc.textContent = picked.desc || "";
+
+            els.resultDisplay.style.transform = "scale(1.2)";
+            els.resultDisplay.style.opacity = "0";
+
+            setTimeout(function () {
+              els.resultDisplay.textContent = picked.name || "未有結果";
+              els.resultDesc.textContent = picked.desc || "";
+              els.resultDisplay.style.transform = "scale(1)";
+              els.resultDisplay.style.opacity = "1";
+            }, 120);
           }
         }, 60);
       }
@@ -2268,11 +2307,8 @@
         if (!cat) return;
 
         currentDinnerCat = cat;
-
         if (selectedDinnerCats.includes(cat)) {
-          selectedDinnerCats = selectedDinnerCats.filter(function (id) {
-            return id !== cat;
-          });
+          selectedDinnerCats = selectedDinnerCats.filter(function (id) { return id !== cat; });
         } else {
           selectedDinnerCats.push(cat);
         }
@@ -2284,9 +2320,7 @@
 
       els.dinnerCatManageList.addEventListener("click", function (e) {
         const delId = e.target.getAttribute("data-del-dinner-cat");
-        if (delId) {
-          deleteDinnerCategory(delId);
-        }
+        if (delId) deleteDinnerCategory(delId);
       });
 
       els.stockCatGrid.addEventListener("click", function (e) {
@@ -2301,9 +2335,7 @@
 
       els.stockCatManageList.addEventListener("click", function (e) {
         const delId = e.target.getAttribute("data-del-stock-cat");
-        if (delId) {
-          deleteStockCategory(delId);
-        }
+        if (delId) deleteStockCategory(delId);
       });
 
       els.foodList.addEventListener("click", async function (e) {
@@ -2313,16 +2345,10 @@
 
         try {
           await db.ref("dinnerItems/" + catId + "/" + id).remove();
-
           const drawKey = catId + "__" + id;
-          if (lastDrawKey === drawKey) {
-            lastDrawKey = null;
-          }
+          if (lastDrawKey === drawKey) lastDrawKey = null;
           delete excludedToday[drawKey];
-
-          if (openSwipeKey === "food:" + catId + ":" + id) {
-            openSwipeKey = null;
-          }
+          if (openSwipeKey === "food:" + catId + ":" + id) openSwipeKey = null;
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
@@ -2333,9 +2359,7 @@
         if (delId) {
           try {
             await db.ref("stockItems/" + currentStockCat + "/" + delId).remove();
-            if (openSwipeKey === "stock:" + currentStockCat + ":" + delId) {
-              openSwipeKey = null;
-            }
+            if (openSwipeKey === "stock:" + currentStockCat + ":" + delId) openSwipeKey = null;
           } catch (err) {
             alert(err.code + " | " + err.message);
           }
@@ -2372,9 +2396,7 @@
 
         try {
           await db.ref("foodPrices/" + id).remove();
-          if (openSwipeKey === "price:" + id) {
-            openSwipeKey = null;
-          }
+          if (openSwipeKey === "price:" + id) openSwipeKey = null;
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
@@ -2392,9 +2414,7 @@
 
         try {
           await db.ref("memos/" + id).remove();
-          if (openSwipeKey === "memo:" + id) {
-            openSwipeKey = null;
-          }
+          if (openSwipeKey === "memo:" + id) openSwipeKey = null;
         } catch (err) {
           alert(err.code + " | " + err.message);
         }
@@ -2403,53 +2423,65 @@
       function attachSwipe(container, typeName) {
         let startX = 0;
         let startY = 0;
-        let touchedRow = null;
-        let moved = false;
+        let row = null;
+        let isDragging = false;
 
         container.addEventListener("touchstart", function (e) {
-          const row = e.target.closest(".swipe-row");
-          if (!row) return;
-          touchedRow = row;
+          const r = e.target.closest(".swipe-row");
+          if (!r) return;
+          row = r;
           startX = e.touches[0].clientX;
           startY = e.touches[0].clientY;
-          moved = false;
+          isDragging = false;
         }, { passive: true });
 
         container.addEventListener("touchmove", function (e) {
-          if (!touchedRow) return;
+          if (!row) return;
+
           const dx = e.touches[0].clientX - startX;
           const dy = e.touches[0].clientY - startY;
+
           if (Math.abs(dy) > Math.abs(dx)) return;
-          moved = true;
-        }, { passive: true });
+          isDragging = true;
+          e.preventDefault();
 
-        container.addEventListener("touchend", function (e) {
-          if (!touchedRow) return;
+          const content = row.querySelector(".swipe-content");
+          let move = Math.min(0, dx);
+          if (move < -96) move = -96;
 
-          const dx = e.changedTouches[0].clientX - startX;
-          const dy = e.changedTouches[0].clientY - startY;
-          const fullKey = touchedRow.getAttribute("data-swipe-key");
+          content.style.transition = "none";
+          content.style.transform = `translateX(${move}px)`;
+        }, { passive: false });
 
-          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 35) {
-            if (dx < 0) {
-              closeAllSwipes();
-              openSwipeKey = fullKey;
-              touchedRow.classList.add("open");
-            } else {
-              touchedRow.classList.remove("open");
-              if (openSwipeKey === fullKey) {
-                openSwipeKey = null;
-              }
-            }
-          } else if (!moved) {
-            const insideButton = e.target.closest("button,input,label");
-            if (!insideButton && openSwipeKey === fullKey) {
-              openSwipeKey = null;
-              renderByType(typeName);
+        container.addEventListener("touchend", function () {
+          if (!row) return;
+
+          const content = row.querySelector(".swipe-content");
+          const fullKey = row.getAttribute("data-swipe-key");
+          const matrix = window.getComputedStyle(content).transform;
+          let currentX = 0;
+
+          if (matrix && matrix !== "none") {
+            const values = matrix.match(/matrix.*\((.+)\)/);
+            if (values && values[1]) {
+              currentX = Number(values[1].split(", ")[4]) || 0;
             }
           }
 
-          touchedRow = null;
+          content.style.transition = "transform 0.25s cubic-bezier(.22,1,.36,1)";
+
+          if (isDragging && Math.abs(currentX) > 60) {
+            closeAllSwipes();
+            openSwipeKey = fullKey;
+            row.classList.add("open");
+            content.style.transform = "";
+          } else {
+            row.classList.remove("open");
+            if (openSwipeKey === fullKey) openSwipeKey = null;
+            content.style.transform = "";
+          }
+
+          row = null;
         });
       }
 
@@ -2467,9 +2499,7 @@
 
       document.addEventListener("click", function (e) {
         const insideSwipe = e.target.closest(".swipe-row");
-        if (!insideSwipe) {
-          closeAllSwipes();
-        }
+        if (!insideSwipe) closeAllSwipes();
       });
 
       auth.onAuthStateChanged(function (user) {
