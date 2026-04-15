@@ -25,11 +25,9 @@
       --blue: #007aff;
       --blue-soft: #eaf3ff;
       --green: #34c759;
-      --green-soft: #eaf9ef;
       --red: #ff3b30;
       --red-soft: #fff1f0;
       --orange: #ff9500;
-      --pill: #f4f5f8;
       --tab-h: 84px;
       --swipe-w: 92px;
       --shadow: 0 8px 28px rgba(0, 0, 0, 0.04);
@@ -555,34 +553,6 @@
       font-weight: 700;
     }
 
-    .memo-check {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(60, 60, 67, 0.25);
-      background: #fff;
-      flex: 0 0 auto;
-      position: relative;
-      margin-right: 2px;
-    }
-
-    .memo-check.done {
-      background: var(--green);
-      border-color: var(--green);
-    }
-
-    .memo-check.done::after {
-      content: "";
-      position: absolute;
-      left: 7px;
-      top: 4px;
-      width: 6px;
-      height: 10px;
-      border: solid #fff;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-    }
-
     .memo-done .cell-title {
       text-decoration: line-through;
       color: var(--sub);
@@ -1041,7 +1011,7 @@
           <div class="topbar">
             <div>
               <h1 class="page-title">備忘</h1>
-              <div class="page-sub">未完成優先、完成狀態、gesture。</div>
+              <div class="page-sub">未完成優先、整行切換完成、gesture。</div>
             </div>
             <button id="logoutBtn4" class="btn-icon">登出</button>
           </div>
@@ -1557,10 +1527,6 @@
             return Number(row.value.price || 0) < Number(min.value.price || 0) ? row : min;
           }, null);
 
-          const stores = Array.from(new Set(histories.map(function (r) {
-            return (r.value.store || "").trim();
-          }).filter(Boolean)));
-
           const diff = Number(latest.price || 0) - Number(lowestRow ? lowestRow.value.price : 0);
           const diffText = diff > 0 ? "+$" + diff.toFixed(1) : "最平";
           const buyAdvice =
@@ -1637,15 +1603,13 @@
           const openClass = openSwipeKey === key ? " open" : "";
           const item = row.value || {};
           const doneClass = item.done ? " memo-done" : "";
-          const checkClass = item.done ? "memo-check done" : "memo-check";
 
           return `
             <div class="swipe-row${openClass}" data-swipe-key="${key}" data-memo-id="${row.id}">
               <div class="swipe-actions">
                 <button class="swipe-delete-btn" data-del-memo="${row.id}">刪除</button>
               </div>
-              <div class="swipe-content${doneClass}">
-                <button class="${checkClass}" data-toggle-memo="${row.id}"></button>
+              <div class="swipe-content${doneClass}" data-toggle-memo="${row.id}">
                 <div class="cell-main">
                   <div class="cell-title">${esc(item.text || "")}</div>
                   <div class="cell-sub">${timeStr(item.ts)}</div>
@@ -1821,7 +1785,7 @@
 
       async function seedDefaultsOnce() {
         try {
-          const seededSnap = await db.ref("meta/seededUltimateV2").once("value");
+          const seededSnap = await db.ref("meta/seededNoMemoCircleV1").once("value");
           if (seededSnap.exists()) return;
 
           const dinnerCategoriesSnapshot = await db.ref("dinnerCategories").once("value");
@@ -1904,7 +1868,7 @@
             );
           }
 
-          jobs.push(db.ref("meta/seededUltimateV2").set(true));
+          jobs.push(db.ref("meta/seededNoMemoCircleV1").set(true));
           await Promise.all(jobs);
         } catch (err) {
           setError(err.code + " | " + err.message);
@@ -2403,20 +2367,22 @@
       });
 
       els.memoList.addEventListener("click", async function (e) {
-        const toggleId = e.target.getAttribute("data-toggle-memo");
-        if (toggleId) {
-          toggleMemoDone(toggleId);
+        const deleteBtn = e.target.closest("[data-del-memo]");
+        if (deleteBtn) {
+          const id = deleteBtn.getAttribute("data-del-memo");
+          try {
+            await db.ref("memos/" + id).remove();
+            if (openSwipeKey === "memo:" + id) openSwipeKey = null;
+          } catch (err) {
+            alert(err.code + " | " + err.message);
+          }
           return;
         }
 
-        const id = e.target.getAttribute("data-del-memo");
-        if (!id) return;
-
-        try {
-          await db.ref("memos/" + id).remove();
-          if (openSwipeKey === "memo:" + id) openSwipeKey = null;
-        } catch (err) {
-          alert(err.code + " | " + err.message);
+        const toggleRow = e.target.closest("[data-toggle-memo]");
+        if (toggleRow) {
+          const toggleId = toggleRow.getAttribute("data-toggle-memo");
+          toggleMemoDone(toggleId);
         }
       });
 
@@ -2483,13 +2449,6 @@
 
           row = null;
         });
-      }
-
-      function renderByType(typeName) {
-        if (typeName === "food") renderDinnerItems();
-        if (typeName === "stock") renderStocks();
-        if (typeName === "price") renderPrices();
-        if (typeName === "memo") renderMemos();
       }
 
       attachSwipe(els.foodList, "food");
