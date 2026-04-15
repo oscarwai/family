@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ULTIMATE FINAL</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system;background:#f2f2f7}
+.wrapper{max-width:520px;margin:auto;padding:20px}
+.panel{background:#fff;padding:16px;border-radius:16px;margin-bottom:16px}
+input,textarea{width:100%;padding:14px;margin-bottom:10px;border-radius:12px;border:1px solid #ddd}
+button{width:100%;padding:14px;border-radius:12px;border:none;background:#007aff;color:#fff;font-size:16px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.hidden{display:none}
+.item{padding:10px;border-bottom:1px solid #eee}
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+
+<div id="loginPanel" class="panel">
+<input id="email" placeholder="Email">
+<input id="pw" type="password" placeholder="Password">
+<button id="loginBtn">Login</button>
+<div id="msg"></div>
+</div>
+
+<div id="app" class="hidden">
+
+<div class="panel">
+<h3>晚餐</h3>
+<input id="foodInput" placeholder="新增菜式">
+<button id="addFood">新增</button>
+<div id="foodList"></div>
+</div>
+
+<div class="panel">
+<h3>存貨</h3>
+<input id="stockInput" placeholder="新增項目">
+<button id="addStock">新增</button>
+<div id="stockList"></div>
+</div>
+
+<div class="panel">
+<h3>價格</h3>
+<input id="kw" placeholder="輸入食物">
+<div class="row">
+<button id="search">搜尋</button>
+<button id="clear">清除</button>
+</div>
+<div id="result"></div>
+</div>
+
+<div class="panel">
+<h3>備忘</h3>
+<textarea id="memoInput"></textarea>
+<button id="addMemo">新增</button>
+<div id="memoList"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+const config={
+apiKey:"AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
+authDomain:"family-958f6.firebaseapp.com",
+databaseURL:"https://family-958f6-default-rtdb.firebaseio.com",
+projectId:"family-958f6"
+};
+firebase.initializeApp(config);
+const auth=firebase.auth();
+const db=firebase.database();
+
+loginBtn.onclick=async()=>{
+msg.innerText="";
+try{
+await auth.signInWithEmailAndPassword(email.value.trim(),pw.value.trim());
+}catch(e){msg.innerText=e.message;}
+};
+
+auth.onAuthStateChanged(u=>{
+if(u){
+loginPanel.classList.add("hidden");
+app.classList.remove("hidden");
+}
+});
+
+addFood.onclick=()=>{
+if(!foodInput.value)return;
+db.ref("food").push({name:foodInput.value});
+foodInput.value="";
+};
+
+db.ref("food").on("value",s=>{
+let v=s.val()||{};
+foodList.innerHTML=Object.values(v).map(i=>'<div class="item">'+i.name+'</div>').join("");
+});
+
+addStock.onclick=()=>{
+if(!stockInput.value)return;
+db.ref("stock").push({name:stockInput.value});
+stockInput.value="";
+};
+
+db.ref("stock").on("value",s=>{
+let v=s.val()||{};
+stockList.innerHTML=Object.values(v).map(i=>'<div class="item">'+i.name+'</div>').join("");
+});
+
+search.onclick=async()=>{
+let k=kw.value;
+result.innerHTML="loading...";
+let r=await fetch("https://young-bush-89a9.oscarwai1994.workers.dev/");
+let j=await r.json();
+let data=j.data||[];
+
+let res=data.filter(i=>(i.name?.["zh-Hant"]||"").includes(k));
+
+result.innerHTML=res.length
+? res.slice(0,5).map(i=>'<div class="item">'+i.name["zh-Hant"]+'</div>').join("")
+: "無結果";
+};
+
+clear.onclick=()=>{
+kw.value="";
+result.innerHTML="";
+};
+
+addMemo.onclick=()=>{
+if(!memoInput.value)return;
+db.ref("memos").push({text:memoInput.value});
+memoInput.value="";
+};
+
+db.ref("memos").on("value",s=>{
+let v=s.val()||{};
+memoList.innerHTML=Object.values(v).map(i=>'<div class="item">'+i.text+'</div>').join("");
+});
+</script>
+
+</body>
+</html>
