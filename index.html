@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#f2f2f7" />
+  <title>家庭小工具</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    :root {
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --text: #111111;
+      --sub: #6e6e73;
+      --line: rgba(60, 60, 67, 0.12);
+      --line-strong: rgba(60, 60, 67, 0.22);
+      --blue: #007aff;
+      --blue-soft: #eaf3ff;
+      --green: #34c759;
+      --red: #ff3b30;
+      --red-soft: #fff1f0;
+      --orange: #ff9500;
+      --tab-h: 84px;
+      --swipe-w: 92px;
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC",
+        "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      overscroll-behavior-y: none;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .hidden { display: none !important; }
+
+    .login-shell {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app-shell {
+      max-width: 560px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+      background: var(--bg);
+    }
+
+    .screen {
+      display: none;
+      padding: 12px 14px 18px;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.18s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .panel + .panel { margin-top: 12px; }
+    .status-banner { margin: 12px 14px 0; }
+    .page-head { padding: 10px 2px 12px; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+    }
+
+    .page-sub {
+      margin-top: 6px;
+      color: var(--sub);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hero-title {
+      margin: 0 0 6px;
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-sub {
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.45;
+      margin: 0 0 18px;
+    }
+
+    .field { margin-bottom: 12px; }
+    .field:last-child { margin-bottom: 0; }
+    .row .field { margin-bottom: 0; }
+
+    .label {
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--sub);
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--text);
+      padding: 14px;
+      font-size: 16px;
+      outline: none;
+      min-height: 52px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: rgba(0, 122, 255, 0.35);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
+    }
+
+    textarea {
+      resize: none;
+      min-height: 96px;
+      line-height: 1.55;
+    }
+
+    input[type="date"] {
+      min-height: 52px;
+      line-height: 1.2;
+      display: block;
+    }
+
+    input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.7; }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.14s ease, opacity 0.14s ease, background 0.14s ease;
+    }
+
+    button:active { transform: scale(0.96); }
+
+    .btn-soft { background: var(--blue-soft); color: var(--blue); }
+    .btn-plain { background: #f4f5f7; color: var(--text); }
+    .btn-danger { background: var(--red-soft); color: var(--red); }
+    .btn-green { background: var(--green); color: #fff; }
+
+    .btn-mini {
+      width: auto;
+      flex: 0 0 auto;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .btn-icon {
+      width: auto;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f4f5f7;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+    .inline-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .inline-row > *:first-child { flex: 1; min-width: 0; }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 750;
+      letter-spacing: -0.01em;
+    }
+
+    .section-meta {
+      font-size: 12px;
+      color: var(--sub);
+      text-align: right;
+      line-height: 1.35;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      width: auto;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1;
+    }
+
+    .chip.active {
+      background: var(--blue-soft);
+      color: var(--blue);
+      border-color: rgba(0, 122, 255, 0.12);
+    }
+
+    .manage-list {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .manage-list.show { display: flex; }
+
+    .manage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #fafafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .manage-name {
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .hero-result {
+      padding: 22px 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+      border: 1px solid #dfeafc;
+      text-align: center;
+    }
+
+    .hero-result-label {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 8px;
+    }
+
+    .hero-result-main {
+      min-height: 42px;
+      font-size: 31px;
+      font-weight: 800;
+      line-height: 1.12;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      word-break: break-word;
+      letter-spacing: -0.02em;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .hero-result-sub {
+      margin-top: 10px;
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--sub);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .group-block + .group-block {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .group-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sub);
+      margin-bottom: 8px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .list.light .swipe-content { padding: 10px 12px; }
+    .list.light .cell-title { font-size: 15px; font-weight: 650; }
+    .list.light .cell-sub { margin-top: 4px; font-size: 12px; }
+    .list.light .qty-btn { width: 28px; height: 28px; font-size: 16px; }
+    .list.light .qty-num { font-size: 14px; min-width: 22px; }
+
+    .empty {
+      padding: 18px 14px;
+      border-radius: 16px;
+      border: 1px dashed var(--line-strong);
+      color: var(--sub);
+      text-align: center;
+      font-size: 14px;
+      background: #fafafc;
+    }
+
+    .swipe-row {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .swipe-actions {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--swipe-w);
+      display: flex;
+    }
+
+    .swipe-delete-btn {
+      width: 100%;
+      border-radius: 0;
+      background: var(--red);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .swipe-content {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transform: translateX(0);
+      transition: transform 0.25s cubic-bezier(.22,1,.36,1), opacity 0.18s ease;
+      touch-action: pan-y;
+    }
+
+    .swipe-row.open .swipe-content {
+      transform: translateX(calc(var(--swipe-w) * -1));
+    }
+
+    .cell-main { flex: 1; min-width: 0; }
+
+    .cell-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+      word-break: break-word;
+    }
+
+    .cell-sub {
+      margin-top: 5px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--sub);
+      word-break: break-word;
+    }
+
+    .cell-price {
+      flex: 0 0 auto;
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .qty-wrap {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 50%;
+      background: #f2f2f7;
+      border: 1px solid rgba(60, 60, 67, 0.2);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .qty-num {
+      min-width: 24px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .low { color: var(--red); font-weight: 700; }
+    .warn { color: var(--orange); font-weight: 700; }
+
+    .memo-done .cell-title {
+      text-decoration: line-through;
+      color: var(--sub);
+    }
+
+    .memo-done .cell-sub { color: #8f8f95; }
+
+    .price-group {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .price-group-head {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fcfcfd;
+    }
+
+    .price-group-title {
+      font-size: 17px;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .price-group-meta {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .price-meta-box {
+      background: #f7f8fa;
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid rgba(60, 60, 67, 0.08);
+    }
+
+    .price-meta-label {
+      font-size: 11px;
+      color: var(--sub);
+      margin-bottom: 5px;
+    }
+
+    .price-meta-value {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .price-advice {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .price-history {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .official-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .official-head {
+      padding: 14px;
+      background: #fcfcfd;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .official-head-title {
+      font-size: 16px;
+      font-weight: 750;
+    }
+
+    .official-head-sub {
+      margin-top: 5px;
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.45;
+    }
+
+    .official-body { padding: 12px; }
+
+    .official-status {
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.45;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .official-result-head {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fafbff;
+      margin-bottom: 10px;
+    }
+
+    .official-result-title {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    .official-cheapest {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .official-updated {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .official-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .official-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+    }
+
+    .official-item-left { min-width: 0; flex: 1; }
+
+    .official-item-store {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .official-item-sub {
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .official-item-price {
+      flex: 0 0 auto;
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .scanner-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.42);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .scanner-sheet {
+      width: min(560px, 100%);
+      background: #fff;
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      animation: scannerUp 0.18s ease;
+    }
+
+    @keyframes scannerUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scanner-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .scanner-title {
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .scanner-sub {
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .scanner-reader {
+      width: 100%;
+      min-height: 260px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #f4f5f7;
+      border: 1px solid var(--line);
+    }
+
+    .scanner-reader video { border-radius: 18px; }
+
+    .scanner-hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    #scannerReader__scan_region {
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    #scannerReader__dashboard {
+      padding: 10px 0 0 !important;
+    }
+
+    #scannerReader__dashboard_section_csr button,
+    #scannerReader__dashboard_section_swaplink {
+      border-radius: 12px !important;
+      font-size: 13px !important;
+    }
+
+    .tabbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .tabbar-inner {
+      width: min(560px, 100%);
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: rgba(249, 249, 249, 0.86);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--line);
+      pointer-events: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--sub);
+      padding: 10px 4px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+    }
+
+    .tab-btn.active { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <div id="loginWrap" class="login-shell">
+    <div class="panel" style="width:100%;max-width:520px;">
+      <h1 class="hero-title">登入</h1>
+      <div class="hero-sub">只限指定帳戶使用。</div>
+
+      <div class="field">
+        <div class="label">Email</div>
+        <input id="loginEmail" type="email" placeholder="你的 Gmail" />
+      </div>
+
+      <div class="field">
+        <div class="label">Password</div>
+        <input id="loginPassword" type="password" placeholder="密碼" />
+      </div>
+
+      <button id="loginBtn">登入</button>
+      <div id="loginMsg" class="hero-sub" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <div id="appWrap" class="hidden">
+    <div id="errorBanner" class="panel hidden status-banner"></div>
+
+    <div class="app-shell">
+      <section id="page-dinner" class="screen active">
+        <div class="page-head">
+          <div class="topbar">
+            <div>
+              <h1 class="page-title">今晚煮咩</h1>
+              <div class="page-sub">完整架構、多分類、gesture、抽選狀態。</div>
+            </div>
+            <button id="logoutBtn1" class="btn-icon">登出</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">選類別</div>
+            <div id="currentDinnerCatLabel" class="section-meta">未選擇</div>
+          </div>
+
+          <div id="dinnerCatGrid" class="chips"></div>
+
+          <div style="height:12px;"></div>
+
+          <div class="inline-row">
+            <input id="newDinnerCatInput" type="text" placeholder="新增大類別，例如：湯類、宵夜、日式" />
+            <button id="addDinnerCatBtn" class="btn-mini">新增</button>
+          </div>
+
+          <div style="height:10px;"></div>
+          <button id="toggleDinnerManageBtn" class="btn-soft">管理分類</button>
+          <div id="dinnerCatManageList" class="manage-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="hero-result">
+            <div class="hero-result-label">抽選結果</div>
+            <div id="resultDisplay" class="hero-result-main">請先選大類別</div>
+            <div id="resultDesc" class="hero-result-sub"></div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="row">
+            <button id="drawBtn" class="btn-green">隨機抽選</button>
+            <button id="redrawBtn" class="btn-soft">再抽一次</button>
+          </div>
+
+          <div style="height:10px;"></div>
+          <button id="resetTodayBtn" class="btn-plain">重置今日抽過</button>
+
+          <div class="hint">再抽一次不重複上一次；今日抽過可重置。</div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">新增菜式</div>
+            <div id="dinnerManageLabel" class="section-meta">新增到：未選擇</div>
+          </div>
+
+          <div class="field">
+            <div class="label">菜式名稱</div>
+            <input id="foodInput" type="text" placeholder="例如：洋蔥牛仔骨" />
+          </div>
+
+          <div class="field">
+            <div class="label">簡單煮法</div>
+            <textarea id="foodDescInput" placeholder="例如：先醃牛仔骨，煎香後加洋蔥炒至軟身"></textarea>
+          </div>
+
+          <button id="addFoodBtn">新增菜式</button>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">菜式清單</div>
+            <div id="dinnerListLabel" class="section-meta">未選類別</div>
+          </div>
+          <div id="foodList"></div>
+        </div>
+      </section>
+
+      <section id="page-stock" class="screen">
+        <div class="page-head">
+          <div class="topbar">
+            <div>
+              <h1 class="page-title">存貨</h1>
+              <div class="page-sub">分類、步進、低庫存、gesture。</div>
+            </div>
+            <button id="logoutBtn2" class="btn-icon">登出</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">選類別</div>
+            <div id="currentStockCatLabel" class="section-meta">未選擇</div>
+          </div>
+
+          <div id="stockCatGrid" class="chips"></div>
+
+          <div style="height:12px;"></div>
+
+          <div class="inline-row">
+            <input id="newStockCatInput" type="text" placeholder="新增類別，例如：零食、早餐、冷凍食品" />
+            <button id="addStockCatBtn" class="btn-mini">新增</button>
+          </div>
+
+          <div style="height:10px;"></div>
+          <button id="toggleStockManageBtn" class="btn-soft">管理類別</button>
+          <div id="stockCatManageList" class="manage-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">新增項目</div>
+            <div id="stockManageLabel" class="section-meta">新增到：未選擇</div>
+          </div>
+
+          <div class="field">
+            <div class="label">項目名稱</div>
+            <input id="stockInput" type="text" placeholder="例如：可樂、雞翼、廁紙" />
+          </div>
+
+          <button id="addStockBtn">新增</button>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">項目清單</div>
+            <div id="stockListLabel" class="section-meta">目前類別：未選擇</div>
+          </div>
+          <div id="stockList" class="list light"></div>
+        </div>
+      </section>
+
+      <section id="page-price" class="screen">
+        <div class="page-head">
+          <div class="topbar">
+            <div>
+              <h1 class="page-title">價格</h1>
+              <div class="page-sub">決策用價格頁：最近、最低、差價、建議、掃碼。</div>
+            </div>
+            <button id="logoutBtn3" class="btn-icon">登出</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="field" style="margin-bottom:0;">
+            <div class="label">搜尋手動記錄</div>
+            <input id="priceSearchInput" type="text" placeholder="搜尋食物名稱 / 商店 / 備註" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="field">
+            <div class="label">食物名稱</div>
+            <input id="priceNameInput" type="text" placeholder="例如：雞蛋、可樂、菜心" />
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <div class="label">價格</div>
+              <input id="priceValueInput" type="number" step="0.1" placeholder="例如：25.9" />
+            </div>
+            <div class="field">
+              <div class="label">日期</div>
+              <input id="priceDateInput" type="date" />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="label">商店</div>
+            <input id="priceStoreInput" type="text" placeholder="例如：百佳、惠康、街市" />
+          </div>
+
+          <div class="field">
+            <div class="label">備註</div>
+            <textarea id="priceNoteInput" placeholder="例如：特價、兩件裝、街市檔口"></textarea>
+          </div>
+
+          <button id="addPriceBtn">新增手動價格記錄</button>
+        </div>
+
+        <div class="panel">
+          <div class="official-box">
+            <div class="official-head">
+              <div class="official-head-title">官方格價查詢</div>
+              <div class="official-head-sub">已接你個 Worker，可手動搜尋，亦可直接掃 QR / barcode。</div>
+            </div>
+            <div class="official-body">
+              <div class="inline-row">
+                <input id="officialKeywordInput" type="text" placeholder="例如：雞蛋、白米、廁紙" />
+                <button id="officialSearchBtn" class="btn-mini">查詢</button>
+              </div>
+
+              <div style="height:10px;"></div>
+
+              <div class="row">
+                <button id="openScannerBtn" class="btn-soft">掃碼搜尋</button>
+                <button id="officialRefreshBtn" class="btn-soft">重新抓取</button>
+                <button id="openOfficialSiteBtn" class="btn-plain">開官方網站</button>
+              </div>
+
+              <div id="officialStatus" class="official-status" style="margin-top:12px;">未查詢</div>
+              <div id="officialResult"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">手動價格歷史</div>
+            <div id="priceCountLabel" class="section-meta">0 組</div>
+          </div>
+          <div id="priceList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="page-memo" class="screen">
+        <div class="page-head">
+          <div class="topbar">
+            <div>
+              <h1 class="page-title">備忘</h1>
+              <div class="page-sub">未完成優先、整行切換完成、gesture。</div>
+            </div>
+            <button id="logoutBtn4" class="btn-icon">登出</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="field">
+            <div class="label">新增備忘</div>
+            <textarea id="memoInput" placeholder="例如：今晚記得解凍雞翼"></textarea>
+          </div>
+          <button id="addMemoBtn">新增備忘</button>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <div class="section-title">備忘清單</div>
+            <div id="memoCountLabel" class="section-meta">0 項</div>
+          </div>
+          <div id="memoList" class="list"></div>
+        </div>
+      </section>
+    </div>
+
+    <nav class="tabbar">
+      <div class="tabbar-inner">
+        <button class="tab-btn active" data-page="dinner">晚餐</button>
+        <button class="tab-btn" data-page="stock">存貨</button>
+        <button class="tab-btn" data-page="price">價格</button>
+        <button class="tab-btn" data-page="memo">備忘</button>
+      </div>
+    </nav>
+  </div>
+
+  <div id="scannerModal" class="scanner-modal hidden">
+    <div class="scanner-sheet">
+      <div class="scanner-head">
+        <div class="scanner-title">掃 QR / barcode</div>
+        <button id="closeScannerBtn" class="btn-icon">關閉</button>
+      </div>
+
+      <div class="scanner-sub">
+        對準商品 QR code 或 barcode。掃到後會自動填入官方價格搜尋。
+      </div>
+
+      <div id="scannerReader" class="scanner-reader"></div>
+      <div id="scannerHint" class="scanner-hint">等待相機啟動…</div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const ALLOWED_EMAILS = [
+        "oscarwai1994@gmail.com",
+        "angelleung2023@gmail.com"
+      ];
+
+      const DEFAULT_DINNER_CATEGORIES = {
+        seafood: { name: "海鮮" },
+        pork: { name: "豬肉" },
+        beef: { name: "牛肉" },
+        chicken: { name: "雞肉" },
+        vegetable: { name: "蔬菜" },
+        western: { name: "西餐" },
+        pasta: { name: "意粉" }
+      };
+
+      const DEFAULT_STOCK_CATEGORIES = {
+        drinks: { name: "飲品" },
+        meat: { name: "肉類（雪藏/急凍）" },
+        vegetables: { name: "蔬菜" },
+        staples: { name: "主食 / 乾貨" },
+        seasoning: { name: "調味 / 廚房材料" },
+        daily: { name: "日用品" },
+        cleaning: { name: "清潔用品" },
+        personal: { name: "個人護理" }
+      };
+
+      const OFFICIAL_PROXY_URL = "https://young-bush-89a9.oscarwai1994.workers.dev/";
+      const OFFICIAL_SITE_URL = "https://online-price-watch.consumer.org.hk/opw/";
+
+      const STORE_NAME_MAP = {
+        WELLCOME: "惠康",
+        PARKNSHOP: "百佳",
+        JASONS: "Jasons",
+        WATSONS: "屈臣氏",
+        AEON: "AEON",
+        DCHFOOD: "大昌食品市場",
+        MARKETPLACE: "Market Place",
+        TASTE: "Taste",
+        FUSION: "Fusion",
+        GREAT: "Great",
+        MNS: "Marks & Spencer",
+        USELECT: "U Select",
+        BESTMART360: "優品360",
+        PRIZEMART: "PrizeMart",
+        HKTVMALL: "HKTVmall",
+        APITA: "APITA",
+        YATA: "YATA",
+        CRVANGUARD: "華潤萬家",
+        CRSUPERSHOP: "華潤超級市場"
+      };
+
+      const BARCODE_KEYWORD_MAP = {};
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAe3A65fLSCR5OM5bS8iTc0get2vfX0HnQ",
+        authDomain: "family-958f6.firebaseapp.com",
+        databaseURL: "https://family-958f6-default-rtdb.firebaseio.com",
+        projectId: "family-958f6",
+        storageBucket: "family-958f6.firebasestorage.app",
+        messagingSenderId: "297002821278",
+        appId: "1:297002821278:web:49f14e9d1f609fa10c3d8f"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.database();
+
+      let initialized = false;
+      let dinnerCategoriesCache = {};
+      let dinnerItemsCache = {};
+      let stockCategoriesCache = {};
+      let stockItemsCache = {};
+      let priceCache = {};
+      let memoCache = {};
+
+      let currentDinnerCat = null;
+      let currentStockCat = null;
+      let selectedDinnerCats = [];
+      let excludedToday = {};
+      let lastDrawKey = null;
+      let openSwipeKey = null;
+      let isDinnerManageOpen = false;
+      let isStockManageOpen = false;
+      let officialDataCache = null;
+      let officialFetchedAt = null;
+      let scannerInstance = null;
+      let scannerRunning = false;
+
+      const els = {
+        loginWrap: document.getElementById("loginWrap"),
+        appWrap: document.getElementById("appWrap"),
+        loginEmail: document.getElementById("loginEmail"),
+        loginPassword: document.getElementById("loginPassword"),
+        loginBtn: document.getElementById("loginBtn"),
+        loginMsg: document.getElementById("loginMsg"),
+        errorBanner: document.getElementById("errorBanner"),
+
+        newDinnerCatInput: document.getElementById("newDinnerCatInput"),
+        addDinnerCatBtn: document.getElementById("addDinnerCatBtn"),
+        toggleDinnerManageBtn: document.getElementById("toggleDinnerManageBtn"),
+        dinnerCatGrid: document.getElementById("dinnerCatGrid"),
+        dinnerCatManageList: document.getElementById("dinnerCatManageList"),
+        currentDinnerCatLabel: document.getElementById("currentDinnerCatLabel"),
+        dinnerManageLabel: document.getElementById("dinnerManageLabel"),
+        dinnerListLabel: document.getElementById("dinnerListLabel"),
+        resultDisplay: document.getElementById("resultDisplay"),
+        resultDesc: document.getElementById("resultDesc"),
+        drawBtn: document.getElementById("drawBtn"),
+        redrawBtn: document.getElementById("redrawBtn"),
+        resetTodayBtn: document.getElementById("resetTodayBtn"),
+        foodInput: document.getElementById("foodInput"),
+        foodDescInput: document.getElementById("foodDescInput"),
+        addFoodBtn: document.getElementById("addFoodBtn"),
+        foodList: document.getElementById("foodList"),
+
+        newStockCatInput: document.getElementById("newStockCatInput"),
+        addStockCatBtn: document.getElementById("addStockCatBtn"),
+        toggleStockManageBtn: document.getElementById("toggleStockManageBtn"),
+        stockCatGrid: document.getElementById("stockCatGrid"),
+        stockCatManageList: document.getElementById("stockCatManageList"),
+        currentStockCatLabel: document.getElementById("currentStockCatLabel"),
+        stockManageLabel: document.getElementById("stockManageLabel"),
+        stockListLabel: document.getElementById("stockListLabel"),
+        stockInput: document.getElementById("stockInput"),
+        addStockBtn: document.getElementById("addStockBtn"),
+        stockList: document.getElementById("stockList"),
+
+        priceSearchInput: document.getElementById("priceSearchInput"),
+        priceNameInput: document.getElementById("priceNameInput"),
+        priceValueInput: document.getElementById("priceValueInput"),
+        priceDateInput: document.getElementById("priceDateInput"),
+        priceStoreInput: document.getElementById("priceStoreInput"),
+        priceNoteInput: document.getElementById("priceNoteInput"),
+        addPriceBtn: document.getElementById("addPriceBtn"),
+        priceList: document.getElementById("priceList"),
+        priceCountLabel: document.getElementById("priceCountLabel"),
+
+        officialKeywordInput: document.getElementById("officialKeywordInput"),
+        officialSearchBtn: document.getElementById("officialSearchBtn"),
+        officialRefreshBtn: document.getElementById("officialRefreshBtn"),
+        officialStatus: document.getElementById("officialStatus"),
+        officialResult: document.getElementById("officialResult"),
+        openOfficialSiteBtn: document.getElementById("openOfficialSiteBtn"),
+
+        memoInput: document.getElementById("memoInput"),
+        addMemoBtn: document.getElementById("addMemoBtn"),
+        memoList: document.getElementById("memoList"),
+        memoCountLabel: document.getElementById("memoCountLabel"),
+
+        openScannerBtn: document.getElementById("openScannerBtn"),
+        scannerModal: document.getElementById("scannerModal"),
+        closeScannerBtn: document.getElementById("closeScannerBtn"),
+        scannerReader: document.getElementById("scannerReader"),
+        scannerHint: document.getElementById("scannerHint")
+      };
+
+      function setError(msg) {
+        if (!msg) {
+          els.errorBanner.classList.add("hidden");
+          els.errorBanner.textContent = "";
+          return;
+        }
+        els.errorBanner.textContent = msg;
+        els.errorBanner.classList.remove("hidden");
+      }
+
+      function setLoginMsg(msg) {
+        els.loginMsg.textContent = msg || "";
+      }
+
+      function setOfficialStatus(msg) {
+        els.officialStatus.textContent = msg || "";
+      }
+
+      function todayStr() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + day;
+      }
+
+      function timeStr(ts) {
+        if (!ts) return "未有內容";
+        const d = new Date(ts);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        const h = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        return y + "/" + m + "/" + day + " " + h + ":" + min;
+      }
+
+      function money(n) {
+        return "$" + Number(n || 0).toLocaleString("en-US", {
+          maximumFractionDigits: 2
+        });
+      }
+
+      function esc(str) {
+        return String(str || "").replace(/[&<>"']/g, function (s) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+          }[s];
+        });
+      }
+
+      function rowsFromObj(obj) {
+        return Object.keys(obj || {}).map(function (k) {
+          return { id: k, value: obj[k] };
+        });
+      }
+
+      function closeAllSwipes() {
+        openSwipeKey = null;
+        document.querySelectorAll(".swipe-row.open").forEach(function (el) {
+          el.classList.remove("open");
+          const content = el.querySelector(".swipe-content");
+          if (content) {
+            content.style.transform = "";
+            content.style.transition = "transform 0.25s cubic-bezier(.22,1,.36,1)";
+          }
+        });
+      }
+
+      function showPage(pageName, btn) {
+        document.querySelectorAll(".screen").forEach(function (el) {
+          el.classList.remove("active");
+        });
+        document.getElementById("page-" + pageName).classList.add("active");
+
+        document.querySelectorAll(".tab-btn").forEach(function (el) {
+          el.classList.remove("active");
+        });
+        btn.classList.add("active");
+
+        closeAllSwipes();
+
+        if (pageName !== "price") {
+          closeScannerModal();
+        }
+      }
+
+      function getDinnerCatName(id) {
+        return dinnerCategoriesCache[id] ? dinnerCategoriesCache[id].name : "未選擇";
+      }
+
+      function getStockCatName(id) {
+        return stockCategoriesCache[id] ? stockCategoriesCache[id].name : "未選擇";
+      }
+
+      function ensureCurrentCats() {
+        const dinnerIds = Object.keys(dinnerCategoriesCache || {});
+        const stockIds = Object.keys(stockCategoriesCache || {});
+
+        if (!currentDinnerCat || !dinnerIds.includes(currentDinnerCat)) {
+          currentDinnerCat = dinnerIds[0] || null;
+        }
+
+        if (!currentStockCat || !stockIds.includes(currentStockCat)) {
+          currentStockCat = stockIds[0] || null;
+        }
+
+        selectedDinnerCats = selectedDinnerCats.filter(function (id) {
+          return dinnerIds.includes(id);
+        });
+
+        if (selectedDinnerCats.length === 0 && currentDinnerCat) {
+          selectedDinnerCats = [currentDinnerCat];
+        }
+      }
+
+      function renderDinnerCategories() {
+        ensureCurrentCats();
+
+        const rows = rowsFromObj(dinnerCategoriesCache);
+
+        els.dinnerCatGrid.innerHTML = rows.map(function (row) {
+          const active = selectedDinnerCats.includes(row.id) ? " active" : "";
+          return `<button class="chip${active}" data-dinner-cat="${row.id}">${esc(row.value.name)}</button>`;
+        }).join("");
+
+        els.dinnerCatManageList.innerHTML = rows.map(function (row) {
+          return `
+            <div class="manage-row">
+              <div class="manage-name">${esc(row.value.name)}</div>
+              <button class="btn-mini btn-danger" data-del-dinner-cat="${row.id}" style="width:auto;">刪除</button>
+            </div>
+          `;
+        }).join("");
+
+        els.dinnerCatManageList.classList.toggle("show", isDinnerManageOpen);
+        els.toggleDinnerManageBtn.textContent = isDinnerManageOpen ? "收起管理" : "管理分類";
+
+        if (selectedDinnerCats.length === 0) {
+          els.currentDinnerCatLabel.textContent = "未選擇";
+        } else {
+          els.currentDinnerCatLabel.textContent = selectedDinnerCats.map(getDinnerCatName).join("、");
+        }
+
+        const manageName = currentDinnerCat ? getDinnerCatName(currentDinnerCat) : "未選擇";
+        els.dinnerManageLabel.textContent = "新增到：" + manageName;
+      }
+
+      function renderStockCategories() {
+        ensureCurrentCats();
+
+        const rows = rowsFromObj(stockCategoriesCache);
+
+        els.stockCatGrid.innerHTML = rows.map(function (row) {
+          const active = currentStockCat === row.id ? " active" : "";
+          return `<button class="chip${active}" data-stock-cat="${row.id}">${esc(row.value.name)}</button>`;
+        }).join("");
+
+        els.stockCatManageList.innerHTML = rows.map(function (row) {
+          return `
+            <div class="manage-row">
+              <div class="manage-name">${esc(row.value.name)}</div>
+              <button class="btn-mini btn-danger" data-del-stock-cat="${row.id}" style="width:auto;">刪除</button>
+            </div>
+          `;
+        }).join("");
+
+        els.stockCatManageList.classList.toggle("show", isStockManageOpen);
+        els.toggleStockManageBtn.textContent = isStockManageOpen ? "收起管理" : "管理類別";
+
+        const label = currentStockCat ? getStockCatName(currentStockCat) : "未選擇";
+        els.currentStockCatLabel.textContent = label;
+        els.stockManageLabel.textContent = "新增到：" + label;
+        els.stockListLabel.textContent = "目前類別：" + label;
+      }
+
+      function renderDinnerItems() {
+        if (selectedDinnerCats.length === 0) {
+          els.foodList.innerHTML = '<div class="empty">請先選晚餐類別</div>';
+          els.dinnerListLabel.textContent = "未選類別";
+          return;
+        }
+
+        let groups = {};
+        selectedDinnerCats.forEach(function (catId) {
+          const rows = rowsFromObj(dinnerItemsCache[catId] || {});
+          if (rows.length > 0) groups[catId] = rows;
+        });
+
+        const groupIds = Object.keys(groups);
+        els.dinnerListLabel.textContent = "已選 " + selectedDinnerCats.length + " 個類別";
+
+        if (groupIds.length === 0) {
+          els.foodList.innerHTML = '<div class="empty">所選類別未有菜式</div>';
+          return;
+        }
+
+        els.foodList.innerHTML = groupIds.map(function (catId) {
+          const groupRows = groups[catId].slice().reverse();
+          return `
+            <div class="group-block">
+              <div class="group-title">${esc(getDinnerCatName(catId))}</div>
+              <div class="list">
+                ${groupRows.map(function (row) {
+                  const key = "food:" + catId + ":" + row.id;
+                  const openClass = openSwipeKey === key ? " open" : "";
+                  const item = row.value || {};
+                  return `
+                    <div class="swipe-row${openClass}" data-swipe-key="${key}" data-food-id="${row.id}" data-food-cat="${catId}">
+                      <div class="swipe-actions">
+                        <button class="swipe-delete-btn" data-del-food="${row.id}" data-del-food-cat="${catId}">刪除</button>
+                      </div>
+                      <div class="swipe-content">
+                        <div class="cell-main">
+                          <div class="cell-title">${esc(item.name || "")}</div>
+                          <div class="cell-sub">${esc(item.desc || "未有簡介")}</div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderStocks() {
+        if (!currentStockCat) {
+          els.stockList.innerHTML = '<div class="empty">未有類別</div>';
+          return;
+        }
+
+        const rows = rowsFromObj(stockItemsCache[currentStockCat] || {});
+        if (rows.length === 0) {
+          els.stockList.innerHTML = '<div class="empty">未有存貨項目</div>';
+          return;
+        }
+
+        els.stockList.innerHTML = rows.reverse().map(function (row) {
+          const key = "stock:" + currentStockCat + ":" + row.id;
+          const openClass = openSwipeKey === key ? " open" : "";
+          const item = row.value || {};
+          const qty = Number(item.qty || 0);
+
+          let sub = "";
+          let cls = "";
+          let opacity = "";
+
+          if (qty === 0) {
+            sub = "無存貨";
+            cls = "low";
+            opacity = "opacity:0.5;";
+          } else if (qty <= 1) {
+            sub = "快用完";
+            cls = "warn";
+          } else {
+            sub = "屋企有";
+          }
+
+          return `
+            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-stock-id="${row.id}">
+              <div class="swipe-actions">
+                <button class="swipe-delete-btn" data-del-stock="${row.id}">刪除</button>
+              </div>
+              <div class="swipe-content" style="${opacity}">
+                <div class="cell-main">
+                  <div class="cell-title">${esc(item.name || "")}</div>
+                  <div class="cell-sub ${cls}">${sub}</div>
+                </div>
+                <div class="qty-wrap">
+                  <button class="qty-btn" data-minus-stock="${row.id}">−</button>
+                  <div class="qty-num">${qty}</div>
+                  <button class="qty-btn" data-plus-stock="${row.id}">+</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function groupPriceRows(rows) {
+        const groups = {};
+        rows.forEach(function (row) {
+          const v = row.value || {};
+          const key = (v.name || "").trim().toLowerCase();
+          if (!key) return;
+          if (!groups[key]) {
+            groups[key] = { displayName: v.name || "", rows: [] };
+          }
+          groups[key].rows.push(row);
+        });
+
+        return Object.values(groups).sort(function (a, b) {
+          const aTs = (a.rows[0] && a.rows[0].value && a.rows[0].value.ts) || 0;
+          const bTs = (b.rows[0] && b.rows[0].value && b.rows[0].value.ts) || 0;
+          return bTs - aTs;
+        });
+      }
+
+      function renderPrices() {
+        const keyword = (els.priceSearchInput.value || "").trim().toLowerCase();
+        let rows = rowsFromObj(priceCache).sort(function (a, b) {
+          return (b.value.ts || 0) - (a.value.ts || 0);
+        });
+
+        if (keyword) {
+          rows = rows.filter(function (row) {
+            const v = row.value || {};
+            const text = [v.name || "", v.store || "", v.note || ""].join(" ").toLowerCase();
+            return text.includes(keyword);
+          });
+        }
+
+        const groups = groupPriceRows(rows);
+        els.priceCountLabel.textContent = groups.length + " 組";
+
+        if (groups.length === 0) {
+          els.priceList.innerHTML = '<div class="empty">未有價格記錄</div>';
+          return;
+        }
+
+        els.priceList.innerHTML = groups.map(function (group) {
+          const histories = group.rows.sort(function (a, b) {
+            return (b.value.ts || 0) - (a.value.ts || 0);
+          });
+
+          const latest = histories[0] ? histories[0].value : {};
+          const lowestRow = histories.reduce(function (min, row) {
+            if (!min) return row;
+            return Number(row.value.price || 0) < Number(min.value.price || 0) ? row : min;
+          }, null);
+
+          const diff = Number(latest.price || 0) - Number(lowestRow ? lowestRow.value.price : 0);
+          const diffText = diff > 0 ? "+$" + diff.toFixed(1) : "最平";
+          const buyAdvice =
+            Number(latest.price || 0) <= Number(lowestRow ? lowestRow.value.price : latest.price || 0)
+              ? "建議購買"
+              : "建議等等";
+
+          return `
+            <div class="price-group">
+              <div class="price-group-head">
+                <div class="price-group-title">${esc(group.displayName)}</div>
+                <div class="price-group-meta">
+                  <div class="price-meta-box">
+                    <div class="price-meta-label">最近</div>
+                    <div class="price-meta-value">${money(latest.price || 0)}</div>
+                  </div>
+                  <div class="price-meta-box">
+                    <div class="price-meta-label">最低</div>
+                    <div class="price-meta-value">${money(lowestRow ? lowestRow.value.price : 0)}</div>
+                  </div>
+                  <div class="price-meta-box">
+                    <div class="price-meta-label">差價</div>
+                    <div class="price-meta-value">${diffText}</div>
+                  </div>
+                </div>
+                <div class="price-advice">${buyAdvice}</div>
+              </div>
+              <div class="price-history">
+                ${histories.map(function (row) {
+                  const key = "price:" + row.id;
+                  const openClass = openSwipeKey === key ? " open" : "";
+                  const item = row.value || {};
+                  const meta = [item.store || "未填商店", item.date || ""].filter(Boolean).join("｜");
+
+                  return `
+                    <div class="swipe-row${openClass}" data-swipe-key="${key}" data-price-id="${row.id}">
+                      <div class="swipe-actions">
+                        <button class="swipe-delete-btn" data-del-price="${row.id}">刪除</button>
+                      </div>
+                      <div class="swipe-content">
+                        <div class="cell-main">
+                          <div class="cell-title">${esc(meta)}</div>
+                          <div class="cell-sub">${item.note ? esc(item.note) : "—"}</div>
+                        </div>
+                        <div class="cell-price">${money(item.price || 0)}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderMemos() {
+        const rows = rowsFromObj(memoCache).sort(function (a, b) {
+          return (b.value.ts || 0) - (a.value.ts || 0);
+        });
+
+        const pending = rows.filter(function (r) { return !r.value.done; });
+        const done = rows.filter(function (r) { return !!r.value.done; });
+        const finalRows = pending.concat(done);
+
+        els.memoCountLabel.textContent = finalRows.length + " 項";
+
+        if (finalRows.length === 0) {
+          els.memoList.innerHTML = '<div class="empty">未有備忘</div>';
+          return;
+        }
+
+        els.memoList.innerHTML = finalRows.map(function (row) {
+          const key = "memo:" + row.id;
+          const openClass = openSwipeKey === key ? " open" : "";
+          const item = row.value || {};
+          const doneClass = item.done ? " memo-done" : "";
+
+          return `
+            <div class="swipe-row${openClass}" data-swipe-key="${key}" data-memo-id="${row.id}">
+              <div class="swipe-actions">
+                <button class="swipe-delete-btn" data-del-memo="${row.id}">刪除</button>
+              </div>
+              <div class="swipe-content${doneClass}" data-toggle-memo="${row.id}">
+                <div class="cell-main">
+                  <div class="cell-title">${esc(item.text || "")}</div>
+                  <div class="cell-sub">${timeStr(item.ts)}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function normalizeText(v) {
+        return String(v || "").trim().toLowerCase();
+      }
+
+      function extractLocalizedText(value) {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        return value["zh-Hant"] || value["zh-Hans"] || value["en"] || "";
+      }
+
+      function getStoreName(code) {
+        return STORE_NAME_MAP[code] || code || "未明商店";
+      }
+
+      function flattenOfficialRows(items) {
+        const rows = [];
+        items.forEach(function (item) {
+          const brand = extractLocalizedText(item.brand);
+          const name = extractLocalizedText(item.name);
+          const cat1 = extractLocalizedText(item.cat1Name);
+          const cat2 = extractLocalizedText(item.cat2Name);
+          const cat3 = extractLocalizedText(item.cat3Name);
+          const prices = Array.isArray(item.prices) ? item.prices : [];
+
+          prices.forEach(function (p) {
+            const priceNum = Number(p.price || 0);
+            if (!priceNum) return;
+
+            rows.push({
+              brand: brand,
+              name: name,
+              cat1: cat1,
+              cat2: cat2,
+              cat3: cat3,
+              storeCode: p.supermarketCode || "",
+              storeName: getStoreName(p.supermarketCode || ""),
+              price: priceNum
+            });
+          });
+        });
+
+        return rows.sort(function (a, b) {
+          return a.price - b.price;
+        });
+      }
+
+      function filterOfficialItems(data, keyword) {
+        const key = normalizeText(keyword);
+        if (!key) return [];
+
+        return (data || []).filter(function (item) {
+          const text = [
+            extractLocalizedText(item.brand),
+            extractLocalizedText(item.name),
+            extractLocalizedText(item.cat1Name),
+            extractLocalizedText(item.cat2Name),
+            extractLocalizedText(item.cat3Name)
+          ].join(" ").toLowerCase();
+
+          return text.includes(key);
+        });
+      }
+
+      function renderOfficialResult(keyword, items) {
+        if (!items || items.length === 0) {
+          els.officialResult.innerHTML = '<div class="empty">搵唔到相關官方商品</div>';
+          return;
+        }
+
+        const rows = flattenOfficialRows(items);
+        if (rows.length === 0) {
+          els.officialResult.innerHTML = '<div class="empty">搵到商品，但未有可用價格</div>';
+          return;
+        }
+
+        const cheapest = rows[0];
+        const top10 = rows.slice(0, 10);
+
+        els.officialResult.innerHTML = `
+          <div class="official-result-head">
+            <div class="official-result-title">${esc(keyword)}｜官方格價結果</div>
+            <div class="official-cheapest">最平：${esc(cheapest.storeName)} ${money(cheapest.price)}</div>
+            <div class="official-updated">${officialFetchedAt ? "資料抓取：" + timeStr(officialFetchedAt) : ""}</div>
+          </div>
+          <div class="official-list">
+            ${top10.map(function (row) {
+              const cats = [row.cat1, row.cat2, row.cat3].filter(Boolean).join(" / ");
+              return `
+                <div class="official-item">
+                  <div class="official-item-left">
+                    <div class="official-item-store">${esc(row.storeName)}</div>
+                    <div class="official-item-sub">${esc([row.brand, row.name].filter(Boolean).join("｜"))}${cats ? "<br>" + esc(cats) : ""}</div>
+                  </div>
+                  <div class="official-item-price">${money(row.price)}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      async function fetchOfficialData(forceRefresh) {
+        if (!forceRefresh && officialDataCache && Array.isArray(officialDataCache)) {
+          return officialDataCache;
+        }
+
+        setOfficialStatus("正在抓取官方資料…");
+        const res = await fetch(OFFICIAL_PROXY_URL, { method: "GET", cache: "no-store" });
+
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+
+        const json = await res.json();
+        let data = [];
+
+        if (Array.isArray(json)) data = json;
+        else if (Array.isArray(json.data)) data = json.data;
+        else if (Array.isArray(json.items)) data = json.items;
+
+        officialDataCache = data;
+        officialFetchedAt = Date.now();
+        setOfficialStatus("官方資料已抓取，共 " + data.length + " 件商品。");
+        return data;
+      }
+
+      async function searchOfficialPrice(forceRefresh) {
+        const keyword = (els.officialKeywordInput.value || "").trim();
+        if (!keyword) {
+          setOfficialStatus("請先輸入關鍵字");
+          els.officialResult.innerHTML = "";
+          return;
+        }
+
+        try {
+          const data = await fetchOfficialData(forceRefresh);
+          const matches = filterOfficialItems(data, keyword);
+
+          if (matches.length === 0) {
+            setOfficialStatus("官方資料中找不到「" + keyword + "」");
+            els.officialResult.innerHTML = '<div class="empty">找不到相關官方商品</div>';
+            return;
+          }
+
+          setOfficialStatus("找到 " + matches.length + " 件相關官方商品。");
+          renderOfficialResult(keyword, matches);
+        } catch (err) {
+          setOfficialStatus("官方資料讀取失敗。請檢查 Worker 或網絡。");
+          els.officialResult.innerHTML = '<div class="empty">未能讀取官方資料，可按上方按鈕打開官方網站。</div>';
+          console.error(err);
+        }
+      }
+
+      function normalizeScanResult(rawText) {
+        const text = String(rawText || "").trim();
+        if (!text) return "";
+
+        if (/^https?:\/\//i.test(text)) {
+          try {
+            const url = new URL(text);
+            const parts = decodeURIComponent(url.pathname + " " + url.search);
+            return parts.replace(/[-_/=&?]/g, " ").trim();
+          } catch (e) {
+            return text;
+          }
+        }
+
+        if (/^\d{8,14}$/.test(text)) {
+          return BARCODE_KEYWORD_MAP[text] || text;
+        }
+
+        return text;
+      }
+
+      async function stopScanner() {
+        if (scannerInstance && scannerRunning) {
+          try { await scannerInstance.stop(); } catch (e) {}
+        }
+
+        if (scannerInstance) {
+          try { await scannerInstance.clear(); } catch (e) {}
+        }
+
+        scannerInstance = null;
+        scannerRunning = false;
+      }
+
+      async function closeScannerModal() {
+        await stopScanner();
+        els.scannerModal.classList.add("hidden");
+        els.scannerHint.textContent = "等待相機啟動…";
+        els.scannerReader.innerHTML = "";
+      }
+
+      async function handleScanSuccess(decodedText) {
+        const keyword = normalizeScanResult(decodedText);
+        els.scannerHint.textContent = "已掃到：" + keyword;
+        await closeScannerModal();
+        els.officialKeywordInput.value = keyword;
+        searchOfficialPrice(false);
+      }
+
+      async function openScannerModal() {
+        els.scannerModal.classList.remove("hidden");
+        els.scannerHint.textContent = "正在啟動相機…";
+        els.scannerReader.innerHTML = "";
+
+        try {
+          scannerInstance = new Html5Qrcode("scannerReader");
+          const config = {
+            fps: 10,
+            qrbox: { width: 220, height: 220 },
+            rememberLastUsedCamera: true,
+            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+          };
+
+          await scannerInstance.start(
+            { facingMode: "environment" },
+            config,
+            function (decodedText) {
+              if (!scannerRunning) return;
+              scannerRunning = false;
+              handleScanSuccess(decodedText);
+            },
+            function () {}
+          );
+
+          scannerRunning = true;
+          els.scannerHint.textContent = "請將 QR / barcode 放入框內";
+        } catch (err) {
+          els.scannerHint.textContent = "相機開啟失敗，請檢查瀏覽器相機權限。";
+          console.error(err);
+        }
+      }
+
+      async function seedDefaultsOnce() {
+        try {
+          const seededSnap = await db.ref("meta/seededScannerFullV2").once("value");
+          if (seededSnap.exists()) return;
+
+          const dinnerCategoriesSnapshot = await db.ref("dinnerCategories").once("value");
+          const stockCategoriesSnapshot = await db.ref("stockCategories").once("value");
+          const dinnerItemsSnapshot = await db.ref("dinnerItems").once("value");
+          const stockItemsSnapshot = await db.ref("stockItems").once("value");
+
+          const jobs = [];
+
+          if (!dinnerCategoriesSnapshot.exists()) {
+            jobs.push(db.ref("dinnerCategories").set(DEFAULT_DINNER_CATEGORIES));
+          }
+
+          if (!stockCategoriesSnapshot.exists()) {
+            jobs.push(db.ref("stockCategories").set(DEFAULT_STOCK_CATEGORIES));
+          }
+
+          if (!dinnerItemsSnapshot.exists()) {
+            jobs.push(
+              db.ref("dinnerItems").set({
+                seafood: {
+                  a1: { name: "蒸魚", desc: "魚加薑蔥蒸 8-10 分鐘，蒸好再淋熟油及豉油。" },
+                  a2: { name: "白酒煮蜆", desc: "蒜蓉炒香後加蜆同白酒，開口後即熄火。" }
+                },
+                pork: { b1: { name: "煎豬扒", desc: "豬扒醃味後煎至兩面金黃。" } },
+                beef: { c1: { name: "洋蔥牛仔骨", desc: "先醃牛仔骨，煎香後加洋蔥炒至軟身。" } },
+                chicken: { d1: { name: "焗雞扒", desc: "雞扒調味後焗熟，最後灑少量香草。" } },
+                vegetable: { e1: { name: "蒜蓉炒菜心", desc: "蒜蓉起鑊，大火快炒菜心至熟。" } },
+                western: { f1: { name: "白汁焗蘑菇雞", desc: "雞件煎香後加白汁及蘑菇焗熟。" } },
+                pasta: { g1: { name: "番茄肉醬意粉", desc: "先炒肉碎，再加番茄醬煮滾後拌意粉。" } }
+              })
+            );
+          }
+
+          if (!stockItemsSnapshot.exists()) {
+            jobs.push(
+              db.ref("stockItems").set({
+                drinks: { s1: { name: "可樂", qty: 2 }, s2: { name: "牛奶", qty: 1 } },
+                meat: { s3: { name: "雞翼", qty: 5 }, s4: { name: "豬扒", qty: 2 } },
+                vegetables: { s5: { name: "洋蔥", qty: 2 }, s6: { name: "菜心", qty: 1 } },
+                staples: { s7: { name: "米", qty: 1 }, s8: { name: "意粉", qty: 2 } },
+                seasoning: { s9: { name: "豉油", qty: 1 }, s10: { name: "鹽", qty: 1 } },
+                daily: { s11: { name: "廁紙", qty: 5 } },
+                cleaning: { s12: { name: "洗潔精", qty: 1 } },
+                personal: { s13: { name: "牙膏", qty: 1 } }
+              })
+            );
+          }
+
+          jobs.push(db.ref("meta/seededScannerFullV2").set(true));
+          await Promise.all(jobs);
+        } catch (err) {
+          setError(err.code + " | " + err.message);
+        }
+      }
+
+      function initApp() {
+        if (initialized) return;
+        initialized = true;
+        els.priceDateInput.value = todayStr();
+        seedDefaultsOnce();
+
+        db.ref("dinnerCategories").on("value", function (s) {
+          dinnerCategoriesCache = s.val() || {};
+          ensureCurrentCats();
+          renderDinnerCategories();
+          renderDinnerItems();
+        });
+
+        db.ref("dinnerItems").on("value", function (s) {
+          dinnerItemsCache = s.val() || {};
+          renderDinnerItems();
+        });
+
+        db.ref("stockCategories").on("value", function (s) {
+          stockCategoriesCache = s.val() || {};
+          ensureCurrentCats();
+          renderStockCategories();
+          renderStocks();
+        });
+
+        db.ref("stockItems").on("value", function (s) {
+          stockItemsCache = s.val() || {};
+          renderStocks();
+        });
+
+        db.ref("foodPrices").on("value", function (s) {
+          priceCache = s.val() || {};
+          renderPrices();
+        });
+
+        db.ref("memos").on("value", function (s) {
+          memoCache = s.val() || {};
+          renderMemos();
+        });
+      }
+
+      async function doLogin() {
+        const email = (els.loginEmail.value || "").trim().toLowerCase();
+        const password = els.loginPassword.value;
+
+        if (!email || !password) {
+          setLoginMsg("請輸入 email 同 password");
+          return;
+        }
+
+        if (!ALLOWED_EMAILS.includes(email)) {
+          setLoginMsg("此帳戶不允許登入");
+          return;
+        }
+
+        try {
+          await auth.signInWithEmailAndPassword(email, password);
+          setLoginMsg("");
+        } catch (err) {
+          setLoginMsg(err.code + " | " + err.message);
+          alert("Login Error: " + err.code + " | " + err.message);
+        }
+      }
+
+      async function doLogout() {
+        try {
+          await stopScanner();
+          await auth.signOut();
+          els.loginPassword.value = "";
+          setLoginMsg("已登出");
+        } catch (err) {
+          alert("Logout Error: " + err.code + " | " + err.message);
+        }
+      }
+
+      async function addDinnerCategory() {
+        try {
+          const name = (els.newDinnerCatInput.value || "").trim();
+          if (!name) return;
+
+          const ref = db.ref("dinnerCategories").push();
+          await ref.set({ name: name });
+
+          currentDinnerCat = ref.key;
+          if (!selectedDinnerCats.includes(ref.key)) {
+            selectedDinnerCats.push(ref.key);
+          }
+
+          els.newDinnerCatInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function deleteDinnerCategory(id) {
+        const name = getDinnerCatName(id);
+        const itemCount = rowsFromObj(dinnerItemsCache[id] || {}).length;
+        const message = `確定刪除晚餐大類別「${name}」？\n\n會同時刪除入面 ${itemCount} 個菜式。`;
+        if (!confirm(message)) return;
+
+        try {
+          await Promise.all([
+            db.ref("dinnerCategories/" + id).remove(),
+            db.ref("dinnerItems/" + id).remove()
+          ]);
+
+          selectedDinnerCats = selectedDinnerCats.filter(function (x) {
+            return x !== id;
+          });
+
+          if (currentDinnerCat === id) {
+            const remaining = Object.keys(dinnerCategoriesCache).filter(function (x) {
+              return x !== id;
+            });
+            currentDinnerCat = remaining[0] || null;
+          }
+
+          Object.keys(excludedToday).forEach(function (key) {
+            if (key.startsWith(id + "__")) delete excludedToday[key];
+          });
+
+          if (lastDrawKey && lastDrawKey.startsWith(id + "__")) {
+            lastDrawKey = null;
+          }
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addFood() {
+        try {
+          if (!currentDinnerCat) {
+            alert("請先新增或選擇管理類別");
+            return;
+          }
+
+          const name = (els.foodInput.value || "").trim();
+          const desc = (els.foodDescInput.value || "").trim();
+          if (!name) return;
+
+          await db.ref("dinnerItems/" + currentDinnerCat).push({
+            name: name,
+            desc: desc
+          });
+
+          els.foodInput.value = "";
+          els.foodDescInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      function drawFood(isRedraw) {
+        if (selectedDinnerCats.length === 0) {
+          els.resultDisplay.textContent = "請先選大類別";
+          els.resultDesc.textContent = "";
+          return;
+        }
+
+        let pool = [];
+        selectedDinnerCats.forEach(function (cat) {
+          const rows = rowsFromObj(dinnerItemsCache[cat] || {});
+          rows.forEach(function (row) {
+            const excludeKey = cat + "__" + row.id;
+            if (!excludedToday[excludeKey]) {
+              pool.push({
+                ...row.value,
+                id: row.id,
+                cat: cat,
+                excludeKey: excludeKey
+              });
+            }
+          });
+        });
+
+        if (isRedraw && lastDrawKey && pool.length > 1) {
+          pool = pool.filter(function (item) {
+            return item.excludeKey !== lastDrawKey;
+          });
+        }
+
+        if (pool.length === 0) {
+          els.resultDisplay.textContent = "今日已抽晒";
+          els.resultDesc.textContent = "";
+          return;
+        }
+
+        const picked = pool[Math.floor(Math.random() * pool.length)];
+        const names = pool.map(function (item) { return item.name || ""; });
+
+        let count = 0;
+        const timer = setInterval(function () {
+          els.resultDisplay.textContent = names[Math.floor(Math.random() * names.length)] || "未有結果";
+          els.resultDesc.textContent = "";
+          count++;
+          if (count > 12) {
+            clearInterval(timer);
+            excludedToday[picked.excludeKey] = true;
+            lastDrawKey = picked.excludeKey;
+
+            els.resultDisplay.style.transform = "scale(1.2)";
+            els.resultDisplay.style.opacity = "0";
+
+            setTimeout(function () {
+              els.resultDisplay.textContent = picked.name || "未有結果";
+              els.resultDesc.textContent = picked.desc || "";
+              els.resultDisplay.style.transform = "scale(1)";
+              els.resultDisplay.style.opacity = "1";
+            }, 120);
+          }
+        }, 60);
+      }
+
+      function resetToday() {
+        excludedToday = {};
+        lastDrawKey = null;
+        els.resultDisplay.textContent = "已重置今日抽過";
+        els.resultDesc.textContent = "";
+      }
+
+      async function addStockCategory() {
+        try {
+          const name = (els.newStockCatInput.value || "").trim();
+          if (!name) return;
+
+          const ref = db.ref("stockCategories").push();
+          await ref.set({ name: name });
+          currentStockCat = ref.key;
+          els.newStockCatInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function deleteStockCategory(id) {
+        const name = getStockCatName(id);
+        const itemCount = rowsFromObj(stockItemsCache[id] || {}).length;
+        const message = `確定刪除存貨類別「${name}」？\n\n會同時刪除入面 ${itemCount} 個項目。`;
+        if (!confirm(message)) return;
+
+        try {
+          await Promise.all([
+            db.ref("stockCategories/" + id).remove(),
+            db.ref("stockItems/" + id).remove()
+          ]);
+
+          if (currentStockCat === id) {
+            const remaining = Object.keys(stockCategoriesCache).filter(function (x) {
+              return x !== id;
+            });
+            currentStockCat = remaining[0] || null;
+          }
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addStock() {
+        try {
+          if (!currentStockCat) {
+            alert("請先新增或選擇存貨類別");
+            return;
+          }
+
+          const val = (els.stockInput.value || "").trim();
+          if (!val) return;
+
+          await db.ref("stockItems/" + currentStockCat).push({
+            name: val,
+            qty: 1
+          });
+
+          els.stockInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addPrice() {
+        try {
+          const name = (els.priceNameInput.value || "").trim();
+          const price = Number(els.priceValueInput.value || 0);
+          const date = els.priceDateInput.value || todayStr();
+          const store = (els.priceStoreInput.value || "").trim();
+          const note = (els.priceNoteInput.value || "").trim();
+
+          if (!name || !price) return;
+
+          await db.ref("foodPrices").push({
+            name: name,
+            price: price,
+            date: date,
+            store: store,
+            note: note,
+            ts: Date.now()
+          });
+
+          els.priceNameInput.value = "";
+          els.priceValueInput.value = "";
+          els.priceDateInput.value = todayStr();
+          els.priceStoreInput.value = "";
+          els.priceNoteInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function addMemo() {
+        try {
+          const text = (els.memoInput.value || "").trim();
+          if (!text) return;
+
+          await db.ref("memos").push({
+            text: text,
+            ts: Date.now(),
+            done: false
+          });
+
+          els.memoInput.value = "";
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      async function toggleMemoDone(id) {
+        try {
+          const item = memoCache[id] || {};
+          await db.ref("memos/" + id + "/done").set(!item.done);
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      }
+
+      els.loginBtn.addEventListener("click", doLogin);
+      document.getElementById("logoutBtn1").addEventListener("click", doLogout);
+      document.getElementById("logoutBtn2").addEventListener("click", doLogout);
+      document.getElementById("logoutBtn3").addEventListener("click", doLogout);
+      document.getElementById("logoutBtn4").addEventListener("click", doLogout);
+
+      els.addDinnerCatBtn.addEventListener("click", addDinnerCategory);
+      els.toggleDinnerManageBtn.addEventListener("click", function () {
+        isDinnerManageOpen = !isDinnerManageOpen;
+        renderDinnerCategories();
+      });
+      els.drawBtn.addEventListener("click", function () { drawFood(false); });
+      els.redrawBtn.addEventListener("click", function () { drawFood(true); });
+      els.resetTodayBtn.addEventListener("click", resetToday);
+      els.addFoodBtn.addEventListener("click", addFood);
+
+      els.addStockCatBtn.addEventListener("click", addStockCategory);
+      els.toggleStockManageBtn.addEventListener("click", function () {
+        isStockManageOpen = !isStockManageOpen;
+        renderStockCategories();
+      });
+      els.addStockBtn.addEventListener("click", addStock);
+
+      els.addPriceBtn.addEventListener("click", addPrice);
+      els.priceSearchInput.addEventListener("input", renderPrices);
+
+      els.officialSearchBtn.addEventListener("click", function () {
+        searchOfficialPrice(false);
+      });
+      els.officialRefreshBtn.addEventListener("click", function () {
+        searchOfficialPrice(true);
+      });
+      els.openOfficialSiteBtn.addEventListener("click", function () {
+        window.open(OFFICIAL_SITE_URL, "_blank");
+      });
+      els.officialKeywordInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          searchOfficialPrice(false);
+        }
+      });
+
+      els.openScannerBtn.addEventListener("click", function () {
+        openScannerModal();
+      });
+
+      els.closeScannerBtn.addEventListener("click", function () {
+        closeScannerModal();
+      });
+
+      els.scannerModal.addEventListener("click", function (e) {
+        if (e.target === els.scannerModal) {
+          closeScannerModal();
+        }
+      });
+
+      els.addMemoBtn.addEventListener("click", addMemo);
+
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          showPage(btn.dataset.page, btn);
+        });
+      });
+
+      els.dinnerCatGrid.addEventListener("click", function (e) {
+        const cat = e.target.getAttribute("data-dinner-cat");
+        if (!cat) return;
+
+        currentDinnerCat = cat;
+        if (selectedDinnerCats.includes(cat)) {
+          selectedDinnerCats = selectedDinnerCats.filter(function (id) { return id !== cat; });
+        } else {
+          selectedDinnerCats.push(cat);
+        }
+
+        closeAllSwipes();
+        renderDinnerCategories();
+        renderDinnerItems();
+      });
+
+      els.dinnerCatManageList.addEventListener("click", function (e) {
+        const delId = e.target.getAttribute("data-del-dinner-cat");
+        if (delId) deleteDinnerCategory(delId);
+      });
+
+      els.stockCatGrid.addEventListener("click", function (e) {
+        const cat = e.target.getAttribute("data-stock-cat");
+        if (!cat) return;
+
+        currentStockCat = cat;
+        closeAllSwipes();
+        renderStockCategories();
+        renderStocks();
+      });
+
+      els.stockCatManageList.addEventListener("click", function (e) {
+        const delId = e.target.getAttribute("data-del-stock-cat");
+        if (delId) deleteStockCategory(delId);
+      });
+
+      els.foodList.addEventListener("click", async function (e) {
+        const id = e.target.getAttribute("data-del-food");
+        const catId = e.target.getAttribute("data-del-food-cat");
+        if (!id || !catId) return;
+
+        try {
+          await db.ref("dinnerItems/" + catId + "/" + id).remove();
+          const drawKey = catId + "__" + id;
+          if (lastDrawKey === drawKey) lastDrawKey = null;
+          delete excludedToday[drawKey];
+          if (openSwipeKey === "food:" + catId + ":" + id) openSwipeKey = null;
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      });
+
+      els.stockList.addEventListener("click", async function (e) {
+        const delId = e.target.getAttribute("data-del-stock");
+        if (delId) {
+          try {
+            await db.ref("stockItems/" + currentStockCat + "/" + delId).remove();
+            if (openSwipeKey === "stock:" + currentStockCat + ":" + delId) openSwipeKey = null;
+          } catch (err) {
+            alert(err.code + " | " + err.message);
+          }
+          return;
+        }
+
+        const plusId = e.target.getAttribute("data-plus-stock");
+        if (plusId) {
+          try {
+            const item = (stockItemsCache[currentStockCat] || {})[plusId];
+            const qty = Number((item && item.qty) || 0) + 1;
+            await db.ref("stockItems/" + currentStockCat + "/" + plusId + "/qty").set(qty);
+          } catch (err) {
+            alert(err.code + " | " + err.message);
+          }
+          return;
+        }
+
+        const minusId = e.target.getAttribute("data-minus-stock");
+        if (minusId) {
+          try {
+            const item = (stockItemsCache[currentStockCat] || {})[minusId];
+            const qty = Math.max(0, Number((item && item.qty) || 0) - 1);
+            await db.ref("stockItems/" + currentStockCat + "/" + minusId + "/qty").set(qty);
+          } catch (err) {
+            alert(err.code + " | " + err.message);
+          }
+        }
+      });
+
+      els.priceList.addEventListener("click", async function (e) {
+        const id = e.target.getAttribute("data-del-price");
+        if (!id) return;
+
+        try {
+          await db.ref("foodPrices/" + id).remove();
+          if (openSwipeKey === "price:" + id) openSwipeKey = null;
+        } catch (err) {
+          alert(err.code + " | " + err.message);
+        }
+      });
+
+      els.memoList.addEventListener("click", async function (e) {
+        const deleteBtn = e.target.closest("[data-del-memo]");
+        if (deleteBtn) {
+          const id = deleteBtn.getAttribute("data-del-memo");
+          try {
+            await db.ref("memos/" + id).remove();
+            if (openSwipeKey === "memo:" + id) openSwipeKey = null;
+          } catch (err) {
+            alert(err.code + " | " + err.message);
+          }
+          return;
+        }
+
+        const toggleRow = e.target.closest("[data-toggle-memo]");
+        if (toggleRow) {
+          const toggleId = toggleRow.getAttribute("data-toggle-memo");
+          toggleMemoDone(toggleId);
+        }
+      });
+
+      function attachSwipe(container) {
+        let startX = 0;
+        let startY = 0;
+        let row = null;
+        let isDragging = false;
+
+        container.addEventListener("touchstart", function (e) {
+          const r = e.target.closest(".swipe-row");
+          if (!r) return;
+          row = r;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          isDragging = false;
+        }, { passive: true });
+
+        container.addEventListener("touchmove", function (e) {
+          if (!row) return;
+
+          const dx = e.touches[0].clientX - startX;
+          const dy = e.touches[0].clientY - startY;
+
+          if (Math.abs(dy) > Math.abs(dx)) return;
+          isDragging = true;
+          e.preventDefault();
+
+          const content = row.querySelector(".swipe-content");
+          let move = Math.min(0, dx);
+          if (move < -96) move = -96;
+
+          content.style.transition = "none";
+          content.style.transform = `translateX(${move}px)`;
+        }, { passive: false });
+
+        container.addEventListener("touchend", function () {
+          if (!row) return;
+
+          const content = row.querySelector(".swipe-content");
+          const fullKey = row.getAttribute("data-swipe-key");
+          const matrix = window.getComputedStyle(content).transform;
+          let currentX = 0;
+
+          if (matrix && matrix !== "none") {
+            const values = matrix.match(/matrix.*\((.+)\)/);
+            if (values && values[1]) {
+              currentX = Number(values[1].split(", ")[4]) || 0;
+            }
+          }
+
+          content.style.transition = "transform 0.25s cubic-bezier(.22,1,.36,1)";
+
+          if (isDragging && Math.abs(currentX) > 60) {
+            closeAllSwipes();
+            openSwipeKey = fullKey;
+            row.classList.add("open");
+            content.style.transform = "";
+          } else {
+            row.classList.remove("open");
+            if (openSwipeKey === fullKey) openSwipeKey = null;
+            content.style.transform = "";
+          }
+
+          row = null;
+        });
+      }
+
+      attachSwipe(els.foodList);
+      attachSwipe(els.stockList);
+      attachSwipe(els.priceList);
+      attachSwipe(els.memoList);
+
+      document.addEventListener("click", function (e) {
+        const insideSwipe = e.target.closest(".swipe-row");
+        if (!insideSwipe) closeAllSwipes();
+      });
+
+      auth.onAuthStateChanged(function (user) {
+        if (user) {
+          const email = String(user.email || "").toLowerCase();
+          if (!ALLOWED_EMAILS.includes(email)) {
+            alert("你無權使用");
+            auth.signOut();
+            return;
+          }
+
+          els.loginWrap.classList.add("hidden");
+          els.appWrap.classList.remove("hidden");
+          initApp();
+        } else {
+          els.loginWrap.classList.remove("hidden");
+          els.appWrap.classList.add("hidden");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
